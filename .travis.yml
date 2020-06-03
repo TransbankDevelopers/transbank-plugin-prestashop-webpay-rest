@@ -1,0 +1,19 @@
+language: php
+php:
+- '5.6'
+
+script: echo "We don't have tests yet :("
+
+before_deploy:
+- sh package.sh
+
+deploy:
+  provider: releases
+  name: "$TRAVIS_TAG"
+  api_key:
+    secure: KdB3GUU1/dG7iXfF7O477ZmIRNYXkiUgJ9G1E0KUox5xSNV+2Tc10rkMNf557Uu/hCzmnWjuN8tdiRUC0z5gVfFKe3IHhivjFsqc9hT/o+daG62W6yfEWVvWAcAlw/WnmOZUmIFaxAh5GFiVbmiUBp3LTQbtygPzi2q9ka0PS7JC370fxWaJZNQwet6mvlPBIdVpgA6qCx67I1P1WICzNX3umrYEANfqmlI7v1ymB2OWXbqQ3119bCXO+/eoURIfUOq36FRteWHP0hlfDZmqae8/F6A4+hP/cRYh5/lUYn3uGkwJBRa5UdlWYvYJBLQ5hIhRYKhT0UBlnlitH/QNk9dgft158+2FUuxk8N0xNSoMxeuXTczIw1rgzIczgLfGFZxAOesP+RLJl6QjH7Qi7FezucohBoCKsKzBboHQEuYlz45QqldP45ohyfddGih4VDIT6miG5OTTPay4JErAShc4OBPgU1PaktLbn28xgpfLP3GMbS34XiNPeJd3sMWWh6n0J3m8pKFXe25sTgWdHKRxQDg56SKgKCMu9k/BwMBpb7GrUCkLh7zdG8KX2Uv92g2GcFPoQI51wU/KTiZMRakTVJbm95IJHJjZPBYF7J3K8Z+5c0gTWtIzH4kYAg5ylUufDTB3lmpCMw2TzaOyvJYmX8tusF1BOj6ll0UXG3Q=
+  file: "plugin-prestashop-webpay-$TRAVIS_TAG.zip"
+  skip_cleanup: true
+  on:
+    repo: TransbankDevelopers/transbank-plugin-prestashop-webpay
+    tags: true
