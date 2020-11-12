@@ -2,14 +2,13 @@
 require_once('../../../config/config.inc.php');
 if (!defined('_PS_VERSION_')) exit;
 
+require_once(_PS_MODULE_DIR_.'webpay/vendor/autoload.php');
 require_once('ReportPdfLog.php');
 require_once('HealthCheck.php');
 
 $config = array(
-    "MODO" => Configuration::get('WEBPAY_AMBIENT'),
-    "PRIVATE_KEY" => Configuration::get('WEBPAY_SECRETCODE'),
-    "PUBLIC_CERT" => Configuration::get('WEBPAY_CERTIFICATE'),
-    "WEBPAY_CERT" => Configuration::get('WEBPAY_CERTIFICATETRANSBANK'),
+    "ENVIRONMENT" => Configuration::get('WEBPAY_ENVIRONMENT'),
+    "API_KEY" => Configuration::get('WEBPAY_API_KEY_SECRET'),
     "COMMERCE_CODE" => Configuration::get('WEBPAY_STOREID'),
     'ECOMMERCE' => 'prestashop'
 );

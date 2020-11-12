@@ -16,14 +16,12 @@ $( document ).ready(function() {
 
 		var data = {
 			"type" : "checkInit",
-			"MODE" : $("input[name='ambient']").val(),
+			"MODE" : $("input[name='environment']").val(),
 			"C_CODE" : $("input[name='storeID']").val(),
-			"PUBLIC_CERT" : $("input[name='certificate']").val(),
-			"PRIVATE_KEY" : $("input[name='secretCode']").val(),
-			"WEBPAY_CERT" : $("input[name='certificateTransbank']").val()
+			"PRIVATE_KEY" : $("input[name='apiKeySecret']").val(),
 		};
 
-		$.post('../modules/webpay/controllers/front/request.php',data,function(response){
+		$.post(REQUEST_PATH,data,function(response){
 
 			$(".status-label").show();
 			$(".check_conn").text("Verificar Conexión");

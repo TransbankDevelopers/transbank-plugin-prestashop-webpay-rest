@@ -1,6 +1,5 @@
-version: '3.1'
+version: '3'
 services:
-
   web:
     image: "prestashop/prestashop:1.7-7.2-apache"
     container_name: "webpay_prestashop_1.7-7.2"
@@ -31,6 +30,3 @@ services:
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_ROOT_PASSWORD=admin
-volumes:
-  webpay_prestashop_1.7_7.2_volume:
-    driver: local
