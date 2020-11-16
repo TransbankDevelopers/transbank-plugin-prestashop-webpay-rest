@@ -22,7 +22,7 @@ sed -i.bkp "s/$this->version = '1.0.0'/$this->version = '${TRAVIS_TAG#"v"}'/g" "
 sed -i.bkp "s/\[1.0.0\]/\[${TRAVIS_TAG#"v"}\]/g" "$SRC_DIR/$FILE2"
 sed -i.bkp "s/\[1.0.0\]/\[${TRAVIS_TAG#"v"}\]/g" "$SRC_DIR/$FILE3"
 
-PLUGIN_FILE="plugin-prestashop-webpay-$TRAVIS_TAG.zip"
+PLUGIN_FILE="plugin-prestashop-webpay-rest-$TRAVIS_TAG.zip"
 
 zip -FSr $PLUGIN_FILE $SRC_DIR -x webpay/vendor/tecnickcom/tcpdf/fonts/a*\/* \
                                     webpay/vendor/tecnickcom/tcpdf/fonts/d*\/* \
