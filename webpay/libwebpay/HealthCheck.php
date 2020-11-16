@@ -3,33 +3,37 @@ require_once('TransbankSdkWebpay.php');
 
 class HealthCheck {
 
-    var $apiKey;
+    var $publicCert;
+    var $privateKey;
+    var $webpayCert;
     var $commerceCode;
     var $environment;
     var $extensions;
     var $versioninfo;
     var $resume;
     var $fullResume;
+    var $certficados;
     var $ecommerce;
     var $config;
 
     public function __construct($config) {
         $this->config = $config;
-        $this->environment = $config['MODO'];
+        $this->environment = $config['ENVIRONMENT'];
         $this->commerceCode = $config['COMMERCE_CODE'];
-        $this->apiKey = $config['API_KEY'];
+        $this->apiKeySecret = $config['API_KEY_SECRET'];
         $this->ecommerce = $config['ECOMMERCE'];
         // extensiones necesarias
         $this->extensions = array(
             'openssl',
             'SimpleXML',
+            'soap',
             'dom'
         );
     }
 
     // valida version de php
     private function getValidatephp(){
-        if (version_compare(phpversion(), '7.2.19', '<=') and version_compare(phpversion(), '7.0.0', '>=')) {
+        if (version_compare(phpversion(), '7.4', '<') and version_compare(phpversion(), '7.0.0', '>=')) {
             $this->versioninfo = array(
                 'status' => 'OK',
                 'version' => phpversion()
@@ -112,7 +116,7 @@ class HealthCheck {
 
     // creacion de retornos
     // arma array que entrega informacion del ecommerce: nombre, version instalada, ultima version disponible
-    private function getPluginInfo($ecommerce) {
+    public function getPluginInfo($ecommerce) {
         $data = $this->getEcommerceInfo($ecommerce);
         $result = array(
             'ecommerce' => $ecommerce,
@@ -132,7 +136,7 @@ class HealthCheck {
     4 => OnePay
     */
     private function getPluginLastVersion($ecommerce, $currentversion){
-        return 'Indefinido';
+        return $this->getLastGitHubReleaseVersion('TransbankDevelopers/transbank-plugin-prestashop-webpay-rest');
     }
 
     // lista y valida extensiones/ modulos de php en servidor ademas mostrar version
@@ -159,7 +163,7 @@ class HealthCheck {
         $result = array(
             'environment' => $this->environment,
             'commerce_code' => $this->commerceCode,
-            'api_key' => $this->apiKey
+            'apiKeySecret' => $this->apiKeySecret,
         );
         return array('data' => $result);
     }
@@ -176,12 +180,12 @@ class HealthCheck {
         return $return;
     }
 
-    public function setCreateTransaction(){
+    public function setInitTransaction(){
         $transbankSdkWebpay = new TransbankSdkWebpay($this->config);
         $amount = 990;
         $buyOrder = "_Healthcheck_";
         $sessionId = uniqid();
-        $returnUrl = "https://webpay3gint.transbank.cl/filtroUnificado/initTransaction";
+        $returnUrl = "https://test.com/test";
         $result = $transbankSdkWebpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
         if ($result) {
             if (!empty($result["error"]) && isset($result["error"])) {
@@ -225,6 +229,10 @@ class HealthCheck {
         return json_encode($this->getPhpInfo());
     }
 
+    // imprime resultado la consistencia de certificados y llabves
+    public function printCertificatesStatus() {
+        return json_encode($this->getValidateCertificates());
+    }
 
     // imprime en formato json la validacion de extensiones / modulos de php
     public function printExtensionStatus() {
@@ -242,7 +250,7 @@ class HealthCheck {
     }
 
     public function getInitTransaction() {
-        return json_encode($this->setCreateTransaction());
+        return json_encode($this->setInitTransaction());
     }
 
     public function getpostinstallinfo() {

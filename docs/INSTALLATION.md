@@ -101,7 +101,7 @@ En ambiente de integración es posible realizar una prueba de transacción utili
 
   ![demo5](img/demo5.png)
 
-* Selecciona método de Pago con Tarjetas de Credito o Redcompra, selecciona los "términos de servicio" y luego presiona el botón [Pedido con obligación de pago] y luego el botón [Pagar]
+* Selecciona método de pago con tarjetas de crédito o Redcompra, selecciona los "términos de servicio" y luego presiona el botón [Pedido con obligación de pago] y luego el botón [Pagar]
 
   ![demo6](img/demo6.png)
 

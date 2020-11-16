@@ -18,9 +18,9 @@ composer install --no-dev
 composer update --no-dev
 cd ..
 
-sed -i.bkp "s/$this->version = '3.0.6'/$this->version = '${TRAVIS_TAG#"v"}'/g" "$SRC_DIR/$FILE1"
-sed -i.bkp "s/\[3.0.6\]/\[${TRAVIS_TAG#"v"}\]/g" "$SRC_DIR/$FILE2"
-sed -i.bkp "s/\[3.0.6\]/\[${TRAVIS_TAG#"v"}\]/g" "$SRC_DIR/$FILE3"
+sed -i.bkp "s/$this->version = '1.0.0'/$this->version = '${TRAVIS_TAG#"v"}'/g" "$SRC_DIR/$FILE1"
+sed -i.bkp "s/\[1.0.0\]/\[${TRAVIS_TAG#"v"}\]/g" "$SRC_DIR/$FILE2"
+sed -i.bkp "s/\[1.0.0\]/\[${TRAVIS_TAG#"v"}\]/g" "$SRC_DIR/$FILE3"
 
 PLUGIN_FILE="plugin-prestashop-webpay-$TRAVIS_TAG.zip"
 
@@ -29,7 +29,14 @@ zip -FSr $PLUGIN_FILE $SRC_DIR -x webpay/vendor/tecnickcom/tcpdf/fonts/a*\/* \
                                     webpay/vendor/tecnickcom/tcpdf/fonts/f*\/* \
                                     webpay/vendor/tecnickcom/tcpdf/fonts/a* \
                                     webpay/vendor/tecnickcom/tcpdf/fonts/ci* \
-                                    webpay/vendor/tecnickcom/tcpdf/fonts/d* \
+                                    webpay/vendor/tecnickcom/tcpdf/fonts/dejavu-* \
+                                    webpay/vendor/tecnickcom/tcpdf/fonts/dejavusansb* \
+                                    webpay/vendor/tecnickcom/tcpdf/fonts/dejavusansc* \
+                                    webpay/vendor/tecnickcom/tcpdf/fonts/dejavusanse* \
+                                    webpay/vendor/tecnickcom/tcpdf/fonts/dejavusansi* \
+                                    webpay/vendor/tecnickcom/tcpdf/fonts/dejavusansm* \
+                                    webpay/vendor/tecnickcom/tcpdf/fonts/dejavusans.z \
+                                    webpay/vendor/tecnickcom/tcpdf/fonts/dejavuser* \
                                     webpay/vendor/tecnickcom/tcpdf/fonts/f* \
                                     webpay/vendor/tecnickcom/tcpdf/fonts/k* \
                                     webpay/vendor/tecnickcom/tcpdf/fonts/m* \

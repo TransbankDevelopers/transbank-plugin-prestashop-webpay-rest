@@ -1,318 +1,331 @@
 <?php
-require_once(dirname(__FILE__).'../../../../../config/config.inc.php');
-if (!defined('_PS_VERSION_')) exit;
 
-require_once(_PS_MODULE_DIR_.'webpay/libwebpay/TransbankSdkWebpay.php');
-require_once(_PS_MODULE_DIR_.'webpay/libwebpay/LogHandler.php');
+use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 
-class WebPayValidateModuleFrontController extends ModuleFrontController {
 
-    private $paymentTypeCodearray = array(
-        "VD" => "Venta Debito",
-        "VN" => "Venta Normal",
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
+require_once(_PS_MODULE_DIR_ . 'webpay/src/Model/TransbankWebpayRestTransaction.php');
+require_once(_PS_MODULE_DIR_ . 'webpay/libwebpay/TransbankSdkWebpay.php');
+require_once(_PS_MODULE_DIR_ . 'webpay/libwebpay/LogHandler.php');
+
+/**
+ * Class WebPayValidateModuleFrontController
+ */
+class WebPayValidateModuleFrontController extends ModuleFrontController
+{
+
+    /**
+     * @var LogHandler
+     */
+    protected $log;
+
+    public $display_column_right = false;
+    public $display_footer = false;
+    public $display_column_left = false;
+    public $ssl = true;
+
+    protected $responseData = [];
+    /**
+     * @var string[]
+     */
+    private $paymentTypeCodearray = [
+        "VD" => "Venta débito",
+        "VN" => "Venta normal",
         "VC" => "Venta en cuotas",
         "SI" => "3 cuotas sin interés",
         "S2" => "2 cuotas sin interés",
         "NC" => "N cuotas sin interés",
-    );
+    ];
 
-    public function initContent() {
-
-        $this->display_column_left = true;
-        $this->display_column_right = true;
+    public function initContent()
+    {
         parent::initContent();
 
-        $this->log = new LogHandler();
+        $this->stopIfComingFromAnTimeoutErrorOnWebpay();
 
-        if (Context::getContext()->cookie->PAYMENT_OK == 'WAITING') {
-            $this->processPayment($_POST);
-        } else {
-            $this->processRedirect($_POST);
+        if (isset($_POST['TBK_TOKEN']) && !isset($_POST['token_ws'])) {
+            $token = $_POST['TBK_TOKEN'];
+
+            $webpayTransaction = $this->getTransactionByToken($token);
+            $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER;
+            $webpayTransaction->save();
+
+            return $this->showErrorPage('Transacción abortada desde el formulario de pago. Puedes reintentar el pago. ');
         }
+
+        $webpayTransaction = $this->getTransactionByToken();
+
+
+        $cart = new Cart($webpayTransaction->cart_id);
+        if (!$this->validateData($cart)) {
+            return $this->throwError('Can not validate order cart');
+        }
+
+        if ($webpayTransaction->status == TransbankWebpayRestTransaction::STATUS_APPROVED) {
+            return $this->redirectToSuccessPage($cart);
+        }
+
+
+        if ($webpayTransaction->status != TransbankWebpayRestTransaction::STATUS_INITIALIZED) {
+            return $this->showErrorPage('Esta compra se encuentra en estado rechazado o cancelado y no se puede aceptar el pago');
+        }
+
+        if (isset($_POST['TBK_TOKEN']) && isset($_POST['token_ws'])) {
+            $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
+            $webpayTransaction->save();
+
+            return $this->showErrorPage('Al parecer ocurrió un error durante el proceso de pago. Puedes volver a intentar. ');
+        }
+
+        if ($this->getOtherApprovedTransactionsOfThisCart($webpayTransaction) && !isset($_GET['final'])) {
+            $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
+            $webpayTransaction->save();
+
+            return $this->setErrorPage('Otra transacción de este carro de compras ya fue aprobada. Se rechazo este pago para no generar un cobro duplicado');
+        }
+
+        $this->processPayment($webpayTransaction, $cart);
+
     }
 
-    private function validateData($cart) {
+    /**
+     * @param $data
+     * @return |null
+     */
+    protected function getTokenWs($data)
+    {
+        $token_ws = isset($data["token_ws"]) ? $data["token_ws"] : null;
 
-        $authorized = false;
-
-        foreach (Module::getPaymentModules() as $module) {
-            if ($module['name'] == 'webpay') {
-                $authorized = true;
-                break;
-            }
+        if (!isset($token_ws)) {
+            $this->throwError('RESPONSE: No se recibió el token');
         }
 
-        if (!$authorized) {
-            die($this->module->l('This payment method is not available.', 'validation'));
-        }
+        return $token_ws;
+    }
+
+    private function validateData($cart)
+    {
 
         if ($cart->id == null) {
+            (new LogHandler())->logDebug('Cart id was null. Redirecto to confirmation page of the last order');
             $id_usuario = Context::getContext()->customer->id;
-            $sql = "SELECT id_cart FROM ps_cart p WHERE p.id_customer = $id_usuario ORDER BY p.id_cart DESC";
+            $sql = "SELECT id_cart FROM " . _DB_PREFIX_ . "cart p WHERE p.id_customer = $id_usuario ORDER BY p.id_cart DESC";
             $id_carro = Db::getInstance()->getValue($sql, $use_cache = true);
             $cart->id = $id_carro;
             $customer = new Customer($cart->id_customer);
-            Tools::redirect('index.php?controller=order-confirmation&id_cart='.(int)$cart->id.'&id_module='.(int)$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
+            Tools::redirect('index.php?controller=order-confirmation&id_cart=' . (int)$cart->id . '&id_module=' . (int)$this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
+
             return false;
         }
 
         if ($cart->id_customer == 0 || $cart->id_address_delivery == 0 || $cart->id_address_invoice == 0 || !$this->module->active) {
-            Tools::redirect('index.php?controller=order&step=1');
+            $this->throwError('Error: id_costumer or id_address_delivery or id_address_invoice or $this->module->active was true');
+
             return false;
         }
 
         $customer = new Customer($cart->id_customer);
 
         if (!Validate::isLoadedObject($customer)) {
-            Tools::redirect('index.php?controller=order&step=1');
+            $this->throwError();
+
             return false;
         }
 
         return true;
     }
 
-	private function processPayment($data) {
-
-        $cart = Context::getContext()->cart;
-
-        if (!$this->validateData($cart)) {
-            return;
-        }
-
-        $products = $cart->getProducts();
-        $itemsId = array();
-        foreach ($products as $product) {
-            $itemsId[] = (int)$product['id_product'];
-        }
-
+    /**
+     * @param $webpayTransaction TransbankWebpayRestTransaction
+     * @param $cart
+     */
+    private function processPayment($webpayTransaction, $cart)
+    {
         $amount = $cart->getOrderTotal(true, Cart::BOTH);
-        $buyOrder = $cart->id;
 
-        $tokenWs = isset($data["token_ws"]) ? $data["token_ws"] : null;
+        $transbankSdkWebpay = WebpayPlusFactory::create();
+        $result = $transbankSdkWebpay->commitTransaction($webpayTransaction->token);
+        $webpayTransaction->transbank_response = json_encode($result);
+        $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
+        $updateResult = $webpayTransaction->save(); // Guardar como fallida por si algo falla más adelante
 
-        if (!isset($tokenWs)) {
-
-            $error = 'Compra cancelada';
-            $detail = 'El token no ha sido enviado';
-
-            Context::getContext()->cookie->__set('PAYMENT_OK', 'FAIL');
-            Context::getContext()->cookie->__set('WEBPAY_RESULT_CODE', 500);
-            Context::getContext()->cookie->__set('WEBPAY_RESULT_DESC', $error . ', ' . $detail);
-
+        if (!$updateResult) {
+            $this->throwError('No se pudo guardar en base de datos el resultado de la transacción: ' . \DB::getMsgError());
+        }
+        if (is_array($result) && isset($result['error'])) {
+            $this->throwError('Error: ' . $result['detail']);
+        }
+        if (isset($result->buyOrder) && $result->responseCode === 0) {
             $customer = new Customer($cart->id_customer);
             $currency = Context::getContext()->currency;
-            $orderStatus = Configuration::get('PS_OS_CANCELED');
-
-            $this->module->validateOrder((int)$cart->id,
-                                        $orderStatus,
-                                        $amount,
-                                        $this->module->displayName,
-                                        'Pago cancelado',
-                                        array(),
-                                        (int)$currency->id,
-                                        false,
-                                        $customer->secure_key);
-
-            $this->processRedirect($data);
-
-            return;
-        }
-
-        //patch for error with parallels carts
-        $dataPaymentHash = $amount . $buyOrder. json_encode($itemsId);
-        $paymentHash = md5($dataPaymentHash);
-        $dataPaymentHashOriginal = $_GET['ph_'];
-
-        //patch for error with parallels carts
-        if ($dataPaymentHashOriginal != $paymentHash) {
-
-            $this->log->logError('Error en el pago - dataPaymentHashOriginal: ' . $dataPaymentHashOriginal .
-                                ', paymentHash: ' . $paymentHash);
-
-            Context::getContext()->cookie->__set('PAYMENT_OK', 'FAIL');
-            Context::getContext()->cookie->__set('WEBPAY_RESULT_CODE', 500);
-            Context::getContext()->cookie->__set('WEBPAY_RESULT_DESC', 'Error en el pago, Carro inválido');
-
-            $customer = new Customer($cart->id_customer);
-            $currency = Context::getContext()->currency;
-            $orderStatus = Configuration::get('PS_OS_ERROR');
-
-            $this->module->validateOrder((int)$cart->id,
-                                        $orderStatus,
-                                        $amount,
-                                        $this->module->displayName,
-                                        'Pago fallido',
-                                        array(),
-                                        (int)$currency->id,
-                                        false,
-                                        $customer->secure_key);
-
-            $this->processRedirect($data);
-            return;
-        }
-
-        $config = array(
-            "MODO" => Configuration::get('WEBPAY_AMBIENT'),
-            "API_KEY" => Configuration::get('WEBPAY_APIKEY'),
-            "COMMERCE_CODE" => Configuration::get('WEBPAY_STOREID')
-        );
-
-        $transbankSdkWebpay = new TransbankSdkWebpay($config);
-        $result = $transbankSdkWebpay->commitTransaction($tokenWs);
-
-        if (isset($result->buyOrder) && isset($result->detailOutput) && $result->detailOutput->responseCode == 0) {
-
-            $transactionResponse = "Transacción aprobada";
-            $date_tmp = strtotime($result->transactionDate);
-            $date_tx_hora = date('H:i:s',$date_tmp);
-            $date_tx_fecha = date('d-m-Y',$date_tmp);
-
-            if($result->detailOutput->paymentTypeCode == "SI" || $result->detailOutput->paymentTypeCode == "S2" ||
-                $result->detailOutput->paymentTypeCode == "NC" || $result->detailOutput->paymentTypeCode == "VC" ) {
-                $tipo_cuotas = $this->paymentTypeCodearray[$result->detailOutput->paymentTypeCode];
-            } else {
-                $tipo_cuotas = "Sin cuotas";
+            $OKStatus = Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
+            if ($OKStatus === "0") {
+                $OKStatus = Configuration::get('PS_OS_PREPARATION');
             }
 
-            if($result->detailOutput->paymentTypeCode == "VD"){
-                $paymentType = "Débito";
-            } else {
-                $paymentType = "Crédito";
-            }
-
-            Context::getContext()->cookie->__set('PAYMENT_OK', 'SUCCESS');
-            Context::getContext()->cookie->__set('WEBPAY_RESULT_CODE', $result->detailOutput->responseCode);
-            Context::getContext()->cookie->__set('WEBPAY_RESULT_DESC', $transactionResponse);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_TXRESPTEXTO', $transactionResponse);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_TOTALPAGO', $result->detailOutput->amount);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_ACCDATE', $result->accountingDate);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_ORDENCOMPRA', $result->buyOrder);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_TXDATE_HORA', $date_tx_hora);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_TXDATE_FECHA', $date_tx_fecha);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_NROTARJETA', $result->cardDetail['card_number']);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_AUTCODE', $result->detailOutput->authorizationCode);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_TIPOPAGO', $paymentType);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_TIPOCUOTAS', $tipo_cuotas);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_RESPCODE', $result->detailOutput->responseCode);
-            Context::getContext()->cookie->__set('WEBPAY_VOUCHER_NROCUOTAS', $result->detailOutput->installmentsNumber);
-
-            $customer = new Customer($cart->id_customer);
-            $currency = Context::getContext()->currency;
-            $orderStatus = Configuration::get('PS_OS_PREPARATION');
-
-            $this->module->validateOrder((int)$cart->id,
-                                        $orderStatus,
-                                        $amount,
-                                        $this->module->displayName,
-                                        'Pago exitoso',
-                                        array(),
-                                        (int)$currency->id,
-                                        false,
-                                        $customer->secure_key);
+            $this->module->validateOrder((int)$cart->id, $OKStatus, $amount, $this->module->displayName, 'Pago exitoso',
+                [], (int)$currency->id, false, $customer->secure_key);
 
             $order = new Order($this->module->currentOrder);
             $payment = $order->getOrderPaymentCollection();
             if (isset($payment[0])) {
                 $payment[0]->transaction_id = $cart->id;
-                $payment[0]->card_number = '**********' . $result->cardDetail['card_number'];
+                $payment[0]->card_number = '**** **** **** ' . $result->cardDetail['card_number'];
                 $payment[0]->card_brand = '';
                 $payment[0]->card_expiration = '';
                 $payment[0]->card_holder = '';
                 $payment[0]->save();
             }
 
-            $this->toRedirect($result->urlRedirection, array("token_ws" => $tokenWs));
+
+            $webpayTransaction->response_code = $result->responseCode;
+            $webpayTransaction->order_id = $order->id;
+            $webpayTransaction->vci = $result->vci;
+            $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_APPROVED;
+            $webpayTransaction->save();
+    
+            return $this->redirectToSuccessPage($cart);
 
         } else {
 
-            Context::getContext()->cookie->__set('PAYMENT_OK', 'FAIL');
+            $webpayTransaction->response_code = isset($result->responseCode) ? $result->responseCode : null;
+            $webpayTransaction->save();
 
-            $customer = new Customer($cart->id_customer);
-            $currency = Context::getContext()->currency;
-            $orderStatus = Configuration::get('PS_OS_ERROR');
+            $this->responseData['PAYMENT_OK'] = 'FAIL';
 
-            $this->module->validateOrder((int)$cart->id,
-                                        $orderStatus,
-                                        $amount,
-                                        $this->module->displayName,
-                                        'Pago fallido',
-                                        array(),
-                                        (int)$currency->id,
-                                        false,
-                                        $customer->secure_key);
 
-            if (isset($result->detailOutput->responseDescription)) {
-
-                Context::getContext()->cookie->__set('WEBPAY_RESULT_CODE', $result->detailOutput->responseCode);
-                Context::getContext()->cookie->__set('WEBPAY_RESULT_DESC', $result->detailOutput->responseDescription);
-
-                $this->processRedirect($data);
-
-            } else {
-
-                $error = isset($result["error"]) ? $result["error"] : 'Error en el pago';
-                $detail = isset($result["detail"]) ? $result["detail"] : 'Indefinido';
-
-                Context::getContext()->cookie->__set('WEBPAY_RESULT_CODE', 500);
-                Context::getContext()->cookie->__set('WEBPAY_RESULT_DESC', $error . ', ' . $detail);
-
-                $this->processRedirect($data);
-            }
+            $error = isset($result["error"]) ? $result["error"] : 'Error en el pago';
+            $detail = isset($result["detail"]) ? $result["detail"] : 'Indefinido';
+            $this->showErrorPage($error . ', ' . $detail);
         }
     }
 
-    private function processRedirect($data) {
+    private function showErrorPage($description = '', $resultCode = null)
+    {
 
-        $cart = Context::getContext()->cart;
 
-        if (!$this->validateData($cart)) {
-            return;
-        }
+        $WEBPAY_RESULT_DESC = $description;
+        $WEBPAY_RESULT_CODE = $resultCode;
+        $WEBPAY_VOUCHER_ORDENCOMPRA = isset($this->responseData['WEBPAY_VOUCHER_ORDENCOMPRA']) ? $this->responseData['WEBPAY_VOUCHER_ORDENCOMPRA'] : null;
+        $WEBPAY_VOUCHER_TXDATE_HORA = isset($this->responseData['WEBPAY_VOUCHER_TXDATE_HORA']) ? $this->responseData['WEBPAY_VOUCHER_TXDATE_HORA'] : null;
+        $WEBPAY_VOUCHER_TXDATE_FECHA = isset($this->responseData['WEBPAY_VOUCHER_TXDATE_FECHA']) ? $this->responseData['WEBPAY_VOUCHER_TXDATE_FECHA'] : null;
 
-        $customer = new Customer($cart->id_customer);
-        $currency = Context::getContext()->currency;
-
-        if (Context::getContext()->cookie->PAYMENT_OK == 'SUCCESS') {
-
-            $dataUrl = 'id_cart='.(int)$cart->id.
-                    '&id_module='.(int)$this->module->id.
-                    '&id_order='.$this->module->currentOrder.
-                    '&key='.$customer->secure_key;
-
-            Tools::redirect('index.php?controller=order-confirmation&' . $dataUrl);
-
-        } else {
-
-            $WEBPAY_RESULT_CODE = Context::getContext()->cookie->__get('WEBPAY_RESULT_CODE');
-            $WEBPAY_RESULT_DESC = Context::getContext()->cookie->__get('WEBPAY_RESULT_DESC');
-            $WEBPAY_VOUCHER_ORDENCOMPRA = Context::getContext()->cookie->__get('WEBPAY_VOUCHER_ORDENCOMPRA');
-            $WEBPAY_VOUCHER_TXDATE_HORA = Context::getContext()->cookie->__get('WEBPAY_VOUCHER_TXDATE_HORA');
-            $WEBPAY_VOUCHER_TXDATE_FECHA = Context::getContext()->cookie->__get('WEBPAY_VOUCHER_TXDATE_FECHA');
-
-            Context::getContext()->smarty->assign(array(
-                'WEBPAY_RESULT_CODE' => $WEBPAY_RESULT_CODE,
-                'WEBPAY_RESULT_DESC' => $WEBPAY_RESULT_DESC,
-                'WEBPAY_VOUCHER_ORDENCOMPRA' => $WEBPAY_VOUCHER_ORDENCOMPRA,
-                'WEBPAY_VOUCHER_TXDATE_HORA' => $WEBPAY_VOUCHER_TXDATE_HORA,
-                'WEBPAY_VOUCHER_TXDATE_FECHA' => $WEBPAY_VOUCHER_TXDATE_FECHA
-            ));
-
-            if (Utils::isPrestashop_1_6()) {
-                $this->setTemplate('payment_error_1.6.tpl');
-            } else {
-                $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-            }
-        }
+        $this->setErrorPage($WEBPAY_RESULT_DESC, $WEBPAY_RESULT_CODE, $WEBPAY_VOUCHER_ORDENCOMPRA,
+            $WEBPAY_VOUCHER_TXDATE_HORA, $WEBPAY_VOUCHER_TXDATE_FECHA);
     }
 
-    private function toRedirect($url, $data = []) {
-        echo  "<form action='" . $url . "' method='POST' name='webpayForm'>";
+    private function toRedirect($url, $data = [])
+    {
+        echo "<form action='" . $url . "' method='POST' name='webpayForm'>";
         foreach ($data as $name => $value) {
-            echo "<input type='hidden' name='".htmlentities($name)."' value='".htmlentities($value)."'>";
+            echo "<input type='hidden' name='" . htmlentities($name) . "' value='" . htmlentities($value) . "'>";
         }
-        echo  "</form>"
-                ."<script language='JavaScript'>"
-                ."document.webpayForm.submit();"
-                ."</script>";
+        echo "</form>" . "<script language='JavaScript'>" . "document.webpayForm.submit();" . "</script>";
+    }
+
+    /**
+     * @param $WEBPAY_RESULT_CODE
+     * @param $WEBPAY_RESULT_DESC
+     * @param $WEBPAY_VOUCHER_ORDENCOMPRA
+     * @param $WEBPAY_VOUCHER_TXDATE_HORA
+     * @param $WEBPAY_VOUCHER_TXDATE_FECHA
+     * @throws PrestaShopException
+     */
+    private function setErrorPage(
+        $WEBPAY_RESULT_DESC, $WEBPAY_RESULT_CODE = null, $WEBPAY_VOUCHER_ORDENCOMPRA = null,
+        $WEBPAY_VOUCHER_TXDATE_HORA = null, $WEBPAY_VOUCHER_TXDATE_FECHA = null
+    ) {
+        (new LogHandler())->logError('ERROR PAGE: ' . $WEBPAY_RESULT_DESC);
+        Context::getContext()->smarty->assign([
+            'WEBPAY_RESULT_CODE' => $WEBPAY_RESULT_CODE,
+            'WEBPAY_RESULT_DESC' => $WEBPAY_RESULT_DESC,
+            'WEBPAY_VOUCHER_ORDENCOMPRA' => $WEBPAY_VOUCHER_ORDENCOMPRA,
+            'WEBPAY_VOUCHER_TXDATE_HORA' => $WEBPAY_VOUCHER_TXDATE_HORA,
+            'WEBPAY_VOUCHER_TXDATE_FECHA' => $WEBPAY_VOUCHER_TXDATE_FECHA
+        ]);
+
+        if (Utils::isPrestashop_1_6()) {
+            $this->setTemplate('payment_error_1.6.tpl');
+        } else {
+            $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
+        }
+    }
+
+    protected function throwError($message, $redirectTo = 'index.php?controller=order&step=3')
+    {
+        (new LogHandler())->logError($message);
+        Tools::redirect($redirectTo);
+        die;
+    }
+    /**
+     * @return void
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    private function stopIfComingFromAnTimeoutErrorOnWebpay()
+    {
+        if (!isset($_POST['TBK_TOKEN']) && !isset($_POST['token_ws']) && isset($_POST['TBK_ID_SESION'])) {
+            $sessionId = $_POST['TBK_ID_SESION'];
+            $sqlQuery = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `session_id` = "' . $sessionId . '"';
+            $transaction = \Db::getInstance()->getRow($sqlQuery);
+            $errorMessage = 'Al parecer pasaron más de 15 minutos en el formulario de pago, por lo que la transacción se ha cancelado automáticamente';
+            if (!$transaction) {
+                $this->showErrorPage($errorMessage);
+            }
+            $webpayTransaction = new TransbankWebpayRestTransaction($transaction['id']);
+            if ($webpayTransaction->status == TransbankWebpayRestTransaction::STATUS_APPROVED) {
+                $cart = new Cart($webpayTransaction->cart_id);
+                return $this->redirectToSuccessPage($cart);
+            }
+            $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
+            $webpayTransaction->transbank_response = json_encode(['error' => $errorMessage]);
+            $webpayTransaction->save();
+            $this->showErrorPage($errorMessage);
+        }
+    }
+    /**
+     * @return TransbankWebpayRestTransaction
+     */
+    private function getTransactionByToken($token = null)
+    {
+
+        if (!$token) {
+            $token = $this->getTokenWs($_POST);
+        }
+        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `token` = "' . pSQL($token) . '"';
+        $result = \Db::getInstance()->getRow($sql);
+
+
+        if ($result === false) {
+            $this->throwError('Webpay Token ' . $token . ' was not found on database');
+        }
+
+        $webpayTransaction = new TransbankWebpayRestTransaction($result['id']);
+
+        return $webpayTransaction;
+    }
+
+    /**
+     * @return TransbankWebpayRestTransaction
+     */
+    private function getOtherApprovedTransactionsOfThisCart($webpayTransaction)
+    {
+        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `cart_id` = "' . pSQL($webpayTransaction->cart_id) . '" and status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED;
+
+        return \Db::getInstance()->getRow($sql);
+
+    }
+    /**
+     * @param Cart $cart
+     */
+    private function redirectToSuccessPage(Cart $cart)
+    {
+        $customer = new Customer($cart->id_customer);
+        $dataUrl = 'id_cart=' . (int)$cart->id . '&id_module=' . (int)$this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key;
+
+        return Tools::redirect('index.php?controller=order-confirmation&' . $dataUrl);
     }
 }

@@ -1,5 +1,4 @@
 <?php
-require_once(_PS_MODULE_DIR_.'webpay/external-lib/tecnickcom/tcpdf/tcpdf.php');
 
 class ReportPdf {
 
@@ -30,7 +29,9 @@ class ReportPdf {
                     <tr><td colspan="2" class="log">
                     '.$element['log'].'
                     </td></tr>';
-                }  else {
+                } else if ($child[$count_child] == 'public_cert' || $child[$count_child] == 'private_key' || $child[$count_child] == 'webpay_cert'){
+
+                } else {
                     if ($child_lvl != 3)
                         $this->buffer.= '
                     <tr><td colspan="2" class="pdf'.$child_lvl.'">
