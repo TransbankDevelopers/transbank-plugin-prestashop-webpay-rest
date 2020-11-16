@@ -22,10 +22,10 @@
 			</div>
 		{/if}
 
-		<label for="storeID">{l s='Codigo de Comercio' mod='webpay'}</label>
+		<label for="storeID">{l s='Código de comercio' mod='webpay'}</label>
 		<div class="margin-form"><input type="text" size="90" id="storeID" name="storeID" value="{$data_storeid|escape:'htmlall':'UTF-8'}"/></div>
 		<br/>
-		<label for="apiKey">{l s='API Key' mod='webpay'}</label>
+		<label for="apiKey">{l s='API Key (llave secreta)' mod='webpay'}</label>
 		<div class="margin-form"><input type="text" size="90" id="apiKeySecret" name="apiKeySecret" value="{$data_apikeysecret|escape:'htmlall':'UTF-8'}"/></div>
 
 		<br/>
