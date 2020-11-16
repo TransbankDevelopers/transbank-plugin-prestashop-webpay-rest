@@ -12,8 +12,8 @@ deploy:
   name: "$TRAVIS_TAG"
   api_key:
     secure: Z7mUQxKwIPwq7BIIVjlBB0jS32ct7KgwbEqyKNVzexeN1zHKQjMdoaBMxtCTyTtELlG8X+2acQ9aMweHEcByxVA0UDnt5hLPtk4zGy18RgrceCSme+/au5w01rGqMGbYytG0fwG31U9KR1GQo6k+V9pMWugkdFBlrtwgrb4zqv4xx1kW2caqYBeTG7IFYhSWtNHvHNV1ofX1hhMdY2ZwZ6BL1PRhawnaoYaVD1qynLkaNpJ9rEsTbmruzWzSDmTASnyQZ336nY3mn2C4K0t32MUag4LShGCm4EOzfNgWw283+C6LvU8M79r7hIWBCDxO2rwARHfPMQZNXO89Op/L4aZlj9XblyPXBgxFsaG5AfAnZ9WcYqavIOmhd7i+4YKPHIQ8+zctE+1wMnjod7GfbGBNUbQzKY7kVBBDNSglLc2VjavneZZGVkwYa4O9uIjL3F906t2OrzaJw/oiKj3n4ndV05BOrUHk6a2zqEq0fVFlJm0uH7ia8o0WE/TpG+CkshF6xl7i6cJgHOKPbGBEcAANjJLYLvWfgoRn3SeQLCmY23PpCaSJ2nyYTD/8c+jHmoWQ0YtOiecaRsW3BEKyfolAEbPNkAmZNB1N2VvqSkzr7yJAmpK7rdF896U6iPRpviqQTvNfpHF79kZr7I6zXjr5uIKQYS53V29bqXd4f8I=
-  file: "plugin-prestashop-webpay-$TRAVIS_TAG.zip"
+  file: "plugin-prestashop-webpay-rest-$TRAVIS_TAG.zip"
   skip_cleanup: true
   on:
-    repo: TransbankDevelopers/transbank-plugin-prestashop-webpay
+    repo: TransbankDevelopers/transbank-plugin-prestashop-webpay-rest
     tags: true
