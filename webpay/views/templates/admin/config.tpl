@@ -10,7 +10,7 @@
 	<script src="https://unpkg.com/bootstrap-switch"></script>
 
 	<h2>{l s='Pago electrónico con Tarjetas de Crédito o Redcompra a través de Webpay Plus Rest' mod='webpay'}</h2>
-	<button  class ="btn btn-primary" data-toggle="modal" data-target="#tb_modal">Información</button>
+	<button  class ="btn btn-primary" data-toggle="modal" data-target="#tb_modal">Realizar diagnóstico</button>
 	<hr>
 
 	<form action="{$post_url|escape:'htmlall':'UTF-8'}" method="post" style="clear: both; margin-top: 10px; max-width: 400px">
@@ -81,7 +81,7 @@
 
 							<hr style="border-width: 2px">
 
-							<h2 class="">{l s='Información de Plugin / Ambiente' mod='webpay'}</h2>
+							<h2 class="">{l s='Información del plugin y el ambiente' mod='webpay'}</h2>
 							<table class="table table-striped">
 								<tr>
 									<td><div title="Nombre del E-commerce instalado en el servidor" class="label label-info">?</div> <strong>{l s='Software E-commerce' mod='webpay'}: </strong></td>
@@ -119,7 +119,7 @@
 									<td class="tbk_table_td"><span  class="label {if $php_status eq 'OK'}label-success2{else}label-warning{/if}">{$php_status}</td>
 								</tr>
 								<tr>
-									<td><div title="Versión de PHP instalada en el servidor" class="label label-info">?</div> <strong>{l s='version' mod='webpay'}: </strong></td>
+									<td><div title="Versión de PHP instalada en el servidor" class="label label-info">?</div> <strong>{l s='Versión instalada: ' mod='webpay'}: </strong></td>
 									<td class="tbk_table_td">{$php_version}</td>
 								</tr>
 							</table>

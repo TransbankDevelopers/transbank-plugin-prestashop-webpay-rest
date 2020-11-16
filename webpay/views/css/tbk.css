@@ -47,3 +47,13 @@
 div .modal-dialog {
     width: 80%;
 }
+
+.label-success2{background-color:#3cb521}
+
+.label-success2[href]:hover,
+.label-success2[href]:focus{background-color:#2e8a19}
+
+.label-danger2{background-color:#cd0200}
+
+.label-danger2[href]:hover,
+.label-danger2[href]:focus{background-color:#9a0200}
