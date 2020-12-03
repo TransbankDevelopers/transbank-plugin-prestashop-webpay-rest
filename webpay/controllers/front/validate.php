@@ -1,7 +1,6 @@
 <?php
-
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
-
+use Transbank\Webpay\WebpayPlus\TransactionCommitResponse;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -158,6 +157,7 @@ class WebPayValidateModuleFrontController extends ModuleFrontController
         if (is_array($result) && isset($result['error'])) {
             $this->throwError('Error: ' . $result['detail']);
         }
+
         if (isset($result->buyOrder) && $result->responseCode === 0) {
             $customer = new Customer($cart->id_customer);
             $currency = Context::getContext()->currency;
@@ -186,20 +186,30 @@ class WebPayValidateModuleFrontController extends ModuleFrontController
             $webpayTransaction->vci = $result->vci;
             $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_APPROVED;
             $webpayTransaction->save();
-    
+
             return $this->redirectToSuccessPage($cart);
 
         } else {
 
             $webpayTransaction->response_code = isset($result->responseCode) ? $result->responseCode : null;
+            $webpayTransaction->transbank_response = json_encode($result);
             $webpayTransaction->save();
 
             $this->responseData['PAYMENT_OK'] = 'FAIL';
 
+            $error = 'Error en el pago';
+            $detail = 'Indefinido';
+            if (is_array($result) && isset($result["error"])) {
+                $error = $result["error"] ;
+                $detail = isset($result["detail"]) ? $result["detail"] : 'Indefinido';
+            }
 
-            $error = isset($result["error"]) ? $result["error"] : 'Error en el pago';
-            $detail = isset($result["detail"]) ? $result["detail"] : 'Indefinido';
-            $this->showErrorPage($error . ', ' . $detail);
+            if ($result instanceof TransactionCommitResponse) {
+                $error = 'La transacción ha sido rechazada. Por favor, reintente el pago. ';
+                $detail = 'Código de respuesta: ' . $result->getResponseCode() . '. Estado: ' . $result->getStatus();
+            }
+
+            $this->showErrorPage($error . '  (' . $detail . ')');
         }
     }
 
