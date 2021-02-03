@@ -36,7 +36,7 @@ class WebPay extends PaymentModule {
         
         $this->name = 'webpay';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         $this->author = 'Transbank';
         $this->need_instance = 1;
         $this->bootstrap = true;
@@ -70,16 +70,14 @@ class WebPay extends PaymentModule {
     }
     
     public function install() {
-        
         $this->setupPlugin();
-        
-        return parent::install() &&
-            $this->registerHook('paymentOptions') &&
-            $this->registerHook('paymentReturn') &&
-            $this->registerHook('displayPayment') &&
-            $this->registerHook('displayPaymentReturn') &&
-            $this->installWebpayTable();
-        
+            return parent::install() &&
+                $this->registerHook('paymentOptions') &&
+                $this->registerHook('paymentReturn') &&
+                $this->registerHook('displayPayment') &&
+                $this->registerHook('displayPaymentReturn') &&
+                $this->registerHook('displayAdminOrder') &&
+                $this->installWebpayTable();      
     }
     
     protected function installWebpayTable() {
@@ -92,15 +90,93 @@ class WebPay extends PaymentModule {
             return false;
         return true;
     }
-    
+
+    public function hookdisplayAdminOrder($params) {
+        if (!$this->active)
+            return;
+            
+        $orderId = $params['id_order'];
+        $bsOrder = new Order((int)$orderId);
+
+        if ($bsOrder->module != "webpay"){
+            return;
+        }
+
+        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `order_id` = "' . $orderId . '" AND status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED;
+        $transaction = \Db::getInstance()->getRow($sql);
+        $webpayTransaction = new TransbankWebpayRestTransaction($transaction['id']);
+        $transbankResponse = json_decode($webpayTransaction->transbank_response, true);
+        $transactionDate = strtotime($transbankResponse['transactionDate']);
+        $paymentTypeCode = $transbankResponse['paymentTypeCode'];
+
+        if ($paymentTypeCode == "VD") {
+            $paymentType = "Débito";
+        } elseif ($paymentTypeCode == "VP") {
+            $paymentType = "Prepago";
+        } else {
+            $paymentType = "Crédito";
+        }
+        if (in_array($paymentTypeCode, ["SI", "S2", "NC", "VC"])) {
+            $tipo_cuotas = $this->paymentTypeCodearray[$paymentTypeCode];
+        } else {
+            $tipo_cuotas = "Sin cuotas";
+        }
+        if ($transbankResponse['installmentsAmount']){
+            $cat_cuotas = intval($transbankResponse['amount'])/intval($transbankResponse['installmentsAmount']);
+        }else{
+            $cat_cuotas = 0;
+        }
+  
+        $details = array(
+            array(
+                'desc' => $this->l('Fecha de Transacción'),
+                'data' => date("d-m-Y", $transactionDate)." ".date("H:i:s", $transactionDate),
+            ),
+            array(
+                'desc' => $this->l('Tipo de Tarjeta'),
+                'data' => $paymentType,
+            ),
+            array(
+                'desc' => $this->l('Tipo de Cuotas'),
+                'data' => $tipo_cuotas,
+            ),
+            array(
+                'desc' => $this->l('Cantidad de Cuotas'),
+                'data' => $cat_cuotas,
+            ),
+            array(
+                'desc' => $this->l('Tarjeta'),
+                'data' => $transbankResponse['cardDetail']['card_number'],
+            ),
+            array(
+                'desc' => $this->l('Total Cobrado'),
+                'data' => "$".number_format($transbankResponse['amount'], 0, ',', '.'),
+            ),
+            array(
+                'desc' => $this->l('Código de Autorización'),
+                'data' => $transbankResponse['authorizationCode'],
+            ),
+            array(
+                'desc' => $this->l('Respuesta del Banco'),
+                'data' => $transbankResponse['status'],
+            ),
+        );
+
+        $this->context->smarty->assign($this->name, array(
+            '_path' => $this->_path,
+            'title' => $this->displayName,
+            'details' => $details,
+        ));
+
+        return $this->display(__FILE__, 'views/templates/admin/admin_order.tpl');
+    }
+
     public function hookPaymentReturn($params) {
         if (!$this->active)
             return;
         
-        
         $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
         $orderId = $params[$nameOrderRef]->id;
-        
         
         $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `order_id` = "' . $orderId . '" AND status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED;
         $transaction = \Db::getInstance()->getRow($sql);
@@ -344,7 +420,6 @@ class WebPay extends PaymentModule {
         $this->storeID_init = \Transbank\Webpay\Options::DEFAULT_COMMERCE_CODE;
         
         $this->apiKeySecret_initial_value = \Transbank\Webpay\Options::DEFAULT_API_KEY;
-        
         
         $this->environment = Configuration::get('WEBPAY_ENVIRONMENT');
     }
