@@ -2,10 +2,11 @@
 <module>
     <name>webpay</name>
     <displayName><![CDATA[Webpay Plus]]></displayName>
-    <version><![CDATA[1.0.0]]></version>
-    <description><![CDATA[Recibe pagos en linea con Tarjetas de crédito y Redcompra en tu Prestashop a través de Webpay Plus REST]]></description>
+    <version><![CDATA[1.0.2]]></version>
+    <description><![CDATA[Recibe pagos en l&iacute;nea con tarjetas de cr&eacute;dito y Redcompra en tu Prestashop a trav&eacute;s de Webpay Plus]]></description>
     <author><![CDATA[Transbank]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
+	<confirmUninstall><![CDATA[¿Estás seguro/a que deseas desinstalar este módulo de pago?]]></confirmUninstall>
     <is_configurable>1</is_configurable>
     <need_instance>1</need_instance>
 	<limited_countries></limited_countries>

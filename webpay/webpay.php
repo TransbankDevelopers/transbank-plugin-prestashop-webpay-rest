@@ -36,7 +36,7 @@ class WebPay extends PaymentModule {
         
         $this->name = 'webpay';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.1';
+        $this->version = '1.0.2';
         $this->author = 'Transbank';
         $this->need_instance = 1;
         $this->bootstrap = true;
@@ -70,28 +70,20 @@ class WebPay extends PaymentModule {
     }
     
     public function install() {
+        
         $this->setupPlugin();
-            return parent::install() &&
-                $this->registerHook('paymentOptions') &&
-                $this->registerHook('paymentReturn') &&
-                $this->registerHook('displayPayment') &&
-                $this->registerHook('displayPaymentReturn') &&
-                $this->registerHook('displayAdminOrder') &&
-                $this->installWebpayTable();      
-    }
-    
-    protected function installWebpayTable() {
-        $installer = new \PrestaShop\Module\WebpayPlus\Install\Installer();
-        return $installer->installWebpayOrdersTable();
-    }
-    
-    public function uninstall() {
-        if (!parent::uninstall() || !Configuration::deleteByName("webpay"))
-            return false;
-        return true;
+        
+        return parent::install() &&
+            $this->registerHook('paymentOptions') &&
+            $this->registerHook('paymentReturn') &&
+            $this->registerHook('displayPayment') &&
+            $this->registerHook('displayPaymentReturn') &&
+            $this->registerHook('displayAdminOrderLeft') && 
+            $this->installWebpayTable();
+        
     }
 
-    public function hookdisplayAdminOrder($params) {
+    public function hookdisplayAdminOrderLeft($params) {
         if (!$this->active)
             return;
             
@@ -121,11 +113,6 @@ class WebPay extends PaymentModule {
         } else {
             $tipo_cuotas = "Sin cuotas";
         }
-        if ($transbankResponse['installmentsAmount']){
-            $cat_cuotas = intval($transbankResponse['amount'])/intval($transbankResponse['installmentsAmount']);
-        }else{
-            $cat_cuotas = 0;
-        }
   
         $details = array(
             array(
@@ -142,7 +129,7 @@ class WebPay extends PaymentModule {
             ),
             array(
                 'desc' => $this->l('Cantidad de Cuotas'),
-                'data' => $cat_cuotas,
+                'data' => $transbankResponse['installmentsNumber'],
             ),
             array(
                 'desc' => $this->l('Tarjeta'),
@@ -160,6 +147,18 @@ class WebPay extends PaymentModule {
                 'desc' => $this->l('Respuesta del Banco'),
                 'data' => $transbankResponse['status'],
             ),
+            array(
+                'desc' => $this->l('Orden de Compra'),
+                'data' => $transbankResponse['buyOrder'],
+            ),
+            array(
+                'desc' => $this->l('Código de Resultado'),
+                'data' => $webpayTransaction->response_code,
+            ),
+            array(
+                'desc' => $this->l('Token'),
+                'data' => $webpayTransaction->token,
+            ),
         );
 
         $this->context->smarty->assign($this->name, array(
@@ -171,12 +170,25 @@ class WebPay extends PaymentModule {
         return $this->display(__FILE__, 'views/templates/admin/admin_order.tpl');
     }
 
+    protected function installWebpayTable() {
+        $installer = new \PrestaShop\Module\WebpayPlus\Install\Installer();
+        return $installer->installWebpayOrdersTable();
+    }
+    
+    public function uninstall() {
+        if (!parent::uninstall() || !Configuration::deleteByName("webpay"))
+            return false;
+        return true;
+    }
+    
     public function hookPaymentReturn($params) {
         if (!$this->active)
             return;
         
+        
         $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
         $orderId = $params[$nameOrderRef]->id;
+        
         
         $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `order_id` = "' . $orderId . '" AND status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED;
         $transaction = \Db::getInstance()->getRow($sql);
@@ -420,6 +432,7 @@ class WebPay extends PaymentModule {
         $this->storeID_init = \Transbank\Webpay\Options::DEFAULT_COMMERCE_CODE;
         
         $this->apiKeySecret_initial_value = \Transbank\Webpay\Options::DEFAULT_API_KEY;
+        
         
         $this->environment = Configuration::get('WEBPAY_ENVIRONMENT');
     }
