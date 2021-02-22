@@ -27,6 +27,15 @@
 		<br/>
 		<label for="apiKey">{l s='API Key (llave secreta)' mod='webpay'}</label>
 		<div class="margin-form"><input type="text" size="90" id="apiKeySecret" name="apiKeySecret" value="{$data_apikeysecret|escape:'htmlall':'UTF-8'}"/></div>
+		
+		<br/>
+		<label for="webpay_default_order_state_id_after_payment">{l s='Estado pago aceptado' mod='webpay'}</label>
+		<div class="margin-form">
+			<select name="webpay_default_order_state_id_after_payment">
+				<option value="{$pago_aceptado_id}" {if $default_after_payment_order_state_id eq $pago_aceptado_id}selected{/if}>Pago aceptado</option>
+				<option value="{$preparacion_curso_id}" {if $default_after_payment_order_state_id eq $preparacion_curso_id}selected{/if}>Preparación en curso</option>
+			</select>
+		</div>
 
 		<br/>
 		<label for="environment">{l s='Ambiente' mod='webpay'}</label>
@@ -41,6 +50,7 @@
 				<option value="LIVE" {if $data_environment eq "LIVE"}selected{/if}>Producción</option>
 			</select>
 		</div>
+	
 		<br/>
 
 		<div align="right">
