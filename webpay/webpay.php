@@ -78,10 +78,98 @@ class WebPay extends PaymentModule {
             $this->registerHook('paymentReturn') &&
             $this->registerHook('displayPayment') &&
             $this->registerHook('displayPaymentReturn') &&
+            $this->registerHook('displayAdminOrderLeft') && 
             $this->installWebpayTable();
         
     }
-    
+
+    public function hookdisplayAdminOrderLeft($params) {
+        if (!$this->active)
+            return;
+            
+        $orderId = $params['id_order'];
+        $bsOrder = new Order((int)$orderId);
+
+        if ($bsOrder->module != "webpay"){
+            return;
+        }
+
+        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `order_id` = "' . $orderId . '" AND status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED;
+        $transaction = \Db::getInstance()->getRow($sql);
+        $webpayTransaction = new TransbankWebpayRestTransaction($transaction['id']);
+        $transbankResponse = json_decode($webpayTransaction->transbank_response, true);
+        $transactionDate = strtotime($transbankResponse['transactionDate']);
+        $paymentTypeCode = $transbankResponse['paymentTypeCode'];
+
+        if ($paymentTypeCode == "VD") {
+            $paymentType = "Débito";
+        } elseif ($paymentTypeCode == "VP") {
+            $paymentType = "Prepago";
+        } else {
+            $paymentType = "Crédito";
+        }
+        if (in_array($paymentTypeCode, ["SI", "S2", "NC", "VC"])) {
+            $tipo_cuotas = $this->paymentTypeCodearray[$paymentTypeCode];
+        } else {
+            $tipo_cuotas = "Sin cuotas";
+        }
+  
+        $details = array(
+            array(
+                'desc' => $this->l('Fecha de Transacción'),
+                'data' => date("d-m-Y", $transactionDate)." ".date("H:i:s", $transactionDate),
+            ),
+            array(
+                'desc' => $this->l('Tipo de Tarjeta'),
+                'data' => $paymentType,
+            ),
+            array(
+                'desc' => $this->l('Tipo de Cuotas'),
+                'data' => $tipo_cuotas,
+            ),
+            array(
+                'desc' => $this->l('Cantidad de Cuotas'),
+                'data' => $transbankResponse['installmentsNumber'],
+            ),
+            array(
+                'desc' => $this->l('Tarjeta'),
+                'data' => $transbankResponse['cardDetail']['card_number'],
+            ),
+            array(
+                'desc' => $this->l('Total Cobrado'),
+                'data' => "$".number_format($transbankResponse['amount'], 0, ',', '.'),
+            ),
+            array(
+                'desc' => $this->l('Código de Autorización'),
+                'data' => $transbankResponse['authorizationCode'],
+            ),
+            array(
+                'desc' => $this->l('Respuesta del Banco'),
+                'data' => $transbankResponse['status'],
+            ),
+            array(
+                'desc' => $this->l('Orden de Compra'),
+                'data' => $transbankResponse['buyOrder'],
+            ),
+            array(
+                'desc' => $this->l('Código de Resultado'),
+                'data' => $webpayTransaction->response_code,
+            ),
+            array(
+                'desc' => $this->l('Token'),
+                'data' => $webpayTransaction->token,
+            ),
+        );
+
+        $this->context->smarty->assign($this->name, array(
+            '_path' => $this->_path,
+            'title' => $this->displayName,
+            'details' => $details,
+        ));
+
+        return $this->display(__FILE__, 'views/templates/admin/admin_order.tpl');
+    }
+
     protected function installWebpayTable() {
         $installer = new \PrestaShop\Module\WebpayPlus\Install\Installer();
         return $installer->installWebpayOrdersTable();
@@ -238,10 +326,14 @@ class WebPay extends PaymentModule {
         $ostatus = new OrderState(1);
         $statuses = $ostatus->getOrderStates(1);
         $defaultPaymentStatus = Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
+        $paymentAcceptedStatusId = Configuration::get('PS_OS_PAYMENT');
+        $preparationStatusId = Configuration::get('PS_OS_PREPARATION');
     
         Context::getContext()->smarty->assign(
             array(
                 'default_after_payment_order_state_id' => $defaultPaymentStatus,
+                'paymentAcceptedStatusId' => $paymentAcceptedStatusId,
+                'preparationStatusId' => $preparationStatusId,
                 'payment_states' => $statuses,
                 'errors' => $this->_errors,
                 'post_url' => $_SERVER['REQUEST_URI'],
