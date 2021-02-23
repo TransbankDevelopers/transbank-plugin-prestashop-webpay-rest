@@ -36,7 +36,7 @@ class WebPay extends PaymentModule {
         
         $this->name = 'webpay';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.3';
+        $this->version = '1.0.0';
         $this->author = 'Transbank';
         $this->need_instance = 1;
         $this->bootstrap = true;
@@ -326,14 +326,14 @@ class WebPay extends PaymentModule {
         $ostatus = new OrderState(1);
         $statuses = $ostatus->getOrderStates(1);
         $defaultPaymentStatus = Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
-        $pago_aceptado_id = Configuration::get('PS_OS_PAYMENT');
-        $preparacion_curso_id = Configuration::get('PS_OS_PREPARATION');
+        $paymentAcceptedStatusId = Configuration::get('PS_OS_PAYMENT');
+        $preparationStatusId = Configuration::get('PS_OS_PREPARATION');
     
         Context::getContext()->smarty->assign(
             array(
                 'default_after_payment_order_state_id' => $defaultPaymentStatus,
-                'pago_aceptado_id' => $pago_aceptado_id,
-                'preparacion_curso_id' => $preparacion_curso_id,
+                'paymentAcceptedStatusId' => $paymentAcceptedStatusId,
+                'preparationStatusId' => $preparationStatusId,
                 'payment_states' => $statuses,
                 'errors' => $this->_errors,
                 'post_url' => $_SERVER['REQUEST_URI'],
@@ -428,7 +428,7 @@ class WebPay extends PaymentModule {
         Configuration::updateValue('WEBPAY_ENVIRONMENT', "TEST");
         // We assume that the default state is "PREPARATION" and then set it
         // as the default order status after payment for our plugin
-        $orderInPreparationStateId = Configuration::get('PS_OS_PAYMENT');
+        $orderInPreparationStateId = Configuration::get('PS_OS_PREPARATION');
         Configuration::updateValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', $orderInPreparationStateId);
     }
     

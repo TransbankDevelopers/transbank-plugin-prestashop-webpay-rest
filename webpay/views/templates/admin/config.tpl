@@ -32,8 +32,8 @@
 		<label for="webpay_default_order_state_id_after_payment">{l s='Estado pago aceptado' mod='webpay'}</label>
 		<div class="margin-form">
 			<select name="webpay_default_order_state_id_after_payment">
-				<option value="{$pago_aceptado_id}" {if $default_after_payment_order_state_id eq $pago_aceptado_id}selected{/if}>Pago aceptado</option>
-				<option value="{$preparacion_curso_id}" {if $default_after_payment_order_state_id eq $preparacion_curso_id}selected{/if}>Preparación en curso</option>
+				<option value="{$paymentAcceptedStatusId}" {if $default_after_payment_order_state_id eq $paymentAcceptedStatusId}selected{/if}>{l s='Pago aceptado' mod='webpay'}</option>
+				<option value="{$preparationStatusId}" {if $default_after_payment_order_state_id eq $preparationStatusId}selected{/if}>{l s='Preparación en curso' mod='webpay'}</option>
 			</select>
 		</div>
 
