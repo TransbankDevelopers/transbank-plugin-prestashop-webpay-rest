@@ -1,4 +1,4 @@
-<div id="webpay_details" class="{if version_compare(_PS_VERSION_, '1.7.7.0', '>=')}col-md-4 card mt-2{else}panel{/if}">
+<div id="webpay_details" class="{if version_compare(_PS_VERSION_, '1.7.7.0', '>=')}col card mt-2{else}panel{/if}">
   <div class="{if version_compare(_PS_VERSION_, '1.7.7.0', '>=')}card-header{else}panel-heading{/if}">
     <img src="{$webpay._path|escape:'htmlall':'UTF-8'}logo.gif" {if version_compare(_PS_VERSION_, '1.7.7.0', '>=')}class="material-icons"{/if}/>
     {$webpay.title|escape:'htmlall':'UTF-8'}

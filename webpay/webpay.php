@@ -73,17 +73,31 @@ class WebPay extends PaymentModule {
         
         $this->setupPlugin();
         
+		if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')){
+			$displayorder = 'displayAdminOrderTabContent';
+        }else{
+            $displayorder = 'displayAdminOrderLeft';
+        }
+		
         return parent::install() &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('displayPayment') &&
             $this->registerHook('displayPaymentReturn') &&
             $this->registerHook('displayAdminOrderLeft') && 
+			$this->registerHook($displayorder) && 
             $this->installWebpayTable();
         
     }
-
+    
     public function hookdisplayAdminOrderLeft($params) {
+		return $this->AdminDisplay($params);
+    }
+    public function hookdisplayAdminOrderTabContent($params) {
+        return $this->AdminDisplay($params);
+    }
+
+    public function AdminDisplay($params){
         if (!$this->active)
             return;
             
