@@ -16,10 +16,11 @@ if (Utils::isPrestashop_1_6()) {
 }
 
 
-class WebPay extends PaymentModule {
+class WebPay extends PaymentModule
+{
     protected $_errors = array();
-    var $healthcheck;
-    var $log;
+    public $healthcheck;
+    public $log;
     public $title = 'Pago con tarjetas de crédito o Redcompra';
     protected $apiKeySecret_initial_value;
     
@@ -32,8 +33,8 @@ class WebPay extends PaymentModule {
         "NC" => "N cuotas sin interés",
     ];
     
-    public function __construct() {
-        
+    public function __construct()
+    {
         $this->name = 'webpay';
         $this->tab = 'payments_gateways';
         $this->version = '1.0.0';
@@ -51,60 +52,62 @@ class WebPay extends PaymentModule {
         
         $this->pluginValidation();
         try {
-        $this->loadPluginConfiguration();
+            $this->loadPluginConfiguration();
         
-        $config = array(
+            $config = array(
             'ENVIRONMENT' => $this->environment,
             'COMMERCE_CODE' => $this->storeID,
             'API_KEY_SECRET' => $this->apiKeySecret,
             'ECOMMERCE' => 'prestashop'
         );
         
-        $this->healthcheck = new HealthCheck($config);
-        $this->datos_hc = json_decode($this->healthcheck->printFullResume());
-        $this->log = new LogHandler();
+            $this->healthcheck = new HealthCheck($config);
+            $this->datos_hc = json_decode($this->healthcheck->printFullResume());
+            $this->log = new LogHandler();
         } catch (Exception $e) {
             print_r($e);
         }
-        
     }
     
-    public function install() {
-        
+    public function install()
+    {
         $this->setupPlugin();
         
-		if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')){
-			$displayorder = 'displayAdminOrderTabContent';
-        }else{
+        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
+            $displayorder = 'displayAdminOrderTabContent';
+        } else {
             $displayorder = 'displayAdminOrderLeft';
         }
-		
+        
         return parent::install() &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('displayPayment') &&
             $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('displayAdminOrderLeft') && 
-			$this->registerHook($displayorder) && 
+            $this->registerHook('displayAdminOrderLeft') &&
+            $this->registerHook($displayorder) &&
             $this->installWebpayTable();
-        
     }
     
-    public function hookdisplayAdminOrderLeft($params) {
-		return $this->AdminDisplay($params);
+    public function hookdisplayAdminOrderLeft($params)
+    {
+        return $this->AdminDisplay($params);
     }
-    public function hookdisplayAdminOrderTabContent($params) {
+    public function hookdisplayAdminOrderTabContent($params)
+    {
         return $this->AdminDisplay($params);
     }
 
-    public function AdminDisplay($params){
-        if (!$this->active)
+    public function AdminDisplay($params)
+    {
+        if (!$this->active) {
             return;
+        }
             
         $orderId = $params['id_order'];
         $bsOrder = new Order((int)$orderId);
 
-        if ($bsOrder->module != "webpay"){
+        if ($bsOrder->module != "webpay") {
             return;
         }
 
@@ -184,20 +187,25 @@ class WebPay extends PaymentModule {
         return $this->display(__FILE__, 'views/templates/admin/admin_order.tpl');
     }
 
-    protected function installWebpayTable() {
+    protected function installWebpayTable()
+    {
         $installer = new \PrestaShop\Module\WebpayPlus\Install\Installer();
         return $installer->installWebpayOrdersTable();
     }
     
-    public function uninstall() {
-        if (!parent::uninstall() || !Configuration::deleteByName("webpay"))
+    public function uninstall()
+    {
+        if (!parent::uninstall() || !Configuration::deleteByName("webpay")) {
             return false;
+        }
         return true;
     }
     
-    public function hookPaymentReturn($params) {
-        if (!$this->active)
+    public function hookPaymentReturn($params)
+    {
+        if (!$this->active) {
             return;
+        }
         
         
         $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
@@ -255,7 +263,8 @@ class WebPay extends PaymentModule {
         return $this->display(__FILE__, 'views/templates/hook/payment_return.tpl');
     }
     
-    public function hookPayment($params) {
+    public function hookPayment($params)
+    {
         if (!$this->active) {
             return;
         }
@@ -266,7 +275,8 @@ class WebPay extends PaymentModule {
         return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
     }
     
-    public function hookPaymentOptions($params) {
+    public function hookPaymentOptions($params)
+    {
         if (!$this->active) {
             return;
         }
@@ -279,7 +289,8 @@ class WebPay extends PaymentModule {
         return $payment_options;
     }
     
-    public function checkCurrency($cart) {
+    public function checkCurrency($cart)
+    {
         $currency_order = new Currency($cart->id_currency);
         $currencies_module = $this->getCurrency($cart->id_currency);
         if (is_array($currencies_module)) {
@@ -292,17 +303,18 @@ class WebPay extends PaymentModule {
         return false;
     }
     
-    public function getWebpayPaymentOption() {
+    public function getWebpayPaymentOption()
+    {
         $WPOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
-        $paymentController = $this->context->link->getModuleLink($this->name,'payment',array(),true);
+        $paymentController = $this->context->link->getModuleLink($this->name, 'payment', array(), true);
         
         return $WPOption->setCallToActionText('Pago con tarjetas de crédito o Redcompra')
             ->setAction($paymentController)
             ->setLogo('https://www.transbankdevelopers.cl/public/library/img/svg/logo_webpay_plus.svg');
     }
     
-    public function getContent() {
-        
+    public function getContent()
+    {
         $activeShopID = (int)Context::getContext()->shop->id;
         $shopDomainSsl = Tools::getShopDomainSsl(true, true);
         $theEnvironmentChanged=false;
@@ -319,7 +331,6 @@ class WebPay extends PaymentModule {
             Configuration::updateValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', (int)Tools::getValue('webpay_default_order_state_id_after_payment'));
             $this->loadPluginConfiguration();
             $this->pluginValidation();
-            
         } else {
             $this->loadPluginConfiguration();
         }
@@ -381,23 +392,24 @@ class WebPay extends PaymentModule {
                 'dom_status' =>$this->datos_hc->php_extensions_status->dom->status,
                 'dom_version' =>$this->datos_hc->php_extensions_status->dom->version,
                 'php_info' =>$this->datos_hc->php_info->string->content,
-                'lockfile' => json_decode($this->log->getLockFile(),true)['status'],
-                'logs' => (isset( json_decode($this->log->getLastLog(),true)['log_content'])) ?  json_decode($this->log->getLastLog(),true)['log_content'] : NULL,
-                'log_file' => (isset( json_decode($this->log->getLastLog(),true)['log_file'])) ?  json_decode($this->log->getLastLog(),true)['log_file'] : NULL,
-                'log_weight' => (isset( json_decode($this->log->getLastLog(),true)['log_weight'])) ?  json_decode($this->log->getLastLog(),true)['log_weight'] : NULL,
-                'log_regs_lines' => (isset( json_decode($this->log->getLastLog(),true)['log_regs_lines'])) ?  json_decode($this->log->getLastLog(),true)['log_regs_lines'] : NULL,
+                'lockfile' => json_decode($this->log->getLockFile(), true)['status'],
+                'logs' => (isset(json_decode($this->log->getLastLog(), true)['log_content'])) ?  json_decode($this->log->getLastLog(), true)['log_content'] : null,
+                'log_file' => (isset(json_decode($this->log->getLastLog(), true)['log_file'])) ?  json_decode($this->log->getLastLog(), true)['log_file'] : null,
+                'log_weight' => (isset(json_decode($this->log->getLastLog(), true)['log_weight'])) ?  json_decode($this->log->getLastLog(), true)['log_weight'] : null,
+                'log_regs_lines' => (isset(json_decode($this->log->getLastLog(), true)['log_regs_lines'])) ?  json_decode($this->log->getLastLog(), true)['log_regs_lines'] : null,
                 'log_days' => $this->log->getValidateLockFile()['max_logs_days'],
                 'log_size' => $this->log->getValidateLockFile()['max_log_weight'],
-                'log_dir' => json_decode($this->log->getResume(),true)['log_dir'],
-                'logs_count' => json_decode($this->log->getResume(),true)['logs_count']['log_count'],
-                'logs_list' => json_decode($this->log->getResume(),true)['logs_list']
+                'log_dir' => json_decode($this->log->getResume(), true)['log_dir'],
+                'logs_count' => json_decode($this->log->getResume(), true)['logs_count']['log_count'],
+                'logs_list' => json_decode($this->log->getResume(), true)['logs_list']
             )
         );
         
         return $this->display($this->name, 'views/templates/admin/config.tpl');
     }
     
-    private function pluginValidation() {
+    private function pluginValidation()
+    {
         $this->_errors = array();
     }
     /**
@@ -420,22 +432,28 @@ class WebPay extends PaymentModule {
     public function sendPluginVersion(array $config)
     {
         $telemetryData = $this->healthcheck->getPluginInfo($this->healthcheck->ecommerce);
-        (new \Transbank\Telemetry\PluginVersion())->registerVersion($config['COMMERCE_CODE'],
-            $telemetryData['current_plugin_version'], $telemetryData['ecommerce_version'],
-            \Transbank\Telemetry\PluginVersion::ECOMMERCE_PRESTASHOP);
+        (new \Transbank\Telemetry\PluginVersion())->registerVersion(
+            $config['COMMERCE_CODE'],
+            $telemetryData['current_plugin_version'],
+            $telemetryData['ecommerce_version'],
+            \Transbank\Telemetry\PluginVersion::ECOMMERCE_PRESTASHOP
+        );
     }
     
-    private function adminValidation() {
+    private function adminValidation()
+    {
         $this->_errors = array();
     }
     
-    private function loadPluginConfiguration() {
+    private function loadPluginConfiguration()
+    {
         $this->storeID = Configuration::get('WEBPAY_STOREID');
         $this->apiKeySecret = Configuration::get('WEBPAY_API_KEY_SECRET');
         $this->environment = Configuration::get('WEBPAY_ENVIRONMENT');
     }
     
-    private function setupPlugin() {
+    private function setupPlugin()
+    {
         $this->loadIntegrationCertificates();
         Configuration::updateValue('WEBPAY_STOREID', $this->storeID_init);
         Configuration::updateValue('WEBPAY_API_KEY_SECRET', $this->apiKeySecret_initial_value);
@@ -446,7 +464,8 @@ class WebPay extends PaymentModule {
         Configuration::updateValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', $orderInPreparationStateId);
     }
     
-    private function loadIntegrationCertificates() {
+    private function loadIntegrationCertificates()
+    {
         $this->storeID_init = \Transbank\Webpay\Options::DEFAULT_COMMERCE_CODE;
         
         $this->apiKeySecret_initial_value = \Transbank\Webpay\Options::DEFAULT_API_KEY;
