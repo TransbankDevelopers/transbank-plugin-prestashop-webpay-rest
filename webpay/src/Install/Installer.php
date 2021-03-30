@@ -9,7 +9,7 @@ class Installer
 {
     public function installWebpayOrdersTable()
     {
-        return Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.TransbankWebpayRestTransaction::TABLE_NAME.'` (
+        return Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME .'` (
                 `id` bigint(20) NOT NULL AUTO_INCREMENT,
                 `cart_id` varchar(60) NOT NULL,
                 `order_id` varchar(60),
@@ -24,6 +24,6 @@ class Installer
                 `vci`  varchar(10),
                 `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
                 PRIMARY KEY (id)
-            ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;');
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;');
     }
 }

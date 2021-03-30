@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = [];
+$_MODULE = array();
 $_MODULE['<{webpay}prestashop>webpay_1d0fa96372ad263a6d6cdcb2ddd33d25'] = 'Webpay Plus';
 $_MODULE['<{webpay}prestashop>webpay_29b8b22b661595e84a49f9bc847cd6e1'] = 'Recibe pagos en linea con Tarjetas de Credito y Redcompra en tu Prestashop a traves de Webpay Plus';
 $_MODULE['<{webpay}prestashop>validate_e2b7dec8fa4b498156dfee6e4c84b156'] = 'Este método de pago no está disponible';

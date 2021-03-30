@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2017 PrestaShop.
+ * 2007-2017 PrestaShop
  *
  * NOTICE OF LICENSE
  *
@@ -37,15 +37,15 @@ function upgrade_module_1_0_0($module)
         $result = $installer->installWebpayOrdersTable();
     } catch (Exception $e) {
         $logger = new LogHandler();
-        $logger->logError('Error:  '.$e->getMessage());
+        $logger->logError('Error:  ' . $e->getMessage());
     }
-
-    file_put_contents('log.log', Configuration::get('WEBPAY_ENVIRONMENT')."\n", FILE_APPEND);
+    
+    file_put_contents('log.log', Configuration::get('WEBPAY_ENVIRONMENT') . "\n", FILE_APPEND);
     if (Configuration::get('WEBPAY_ENVIRONMENT') === 'LIVE') {
         $webpayModule = new WebPay();
         $config = $webpayModule->getConfigForHealthCheck();
         $webpayModule->sendPluginVersion($config);
     }
-
+    
     return true;
 }
