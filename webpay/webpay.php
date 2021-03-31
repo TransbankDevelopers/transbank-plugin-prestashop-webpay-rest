@@ -72,20 +72,16 @@ class WebPay extends PaymentModule
     public function install()
     {
         $this->setupPlugin();
-        
-        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
-            $displayorder = 'displayAdminOrderTabContent';
-        } else {
-            $displayorder = 'displayAdminOrderLeft';
-        }
-        
+    
+        $displayOrder = $this->getDisplayOrderHookName();
+    
         return parent::install() &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('displayPayment') &&
             $this->registerHook('displayPaymentReturn') &&
             $this->registerHook('displayAdminOrderLeft') &&
-            $this->registerHook($displayorder) &&
+            $this->registerHook($displayOrder) &&
             $this->installWebpayTable();
     }
     
@@ -103,7 +99,7 @@ class WebPay extends PaymentModule
         if (!$this->active) {
             return;
         }
-            
+        
         $orderId = $params['id_order'];
         $bsOrder = new Order((int)$orderId);
 
@@ -438,6 +434,18 @@ class WebPay extends PaymentModule
             $telemetryData['ecommerce_version'],
             \Transbank\Telemetry\PluginVersion::ECOMMERCE_PRESTASHOP
         );
+    }
+    /**
+     * @return string
+     */
+    public function getDisplayOrderHookName()
+    {
+        $displayOrder = 'displayAdminOrderLeft';
+        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
+            $displayOrder = 'displayAdminOrderTabContent';
+        }
+        
+        return $displayOrder;
     }
     
     private function adminValidation()
