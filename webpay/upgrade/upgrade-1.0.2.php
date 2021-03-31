@@ -34,7 +34,7 @@ function upgrade_module_1_0_2($module)
 {
     $displayOrder = $module->getDisplayOrderHookName();
     
-    $this->registerHook($displayOrder);
+    $module->registerHook($displayOrder);
 
     return true;
 }

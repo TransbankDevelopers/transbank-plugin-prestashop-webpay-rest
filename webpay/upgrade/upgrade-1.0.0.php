@@ -42,9 +42,9 @@ function upgrade_module_1_0_0($module)
 
     file_put_contents('log.log', Configuration::get('WEBPAY_ENVIRONMENT')."\n", FILE_APPEND);
     if (Configuration::get('WEBPAY_ENVIRONMENT') === 'LIVE') {
-        $webpayModule = new WebPay();
-        $config = $webpayModule->getConfigForHealthCheck();
-        $webpayModule->sendPluginVersion($config);
+            $webpayModule = new WebPay();
+            $config = $webpayModule->getConfigForHealthCheck();
+            $webpayModule->sendPluginVersion($config);
     }
 
     return true;
