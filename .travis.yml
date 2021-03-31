@@ -1,19 +1,19 @@
 language: php
 php:
-  - '5.6'
-
+- '5.6'
 script: echo "We don't have tests yet :("
-
 before_deploy:
-  - sh package.sh
-
+- sh package.sh
 deploy:
   provider: releases
   name: "$TRAVIS_TAG"
   api_key:
     secure: WLQXkVm4dZoG8iPgOa/Y98x5CFvgIyooEJQkmC3ZrnEfIUvlMF8KAvie3JPawYvIpqvF0W9AnDBBrkClgZzS2FPGjDqHwjAYlHpwmHMeRLvtcgJ06yKvYFfU2aNvTp76VeiwhiTdKxYrmwh0rdBgel3DmQmdY9H8q3hPUHKnlS0T5KXLgpaj6/DnT3w/Gq+bk+x4uefyGAGc4H16p2gAjBBKxZwZs1D/xMTmJCGohSPP+LmguOeQAyGsm5voKYbdBQEKcGNG99wsGufrLAp071fDyzX8+1OX/oZEsb8xnN2ENJ9J8viKkJW1L4dv6IHT2esq6dKsGrB9aiGAOX2U993+r9/6gs8L1mbdcLX0WmkEec7a1gq0f5CKp6uMsmPR8viO8SOUQzdRQbJS6BK2kVezcEX4hR0WJrgISR9wLelUv3AIPXamm56LhQDtqlIad1rJ7o+VCVCvUug68XqySDOLS2HE6WXvQEErdrtTYSwFRGuDRtpvAy2JP7jecIRAh7z0GOpF/ZX4U+qoNaGx0umlXj4LHYuYO7Pa50ODEEOxgOE57u2Z7WHCb8moYdUgHL38Icr9CzEn9WVjulxC+w1yxsChLIHLpnDOUJOoHeCzVJAChE5RgHW7UulKD5pLhODooZ5Ryaf7bq4uklGw3OiSXGUvkjx8MuvykpomKIg=
-  file: "plugin-prestashop-webpay-rest-$TRAVIS_TAG.zip"
+  file: plugin-prestashop-webpay-rest-$TRAVIS_TAG.zip
   skip_cleanup: true
   on:
     repo: TransbankDevelopers/transbank-plugin-prestashop-webpay-rest
     tags: true
+env:
+  global:
+    secure: RgbRze//Fe06AmFnpABERitiSB6OR7YJpBAbAoZ8MoWCWZxLa3s7hgaUncSvocgGCfVu23k8iZVpie7JWD5q/3YBCqlUr5pO+zWXQOXd76w0+rCrB0LEHqtfkHFLpymvJ7ue6DHTBv/WAbhHKScF/HWCq/qTXTBJX3L+W660q8Tr+l+PwFP/RjqkFeJPhLhmheX2vC+3ctaRgvGBrXzJ4qxDeVHEfK0F469/+vAp3CjMzomizQE2vPjRR6vSPfpUiD8KkC34uRCi20gEPcc1lMYqAqDsxCzzcgx0sVhDeV/y+cOw8NHAgDsRAdXO9YiKjHLzwrkYCdC5doRHFM8BZRTJ8xvICiTYQz+vVS743geVHgWQDXWPP0QuucRBJcCyI/NKuhVg/jsq2E2YrM8PmB/mgPxIC/MCmsPWkqhUNMQTZyYxBS7QnmsslpOtpMOS/eKn1kAefJB+nVeFhwImZcKqtDG9CQC9lp8kZ/wn4NsMy0jAbbphpL/OzW/RaePbPHfsierXR76YdDyqu7WeLQWsrBIGMMfb5qCDmdGfsw7Dam9epqh8DXBcprn2c8n62rHVQaMH+VtkEvdEQegX8gDAyh4i1/V5in9cgx7B0s8encMKxfS7NO2iAix9xexTVudzJ9GW4zAMC/CzLPDYqk0V8a5zrOAaAy2CAV8X4lw=
