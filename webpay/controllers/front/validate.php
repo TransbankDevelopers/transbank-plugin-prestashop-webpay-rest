@@ -142,6 +142,10 @@ class WebPayValidateModuleFrontController extends ModuleFrontController
     {
         $amount = $cart->getOrderTotal(true, Cart::BOTH);
 
+        if ($webpayTransaction->amount != $amount){
+            return $this->handleCartManipulated($webpayTransaction);
+        }
+
         $transbankSdkWebpay = WebpayPlusFactory::create();
         $result = $transbankSdkWebpay->commitTransaction($webpayTransaction->token);
         $webpayTransaction->transbank_response = json_encode($result);
@@ -214,6 +218,17 @@ class WebPayValidateModuleFrontController extends ModuleFrontController
 
             $this->showErrorPage($error.'  ('.$detail.')');
         }
+    }
+
+    protected function handleCartManipulated($webpayTransaction){
+        $error = 'El monto del carro ha cambiado, la transacción no fue completada, ningún
+        cargo será realizado en su tarjeta. Por favor, reintente el pago.';
+        $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
+        $message = 'Carro ha sido manipulado durante el proceso de pago';
+        $webpayTransaction->transbank_response = json_encode(['error' => $message]);
+        $webpayTransaction->save();
+        (new LogHandler())->logError($message);
+        return $this->showErrorPage($error);
     }
 
     private function showErrorPage($description = '', $resultCode = null)
