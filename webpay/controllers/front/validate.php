@@ -142,7 +142,7 @@ class WebPayValidateModuleFrontController extends ModuleFrontController
     {
         $amount = $cart->getOrderTotal(true, Cart::BOTH);
 
-        if ($webpayTransaction->amount != $amount){
+        if ($webpayTransaction->amount != $amount) {
             return $this->handleCartManipulated($webpayTransaction);
         }
 
@@ -220,7 +220,8 @@ class WebPayValidateModuleFrontController extends ModuleFrontController
         }
     }
 
-    protected function handleCartManipulated($webpayTransaction){
+    protected function handleCartManipulated($webpayTransaction)
+    {
         $error = 'El monto del carro ha cambiado, la transacción no fue completada, ningún
         cargo será realizado en su tarjeta. Por favor, reintente el pago.';
         $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
