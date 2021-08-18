@@ -4,6 +4,9 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.3]
+- Se arregla caso en que usuarios pueden manipular monto de carrito durante el proceso de pago
+
 ## [1.0.2]
 - Permite configurar estado del pedido [PR 13](https://github.com/TransbankDevelopers/transbank-plugin-prestashop-webpay-rest/pull/13)
 - Se agregan datos de la transacción al detalle de la orden [PR 12](https://github.com/TransbankDevelopers/transbank-plugin-prestashop-webpay-rest/pull/12)
