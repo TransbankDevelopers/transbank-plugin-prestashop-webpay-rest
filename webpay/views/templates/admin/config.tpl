@@ -9,7 +9,7 @@
 	<script src="../modules/webpay/views/js/request.js"> </script>
 	<script src="https://unpkg.com/bootstrap-switch"></script>
 
-	<h2>{l s='Pago electrónico con Tarjetas de Crédito o Redcompra a través de Webpay Plus Rest' mod='webpay'}</h2>
+	<h2>{l s='Pago electrónico con Tarjetas de Crédito o Redcompra a través de Webpay Plus REST' mod='webpay'}</h2>
 	<button  class ="btn btn-primary" data-toggle="modal" data-target="#tb_modal">Realizar diagnóstico</button>
 	<hr>
 
@@ -27,7 +27,7 @@
 		<br/>
 		<label for="apiKey">{l s='API Key (llave secreta)' mod='webpay'}</label>
 		<div class="margin-form"><input type="text" size="90" id="apiKeySecret" name="apiKeySecret" value="{$data_apikeysecret|escape:'htmlall':'UTF-8'}"/></div>
-		
+
 		<br/>
 		<label for="webpay_default_order_state_id_after_payment">{l s='Estado pago aceptado' mod='webpay'}</label>
 		<div class="margin-form">
@@ -50,7 +50,7 @@
 				<option value="LIVE" {if $data_environment eq "LIVE"}selected{/if}>Producción</option>
 			</select>
 		</div>
-	
+
 		<br/>
 
 		<div align="right">
