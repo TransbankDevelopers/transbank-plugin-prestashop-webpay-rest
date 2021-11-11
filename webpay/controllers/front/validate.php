@@ -332,7 +332,7 @@ class WebPayValidateModuleFrontController extends ModuleFrontController
     private function getTransactionByToken($token = null)
     {
         if (!$token) {
-            $token = $this->getTokenWs($_POST);
+            $token = $this->getTokenWs($_GET);
         }
         $sql = 'SELECT * FROM '._DB_PREFIX_.TransbankWebpayRestTransaction::TABLE_NAME.' WHERE `token` = "'.pSQL($token).'"';
         $result = \Db::getInstance()->getRow($sql);
