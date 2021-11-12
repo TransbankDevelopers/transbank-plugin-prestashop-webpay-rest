@@ -23,7 +23,7 @@ class WebPay extends PaymentModule
     public $log;
     public $title = 'Pago con tarjetas de crédito o Redcompra';
     protected $apiKeySecret_initial_value;
-    
+
     private $paymentTypeCodearray = [
         "VD" => "Venta débito",
         "VN" => "Venta normal",
@@ -32,7 +32,7 @@ class WebPay extends PaymentModule
         "S2" => "2 cuotas sin interés",
         "NC" => "N cuotas sin interés",
     ];
-    
+
     public function __construct()
     {
         $this->name = 'webpay';
@@ -41,26 +41,26 @@ class WebPay extends PaymentModule
         $this->author = 'Transbank';
         $this->need_instance = 1;
         $this->bootstrap = true;
-        
+
         parent::__construct();
         $this->displayName = 'Webpay Plus';
         $this->description = 'Recibe pagos en línea con tarjetas de crédito y Redcompra en tu Prestashop a través de Webpay Plus';
         $this->controllers = array('payment', 'validate');
         $this->confirmUninstall = '¿Estás seguro/a que deseas desinstalar este módulo de pago?';
-        
+
         $this->loadIntegrationCertificates();
-        
+
         $this->pluginValidation();
         try {
             $this->loadPluginConfiguration();
-        
+
             $config = array(
-            'ENVIRONMENT' => $this->environment,
-            'COMMERCE_CODE' => $this->storeID,
-            'API_KEY_SECRET' => $this->apiKeySecret,
-            'ECOMMERCE' => 'prestashop'
-        );
-        
+                'ENVIRONMENT' => $this->environment,
+                'COMMERCE_CODE' => $this->storeID,
+                'API_KEY_SECRET' => $this->apiKeySecret,
+                'ECOMMERCE' => 'prestashop'
+            );
+
             $this->healthcheck = new HealthCheck($config);
             $this->datos_hc = json_decode($this->healthcheck->printFullResume());
             $this->log = new LogHandler();
@@ -68,13 +68,13 @@ class WebPay extends PaymentModule
             print_r($e);
         }
     }
-    
+
     public function install()
     {
         $this->setupPlugin();
-    
+
         $displayOrder = $this->getDisplayOrderHookName();
-    
+
         return parent::install() &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
@@ -84,7 +84,7 @@ class WebPay extends PaymentModule
             $this->registerHook($displayOrder) &&
             $this->installWebpayTable();
     }
-    
+
     public function hookdisplayAdminOrderLeft($params)
     {
         return $this->AdminDisplay($params);
@@ -99,7 +99,7 @@ class WebPay extends PaymentModule
         if (!$this->active) {
             return;
         }
-        
+
         $orderId = $params['id_order'];
         $bsOrder = new Order((int)$orderId);
 
@@ -126,11 +126,11 @@ class WebPay extends PaymentModule
         } else {
             $tipo_cuotas = "Sin cuotas";
         }
-  
+
         $details = array(
             array(
                 'desc' => $this->l('Fecha de Transacción'),
-                'data' => date("d-m-Y", $transactionDate)." ".date("H:i:s", $transactionDate),
+                'data' => date("d-m-Y", $transactionDate) . " " . date("H:i:s", $transactionDate),
             ),
             array(
                 'desc' => $this->l('Tipo de Tarjeta'),
@@ -150,7 +150,7 @@ class WebPay extends PaymentModule
             ),
             array(
                 'desc' => $this->l('Total Cobrado'),
-                'data' => "$".number_format($transbankResponse['amount'], 0, ',', '.'),
+                'data' => "$" . number_format($transbankResponse['amount'], 0, ',', '.'),
             ),
             array(
                 'desc' => $this->l('Código de Autorización'),
@@ -188,7 +188,7 @@ class WebPay extends PaymentModule
         $installer = new \PrestaShop\Module\WebpayPlus\Install\Installer();
         return $installer->installWebpayOrdersTable();
     }
-    
+
     public function uninstall()
     {
         if (!parent::uninstall() || !Configuration::deleteByName("webpay")) {
@@ -196,26 +196,26 @@ class WebPay extends PaymentModule
         }
         return true;
     }
-    
+
     public function hookPaymentReturn($params)
     {
         if (!$this->active) {
             return;
         }
-        
-        
+
+
         $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
         $orderId = $params[$nameOrderRef]->id;
-        
-        
+
+
         $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `order_id` = "' . $orderId . '" AND status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED;
         $transaction = \Db::getInstance()->getRow($sql);
         $webpayTransaction = new TransbankWebpayRestTransaction($transaction['id']);
-        
+
         if (!$webpayTransaction) {
             (new LogHandler())->logError('Showing confirmation page, but there is no webpayTransaction object, so we cant find an approved transaction for this order.');
         }
-        
+
         $transbankResponse = json_decode($webpayTransaction->transbank_response, true);
         $transactionDate = strtotime($transbankResponse['transactionDate']);
         $paymentTypeCode = $transbankResponse['paymentTypeCode'];
@@ -231,8 +231,8 @@ class WebPay extends PaymentModule
         } else {
             $tipo_cuotas = "Sin cuotas";
         }
-        
-        
+
+
         $this->smarty->assign(array(
             'shop_name' => $this->context->shop->name,
             'total_to_pay' =>  $params[$nameOrderRef]->getOrdersTotalPaid(),
@@ -251,14 +251,14 @@ class WebPay extends PaymentModule
             'WEBPAY_VOUCHER_AMOUNT_CUOTAS' => $transbankResponse['installmentsAmount'] ? number_format($transbankResponse['installmentsAmount'], 0, ',', '.') : "0",
             'WEBPAY_RESULT_CODE' => $webpayTransaction->response_code
         ));
-        
+
         if (isset($params[$nameOrderRef]->reference) && !empty($params[$nameOrderRef]->reference)) {
             $this->smarty->assign('reference', $params[$nameOrderRef]->reference);
         }
-        
+
         return $this->display(__FILE__, 'views/templates/hook/payment_return.tpl');
     }
-    
+
     public function hookPayment($params)
     {
         if (!$this->active) {
@@ -270,7 +270,7 @@ class WebPay extends PaymentModule
         ));
         return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
     }
-    
+
     public function hookPaymentOptions($params)
     {
         if (!$this->active) {
@@ -284,7 +284,7 @@ class WebPay extends PaymentModule
         ];
         return $payment_options;
     }
-    
+
     public function checkCurrency($cart)
     {
         $currency_order = new Currency($cart->id_currency);
@@ -298,29 +298,29 @@ class WebPay extends PaymentModule
         }
         return false;
     }
-    
+
     public function getWebpayPaymentOption()
     {
         $WPOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
         $paymentController = $this->context->link->getModuleLink($this->name, 'payment', array(), true);
-        
+
         return $WPOption->setCallToActionText('Pago con tarjetas de crédito o Redcompra')
             ->setAction($paymentController)
             ->setLogo('https://www.transbankdevelopers.cl/public/library/img/svg/logo_webpay_plus.svg');
     }
-    
+
     public function getContent()
     {
         $activeShopID = (int)Context::getContext()->shop->id;
         $shopDomainSsl = Tools::getShopDomainSsl(true, true);
-        $theEnvironmentChanged=false;
-        
+        $theEnvironmentChanged = false;
+
         if (Tools::getIsset('webpay_updateSettings')) {
             if (Tools::getValue('environment') !=  Configuration::get('WEBPAY_ENVIRONMENT')) {
-                $theEnvironmentChanged=true;
+                $theEnvironmentChanged = true;
             }
-            
-            
+
+
             Configuration::updateValue('WEBPAY_STOREID', trim(Tools::getValue('storeID')));
             Configuration::updateValue('WEBPAY_API_KEY_SECRET', trim(Tools::getValue('apiKeySecret')));
             Configuration::updateValue('WEBPAY_ENVIRONMENT', Tools::getValue('environment'));
@@ -330,26 +330,26 @@ class WebPay extends PaymentModule
         } else {
             $this->loadPluginConfiguration();
         }
-        
+
         $config = $this->getConfigForHealthCheck();
-        
+
         $this->healthcheck = new HealthCheck($config);
         if ($theEnvironmentChanged) {
             $rs = $this->healthcheck->getpostinstallinfo();
         }
-        
+
         if (Tools::getValue('environment') === 'LIVE') {
             $this->sendPluginVersion($config);
         }
-        
+
         $this->datos_hc = json_decode($this->healthcheck->printFullResume());
-        
+
         $ostatus = new OrderState(1);
         $statuses = $ostatus->getOrderStates(1);
         $defaultPaymentStatus = Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
         $paymentAcceptedStatusId = Configuration::get('PS_OS_PAYMENT');
         $preparationStatusId = Configuration::get('PS_OS_PREPARATION');
-    
+
         Context::getContext()->smarty->assign(
             array(
                 'default_after_payment_order_state_id' => $defaultPaymentStatus,
@@ -372,22 +372,22 @@ class WebPay extends PaymentModule
                 'init_error_detail' => null, // (isset($this->datos_hc->validate_init_transaction->response->detail)) ? $this->datos_hc->validate_init_transaction->response->detail : NULL,
                 'init_success_url' => null, //$this->datos_hc->validate_init_transaction->response->url,
                 'init_success_token' => null, //$this->datos_hc->validate_init_transaction->response->token_ws,
-                'php_status' =>$this->datos_hc->server_resume->php_version->status,
-                'php_version' =>$this->datos_hc->server_resume->php_version->version,
-                'server_version' =>$this->datos_hc->server_resume->server_version->server_software,
-                'ecommerce' =>$this->datos_hc->server_resume->plugin_info->ecommerce,
-                'ecommerce_version' =>$this->datos_hc->server_resume->plugin_info->ecommerce_version,
-                'current_plugin_version' =>$this->datos_hc->server_resume->plugin_info->current_plugin_version,
-                'last_plugin_version' =>$this->datos_hc->server_resume->plugin_info->last_plugin_version,
-                'openssl_status' =>$this->datos_hc->php_extensions_status->openssl->status,
-                'openssl_version' =>$this->datos_hc->php_extensions_status->openssl->version,
-                'SimpleXML_status' =>$this->datos_hc->php_extensions_status->SimpleXML->status,
-                'SimpleXML_version' =>$this->datos_hc->php_extensions_status->SimpleXML->version,
-                'soap_status' =>$this->datos_hc->php_extensions_status->soap->status,
-                'soap_version' =>$this->datos_hc->php_extensions_status->soap->version,
-                'dom_status' =>$this->datos_hc->php_extensions_status->dom->status,
-                'dom_version' =>$this->datos_hc->php_extensions_status->dom->version,
-                'php_info' =>$this->datos_hc->php_info->string->content,
+                'php_status' => $this->datos_hc->server_resume->php_version->status,
+                'php_version' => $this->datos_hc->server_resume->php_version->version,
+                'server_version' => $this->datos_hc->server_resume->server_version->server_software,
+                'ecommerce' => $this->datos_hc->server_resume->plugin_info->ecommerce,
+                'ecommerce_version' => $this->datos_hc->server_resume->plugin_info->ecommerce_version,
+                'current_plugin_version' => $this->datos_hc->server_resume->plugin_info->current_plugin_version,
+                'last_plugin_version' => $this->datos_hc->server_resume->plugin_info->last_plugin_version,
+                'openssl_status' => $this->datos_hc->php_extensions_status->openssl->status,
+                'openssl_version' => $this->datos_hc->php_extensions_status->openssl->version,
+                'SimpleXML_status' => $this->datos_hc->php_extensions_status->SimpleXML->status,
+                'SimpleXML_version' => $this->datos_hc->php_extensions_status->SimpleXML->version,
+                'soap_status' => $this->datos_hc->php_extensions_status->soap->status,
+                'soap_version' => $this->datos_hc->php_extensions_status->soap->version,
+                'dom_status' => $this->datos_hc->php_extensions_status->dom->status,
+                'dom_version' => $this->datos_hc->php_extensions_status->dom->version,
+                'php_info' => $this->datos_hc->php_info->string->content,
                 'lockfile' => json_decode($this->log->getLockFile(), true)['status'],
                 'logs' => (isset(json_decode($this->log->getLastLog(), true)['log_content'])) ?  json_decode($this->log->getLastLog(), true)['log_content'] : null,
                 'log_file' => (isset(json_decode($this->log->getLastLog(), true)['log_file'])) ?  json_decode($this->log->getLastLog(), true)['log_file'] : null,
@@ -400,10 +400,10 @@ class WebPay extends PaymentModule
                 'logs_list' => json_decode($this->log->getResume(), true)['logs_list']
             )
         );
-        
+
         return $this->display($this->name, 'views/templates/admin/config.tpl');
     }
-    
+
     private function pluginValidation()
     {
         $this->_errors = array();
@@ -419,7 +419,7 @@ class WebPay extends PaymentModule
             'API_KEY_SECRET' => $this->apiKeySecret,
             'ECOMMERCE' => 'prestashop'
         ];
-        
+
         return $config;
     }
     /**
@@ -444,22 +444,22 @@ class WebPay extends PaymentModule
         if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
             $displayOrder = 'displayAdminOrderTabContent';
         }
-        
+
         return $displayOrder;
     }
-    
+
     private function adminValidation()
     {
         $this->_errors = array();
     }
-    
+
     private function loadPluginConfiguration()
     {
         $this->storeID = Configuration::get('WEBPAY_STOREID');
         $this->apiKeySecret = Configuration::get('WEBPAY_API_KEY_SECRET');
         $this->environment = Configuration::get('WEBPAY_ENVIRONMENT');
     }
-    
+
     private function setupPlugin()
     {
         $this->loadIntegrationCertificates();
@@ -471,14 +471,13 @@ class WebPay extends PaymentModule
         $orderInPreparationStateId = Configuration::get('PS_OS_PREPARATION');
         Configuration::updateValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', $orderInPreparationStateId);
     }
-    
+
     private function loadIntegrationCertificates()
     {
-        $this->storeID_init = \Transbank\Webpay\Options::DEFAULT_COMMERCE_CODE;
-        
-        $this->apiKeySecret_initial_value = \Transbank\Webpay\Options::DEFAULT_API_KEY;
-        
-        
+        $this->storeID_init = \Transbank\Webpay\WebpayPlus::DEFAULT_COMMERCE_CODE;
+
+        $this->apiKeySecret_initial_value = \Transbank\Webpay\WebpayPlus::DEFAULT_API_KEY;
+
         $this->environment = Configuration::get('WEBPAY_ENVIRONMENT');
     }
 }
