@@ -164,7 +164,7 @@ class WebPayValidateModuleFrontController extends ModuleFrontController
             $currency = Context::getContext()->currency;
             $OKStatus = Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
             if ($OKStatus === '0') {
-                $OKStatus = Configuration::get('PS_OS_PREPARATION');
+                $OKStatus = Configuration::get('WEBPAY_STATUS_PROCESSING_IN_PROGRESS');
             }
 
             $this->module->validateOrder(
