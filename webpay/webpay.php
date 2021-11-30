@@ -491,10 +491,10 @@ class WebPay extends PaymentModule
             'PROCESSING_IN_PROGRESS' => array('#3498D8', '111001010', 'Webpay preparación en curso', 'preparation')
         );
 
-        foreach ($states as $key => $value) 
-        {
-            if (Configuration::get(self::PAYMENT_STATUS_PREFIX.$key) != false) continue;
-            else {
+        foreach ($states as $key => $value) {
+            if (Configuration::get(self::PAYMENT_STATUS_PREFIX.$key) != false) {
+                continue;
+            } else {
                 $order_state = new OrderState();
                 $order_state->name = array();
                 $order_state->template = array();
@@ -514,8 +514,9 @@ class WebPay extends PaymentModule
                 $order_state->template = array_fill(0, 10, $value[3]);
             }
 
-            if ($order_state->add())
+            if ($order_state->add()) {
                 Configuration::updateValue(self::PAYMENT_STATUS_PREFIX.$key, $order_state->id);
+            }
         }
     }
 }
