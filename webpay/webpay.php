@@ -18,6 +18,8 @@ if (Utils::isPrestashop_1_6()) {
 
 class WebPay extends PaymentModule
 {
+    const PAYMENT_STATUS_PREFIX = 'WEBPAY_STATUS_';
+
     protected $_errors = array();
     public $healthcheck;
     public $log;
@@ -347,8 +349,8 @@ class WebPay extends PaymentModule
         $ostatus = new OrderState(1);
         $statuses = $ostatus->getOrderStates(1);
         $defaultPaymentStatus = Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
-        $paymentAcceptedStatusId = Configuration::get('PS_OS_PAYMENT');
-        $preparationStatusId = Configuration::get('PS_OS_PREPARATION');
+        $paymentAcceptedStatusId = Configuration::get(self::PAYMENT_STATUS_PREFIX.'PAYMENT_ACCEPTED');
+        $preparationStatusId = Configuration::get(self::PAYMENT_STATUS_PREFIX.'PROCESSING_IN_PROGRESS');
 
         Context::getContext()->smarty->assign(
             array(
@@ -463,12 +465,13 @@ class WebPay extends PaymentModule
     private function setupPlugin()
     {
         $this->loadIntegrationCertificates();
+        $this->createPaymentStates();
         Configuration::updateValue('WEBPAY_STOREID', $this->storeID_init);
         Configuration::updateValue('WEBPAY_API_KEY_SECRET', $this->apiKeySecret_initial_value);
         Configuration::updateValue('WEBPAY_ENVIRONMENT', "TEST");
-        // We assume that the default state is "PREPARATION" and then set it
+        // We assume that the default state is "WEBPAY PREPARATION" and then set it
         // as the default order status after payment for our plugin
-        $orderInPreparationStateId = Configuration::get('PS_OS_PREPARATION');
+        $orderInPreparationStateId = Configuration::get(self::PAYMENT_STATUS_PREFIX.'PROCESSING_IN_PROGRESS');
         Configuration::updateValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', $orderInPreparationStateId);
     }
 
@@ -479,5 +482,41 @@ class WebPay extends PaymentModule
         $this->apiKeySecret_initial_value = \Transbank\Webpay\WebpayPlus::DEFAULT_API_KEY;
 
         $this->environment = Configuration::get('WEBPAY_ENVIRONMENT');
+    }
+
+    private function createPaymentStates()
+    {
+        $states = array(
+            'PAYMENT_ACCEPTED' => array('#3498D8', '111000010', 'Webpay pago aceptado', 'payment'),
+            'PROCESSING_IN_PROGRESS' => array('#3498D8', '111001010', 'Webpay preparación en curso', 'preparation')
+        );
+
+        foreach ($states as $key => $value) {
+            if (Configuration::get(self::PAYMENT_STATUS_PREFIX.$key) != false) {
+                continue;
+            } else {
+                $order_state = new OrderState();
+                $order_state->name = array();
+                $order_state->template = array();
+                $order_state->module_name = $this->name;
+                $order_state->color = $value[0];
+                $order_state->invoice = $value[1][0];
+                $order_state->send_email = $value[1][1];
+                $order_state->unremovable = $value[1][2];
+                $order_state->hidden = $value[1][3];
+                $order_state->logable = $value[1][4];
+                $order_state->delivery = $value[1][5];
+                $order_state->shipped = $value[1][6];
+                $order_state->paid = $value[1][7];
+                $order_state->deleted = $value[1][8];
+
+                $order_state->name = array_fill(0, 10, $value[2]);
+                $order_state->template = array_fill(0, 10, $value[3]);
+            }
+
+            if ($order_state->add()) {
+                Configuration::updateValue(self::PAYMENT_STATUS_PREFIX.$key, $order_state->id);
+            }
+        }
     }
 }

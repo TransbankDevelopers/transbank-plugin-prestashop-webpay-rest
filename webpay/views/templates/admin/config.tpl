@@ -77,7 +77,7 @@
 
 						<!-- INFORMACION -->
 						<div id="info" class="tab-pane fade in active">
-
+							<!--
 							<h2 class="">{l s='Informe pdf' mod='webpay'}</h2>
 							<form method="post" action="../modules/webpay/libwebpay/CreatePdf.php" target="_blank">
 								<input type="hidden" name="environment" value="{$data_environment}">
@@ -86,11 +86,11 @@
 								<input type="hidden" name="document" value="report">
 								<button type = "submit">
 									<i class="icon-file-text" value="{l s='genera pdf' mod='webpay'}"></i> Crear PDF
-								</button>
+								</button> 
 							</form>
-
+							
 							<hr style="border-width: 2px">
-
+							-->
 							<h2 class="">{l s='Información del plugin y el ambiente' mod='webpay'}</h2>
 							<table class="table table-striped">
 								<tr>
