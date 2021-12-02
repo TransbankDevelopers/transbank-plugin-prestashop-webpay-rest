@@ -4,7 +4,11 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.0.3]
+## [1.0.4] 2021-12-02
+- Se soluciona problema con el estado del pago en la versión de Prestashop >= 1.7.8.0
+- Se elimina el botón para crear PDF de la sección de diagnostico 
+
+## [1.0.3] 2021-08-18
 - Se arregla caso en que usuarios pueden manipular monto de carrito durante el proceso de pago
 
 ## [1.0.2]
