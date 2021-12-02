@@ -5,7 +5,7 @@ El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [1.0.4] 2021-12-02
-- Se soluciona problema con el estado del pago en la versión de Prestashop >= 1.7.8.0
+- Se soluciona problema con el estado del pago en la versión de Prestashop >= 1.7.8.0, añadiendo los estados de pago Webpay pago aceptado y Webpay preparación en curso
 - Se elimina el botón para crear PDF de la sección de diagnostico 
 
 ## [1.0.3] 2021-08-18
