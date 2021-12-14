@@ -4,7 +4,11 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.0.3]
+## [1.1.0] 2021-12-14
+- Se actualiza SDK de PHP a versión 2.0, por lo que ahora se usa la API v1.2 de Transbank.
+- Se elimina botón para la generación del PDF de diagnostico.
+
+## [1.0.3] 2021-08-18
 - Se arregla caso en que usuarios pueden manipular monto de carrito durante el proceso de pago
 
 ## [1.0.2]
