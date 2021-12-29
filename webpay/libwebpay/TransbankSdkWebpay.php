@@ -35,13 +35,11 @@ class TransbankSdkWebpay
         $environment = 'TEST';
         if (isset($config)) {
             $environment = isset($config['ENVIRONMENT']) ? $config['ENVIRONMENT'] : 'TEST';
-            // $this->options = ($environment != 'TEST') ? new Options($config['API_KEY_SECRET'], $config['COMMERCE_CODE']) : Options::defaultConfig();
-            // $this->options->setIntegrationType($environment);
         }
 
         $options = Transaction::getDefaultOptions();
         if ($environment !== 'TEST') {
-            $options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY']);
+            $options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY_SECRET']);
         }
 
         $this->transaction = new Transaction($options);
