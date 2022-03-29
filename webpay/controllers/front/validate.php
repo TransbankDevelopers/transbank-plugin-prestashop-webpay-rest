@@ -142,7 +142,7 @@ class WebPayValidateModuleFrontController extends ModuleFrontController
     {
         $amount = $cart->getOrderTotal(true, Cart::BOTH);
 
-        if ($webpayTransaction->amount != $amount) {
+        if ($webpayTransaction->amount != round($amount)) {
             return $this->handleCartManipulated($webpayTransaction);
         }
 
