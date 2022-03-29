@@ -4,6 +4,9 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] 2022-03-29
+- Se soluciona el problema que se produce al comparar el monto que se paga por Webpay y el monto del carrito cuando tiene decimales.
+
 ## [1.1.1] 2021-12-29
 - Se soluciona un problema al configurar las credenciales de producción.
 
