@@ -4,8 +4,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-
 require_once(_PS_MODULE_DIR_ . 'webpay/src/Model/TransbankWebpayRestTransaction.php');
+require_once(_PS_MODULE_DIR_ . 'webpay/src/Helpers/InteractsWithWebpay.php');
 require_once('libwebpay/HealthCheck.php');
 require_once('libwebpay/LogHandler.php');
 require_once("libwebpay/Telemetry/PluginVersion.php");
@@ -15,9 +15,14 @@ if (Utils::isPrestashop_1_6()) {
     require('vendor/autoload.php');
 }
 
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
+
 
 class WebPay extends PaymentModule
 {
+    use InteractsWithWebpay;
+
+    const DEBUG_MODE = true;
     protected $_errors = array();
     public $healthcheck;
     public $log;
@@ -48,20 +53,9 @@ class WebPay extends PaymentModule
         $this->controllers = array('payment', 'validate');
         $this->confirmUninstall = '¿Estás seguro/a que deseas desinstalar este módulo de pago?';
 
-        $this->loadIntegrationCertificates();
-
         $this->pluginValidation();
         try {
-            $this->loadPluginConfiguration();
-
-            $config = array(
-                'ENVIRONMENT' => $this->environment,
-                'COMMERCE_CODE' => $this->storeID,
-                'API_KEY_SECRET' => $this->apiKeySecret,
-                'ECOMMERCE' => 'prestashop'
-            );
-
-            $this->healthcheck = new HealthCheck($config);
+            $this->healthcheck = new HealthCheck($this->getConfigForHealthCheck());
             $this->datos_hc = json_decode($this->healthcheck->printFullResume());
             $this->log = new LogHandler();
         } catch (Exception $e) {
@@ -71,7 +65,9 @@ class WebPay extends PaymentModule
 
     public function install()
     {
-        $this->setupPlugin();
+        /* carga la configuracion por defecto al instalar el plugin */
+        $this->setDebugActive("");
+        $this->loadDefaultConfigurationWebpay();
 
         $displayOrder = $this->getDisplayOrderHookName();
 
@@ -203,10 +199,8 @@ class WebPay extends PaymentModule
             return;
         }
 
-
         $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
         $orderId = $params[$nameOrderRef]->id;
-
 
         $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `order_id` = "' . $orderId . '" AND status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED;
         $transaction = \Db::getInstance()->getRow($sql);
@@ -273,6 +267,13 @@ class WebPay extends PaymentModule
 
     public function hookPaymentOptions($params)
     {
+        if($this->getDebugActive()==1){
+            $this->logInfo('*****************************************************');
+            $this->logInfo('A.1. Mostrando medios de pago Webpay Plus');
+            $this->logInfo(json_encode($params['cart']));
+            $this->logInfo('-----------------------------------------------------');
+        }
+
         if (!$this->active) {
             return;
         }
@@ -280,7 +281,7 @@ class WebPay extends PaymentModule
             return;
         }
         $payment_options = [
-            $this->getWebpayPaymentOption()
+            $this->getWebpayPaymentOption($this, $this->context)
         ];
         return $payment_options;
     }
@@ -299,46 +300,20 @@ class WebPay extends PaymentModule
         return false;
     }
 
-    public function getWebpayPaymentOption()
-    {
-        $WPOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
-        $paymentController = $this->context->link->getModuleLink($this->name, 'payment', array(), true);
-
-        return $WPOption->setCallToActionText('Pago con tarjetas de crédito o Redcompra')
-            ->setAction($paymentController)
-            ->setLogo('https://www.transbankdevelopers.cl/public/library/img/svg/logo_webpay_plus.svg');
-    }
-
     public function getContent()
     {
         $activeShopID = (int)Context::getContext()->shop->id;
         $shopDomainSsl = Tools::getShopDomainSsl(true, true);
-        $theEnvironmentChanged = false;
 
-        if (Tools::getIsset('webpay_updateSettings')) {
-            if (Tools::getValue('environment') !=  Configuration::get('WEBPAY_ENVIRONMENT')) {
-                $theEnvironmentChanged = true;
-            }
-
-
-            Configuration::updateValue('WEBPAY_STOREID', trim(Tools::getValue('storeID')));
-            Configuration::updateValue('WEBPAY_API_KEY_SECRET', trim(Tools::getValue('apiKeySecret')));
-            Configuration::updateValue('WEBPAY_ENVIRONMENT', Tools::getValue('environment'));
-            Configuration::updateValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', (int)Tools::getValue('webpay_default_order_state_id_after_payment'));
-            $this->loadPluginConfiguration();
-            $this->pluginValidation();
-        } else {
-            $this->loadPluginConfiguration();
-        }
-
+        $webpayEnvironmentChanged = $this->updateSettings();
         $config = $this->getConfigForHealthCheck();
 
         $this->healthcheck = new HealthCheck($config);
-        if ($theEnvironmentChanged) {
+        if ($webpayEnvironmentChanged) {
             $rs = $this->healthcheck->getpostinstallinfo();
         }
 
-        if (Tools::getValue('environment') === 'LIVE') {
+        if ($this->getFormWebpayEnvironment() === 'LIVE') {
             $this->sendPluginVersion($config);
         }
 
@@ -346,23 +321,21 @@ class WebPay extends PaymentModule
 
         $ostatus = new OrderState(1);
         $statuses = $ostatus->getOrderStates(1);
-        $defaultPaymentStatus = Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
-        $paymentAcceptedStatusId = Configuration::get('PS_OS_PAYMENT');
-        $preparationStatusId = Configuration::get('PS_OS_PREPARATION');
 
         Context::getContext()->smarty->assign(
             array(
-                'default_after_payment_order_state_id' => $defaultPaymentStatus,
-                'paymentAcceptedStatusId' => $paymentAcceptedStatusId,
-                'preparationStatusId' => $preparationStatusId,
+                'paymentAcceptedStatusId' => Configuration::get('PS_OS_PAYMENT'),
+                'preparationStatusId' => Configuration::get('PS_OS_PREPARATION'),
                 'payment_states' => $statuses,
                 'errors' => $this->_errors,
                 'post_url' => $_SERVER['REQUEST_URI'],
-                'data_storeid_init' => $this->storeID_init,
-                'data_apikeysecret_init' => $this->apiKeySecret_initial_value,
-                'data_storeid' => $this->storeID,
-                'data_apikeysecret' => $this->apiKeySecret,
-                'data_environment' => $this->environment,
+                'data_storeid_init' => $this->getDefaultWebpayCommerceCode(),
+                'data_apikeysecret_init' => $this->getDefaultWebpayApiKey(),
+                'data_storeid' => $this->getWebpayCommerceCode(),
+                'data_apikeysecret' => $this->getWebpayApiKey(),
+                'data_environment' => $this->getWebpayEnvironment(),
+                'data_order_after_payment' => $this->getWebpayOrderAfterPayment(),
+                'data_debug_active' => $this->getDebugActive(),
                 'data_title' => $this->title,
                 'version' => $this->version,
                 'api_version' => '1.0',
@@ -397,7 +370,9 @@ class WebPay extends PaymentModule
                 'log_size' => $this->log->getValidateLockFile()['max_log_weight'],
                 'log_dir' => json_decode($this->log->getResume(), true)['log_dir'],
                 'logs_count' => json_decode($this->log->getResume(), true)['logs_count']['log_count'],
-                'logs_list' => json_decode($this->log->getResume(), true)['logs_list']
+                'logs_list' => json_decode($this->log->getResume(), true)['logs_list'],
+
+                'view_base' => _PS_MODULE_DIR_.'/webpay/views/templates',
             )
         );
 
@@ -413,13 +388,12 @@ class WebPay extends PaymentModule
      */
     public function getConfigForHealthCheck()
     {
-        $config = [
-            'ENVIRONMENT' => $this->environment,
-            'COMMERCE_CODE' => $this->storeID,
-            'API_KEY_SECRET' => $this->apiKeySecret,
+        $config = array(
+            'ENVIRONMENT' => $this->getWebpayEnvironment(),
+            'COMMERCE_CODE' => $this->getWebpayCommerceCode(),
+            'API_KEY_SECRET' => $this->getWebpayApiKey(),
             'ECOMMERCE' => 'prestashop'
-        ];
-
+        );
         return $config;
     }
     /**
@@ -453,31 +427,36 @@ class WebPay extends PaymentModule
         $this->_errors = array();
     }
 
-    private function loadPluginConfiguration()
-    {
-        $this->storeID = Configuration::get('WEBPAY_STOREID');
-        $this->apiKeySecret = Configuration::get('WEBPAY_API_KEY_SECRET');
-        $this->environment = Configuration::get('WEBPAY_ENVIRONMENT');
+
+
+    protected function logError($msg){
+        (new LogHandler())->logError($msg);
     }
 
-    private function setupPlugin()
-    {
-        $this->loadIntegrationCertificates();
-        Configuration::updateValue('WEBPAY_STOREID', $this->storeID_init);
-        Configuration::updateValue('WEBPAY_API_KEY_SECRET', $this->apiKeySecret_initial_value);
-        Configuration::updateValue('WEBPAY_ENVIRONMENT', "TEST");
-        // We assume that the default state is "PREPARATION" and then set it
-        // as the default order status after payment for our plugin
-        $orderInPreparationStateId = Configuration::get('PS_OS_PREPARATION');
-        Configuration::updateValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', $orderInPreparationStateId);
+    protected function logInfo($msg){
+        (new LogHandler())->logInfo($msg);
     }
 
-    private function loadIntegrationCertificates()
-    {
-        $this->storeID_init = \Transbank\Webpay\WebpayPlus::DEFAULT_COMMERCE_CODE;
-
-        $this->apiKeySecret_initial_value = \Transbank\Webpay\WebpayPlus::DEFAULT_API_KEY;
-
-        $this->environment = Configuration::get('WEBPAY_ENVIRONMENT');
+    protected function getDebugActive(){
+        return Configuration::get('DEBUG_ACTIVE');
     }
+
+    protected function setDebugActive($value){
+        return Configuration::updateValue('DEBUG_ACTIVE', $value);
+    }
+
+    protected function getFormDebugActive(){
+        return trim(Tools::getValue('form_debug_active'));
+    }
+
+    public function updateSettings(){
+        if (Tools::getIsset('webpay_updateSettings')) {
+            $this->setDebugActive($this->getFormDebugActive());
+            $this->webpayUpdateSettings();
+            return $this->getFormWebpayEnvironment() !=  $this->getWebpayEnvironment();
+        }
+        return false;
+    }
+
+
 }
