@@ -22,7 +22,7 @@ Puedes ver más información sobre este proceso en [este link](https://www.trans
 A continuación, encontrarás información necesaria para el desarrollo de este plugin. 
 
 ## Requisitos 
-* PHP 5.6 o superior
+* PHP 7.0+ o superior
 * Prestashop 1.6 o superior
 
 ## Dependencias
