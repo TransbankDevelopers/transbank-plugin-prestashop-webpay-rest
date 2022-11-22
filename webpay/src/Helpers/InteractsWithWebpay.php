@@ -33,7 +33,7 @@ trait InteractsWithWebpay
 
     public function webpayUpdateSettings(){
         $theEnvironmentChanged = false;
-        if (Tools::getIsset('webpay_updateSettings')) {
+        if (Tools::getIsset('btn_webpay_update')) {
             if ($this->getFormWebpayEnvironment() !=  $this->getWebpayEnvironment()) {
                 $theEnvironmentChanged = true;
             }
@@ -54,7 +54,7 @@ trait InteractsWithWebpay
     }
 
     protected function getFormWebpayEnvironment(){
-        return Tools::getValue('form_environment');
+        return Tools::getValue('form_webpay_environment');
     }
 
     protected function getFormWebpayOrderAfterPayment(){

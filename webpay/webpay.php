@@ -6,6 +6,7 @@ if (!defined('_PS_VERSION_')) {
 
 require_once(_PS_MODULE_DIR_ . 'webpay/src/Model/TransbankWebpayRestTransaction.php');
 require_once(_PS_MODULE_DIR_ . 'webpay/src/Helpers/InteractsWithWebpay.php');
+require_once(_PS_MODULE_DIR_ . 'webpay/src/Helpers/InteractsWithOneclick.php');
 require_once('libwebpay/HealthCheck.php');
 require_once('libwebpay/LogHandler.php');
 require_once("libwebpay/Telemetry/PluginVersion.php");
@@ -16,11 +17,13 @@ if (Utils::isPrestashop_1_6()) {
 }
 
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 
 
 class WebPay extends PaymentModule
 {
     use InteractsWithWebpay;
+    use InteractsWithOneclick;
 
     const DEBUG_MODE = true;
     protected $_errors = array();
@@ -329,12 +332,25 @@ class WebPay extends PaymentModule
                 'payment_states' => $statuses,
                 'errors' => $this->_errors,
                 'post_url' => $_SERVER['REQUEST_URI'],
-                'data_storeid_init' => $this->getDefaultWebpayCommerceCode(),
-                'data_apikeysecret_init' => $this->getDefaultWebpayApiKey(),
-                'data_storeid' => $this->getWebpayCommerceCode(),
-                'data_apikeysecret' => $this->getWebpayApiKey(),
-                'data_environment' => $this->getWebpayEnvironment(),
-                'data_order_after_payment' => $this->getWebpayOrderAfterPayment(),
+
+                //webpay_updateSettings
+                'data_webpay_commerce_code_default' => $this->getDefaultWebpayCommerceCode(),//data_storeid_init
+                'data_webpay_apikey_default' => $this->getDefaultWebpayApiKey(),//data_apikeysecret_init
+                'data_webpay_commerce_code' => $this->getWebpayCommerceCode(),//data_storeid
+                'data_webpay_apikey' => $this->getWebpayApiKey(),//data_apikeysecret
+                'data_webpay_environment' => $this->getWebpayEnvironment(),//data_environment
+                'data_webpay_order_after_payment' => $this->getWebpayOrderAfterPayment(),//data_order_after_payment
+
+                'data_oneclick_mall_commerce_code_default' => $this->getDefaultOneclickMallCommerceCode(),
+                'data_oneclick_child_commerce_code_default' => $this->getDefaultOneclickChildCommerceCode(),
+                'data_oneclick_apikey_default' => $this->getDefaultOneclickApiKey(),
+                'data_oneclick_mall_commerce_code' => $this->getOneclickMallCommerceCode(),
+                'data_oneclick_child_commerce_code' => $this->getOneclickChildCommerceCode(),
+                'data_oneclick_apikey' => $this->getOneclickApiKey(),
+                'data_oneclick_environment' => $this->getOneclickEnvironment(),
+                'data_oneclick_order_after_payment' => $this->getOneclickOrderAfterPayment(),
+                'img_oneclick' =>  _PS_MODULE_DIR_.'/webpay/views/img/oneclick.png',
+
                 'data_debug_active' => $this->getDebugActive(),
                 'data_title' => $this->title,
                 'version' => $this->version,
@@ -450,9 +466,10 @@ class WebPay extends PaymentModule
     }
 
     public function updateSettings(){
-        if (Tools::getIsset('webpay_updateSettings')) {
+        $this->webpayUpdateSettings();
+        $this->oneclickUpdateSettings();
+        if (Tools::getIsset('btn_webpay_update')) {
             $this->setDebugActive($this->getFormDebugActive());
-            $this->webpayUpdateSettings();
             return $this->getFormWebpayEnvironment() !=  $this->getWebpayEnvironment();
         }
         return false;
