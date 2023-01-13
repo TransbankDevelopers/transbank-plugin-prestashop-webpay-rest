@@ -1,7 +1,7 @@
 {
     "require": {
         "transbank/transbank-sdk": "~2.0",
-        "apache/log4php": "2.3.0",
+        "monolog/monolog": "^1.27",
         "guzzlehttp/guzzle": "^5",
         "tecnickcom/tcpdf": "^6.3",
         "ext-json": "*",

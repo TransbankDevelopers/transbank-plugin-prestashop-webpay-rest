@@ -31,13 +31,6 @@ plugin-prestashop-webpay-**
 
 webpay/composer.lock
 
-
-
-docker-prestashop1.7.8.5-php7.4/modules
-docker-prestashop1.7.8.5-php7.4/prestashop
-
-docker-prestashop1.7.3.0/modules
-docker-prestashop1.7.3.0/prestashop
-
-modules
-modules/*
+docker-prestashop*/modules
+docker-prestashop*/log
+*.zip

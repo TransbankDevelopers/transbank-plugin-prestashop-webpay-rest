@@ -1,9 +1,6 @@
 <?php
 
-// require_once(dirname(__FILE__).'../../../../../config/config.inc.php');
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
+use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 
 class WebPayRequestModuleFrontController extends ModuleFrontController
 {

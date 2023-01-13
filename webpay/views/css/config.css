@@ -148,8 +148,8 @@
 
 
 .tbk_link {
-  color: #6B196B !important;
-  cursor: pointer !important;
+  color: #6B196B;
+  cursor: pointer;
 }
 
 .tbk_link a:visited {

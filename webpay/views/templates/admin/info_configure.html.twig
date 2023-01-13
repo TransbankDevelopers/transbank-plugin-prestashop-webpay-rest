@@ -1,0 +1,13 @@
+{% extends '@Modules/webpay/views/templates/admin/configure_layout.html.twig' %}
+
+{% block tab %}
+
+    {% include '@Modules/webpay/views/templates/admin/tabs.html.twig' with {'tabActive': 5} %}
+
+    {% form_theme webpayPlusForm 'PrestaShopBundle:Admin/TwigTemplateForm:prestashop_ui_kit.html.twig' %}
+
+    INFO
+
+{% endblock %}
+    
+   

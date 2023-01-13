@@ -23,8 +23,19 @@
 	<div id="tab_diagnostico" class="tbk_tabcontent">
 		<div class="tbk_card">
 			<div class="tbk_card_container">
-				<label class="tbk_label" for="form_debug_active">{l s='Habilitar log detallado' mod='webpay'}</label>
-				<input  class="tbk_input" type="checkbox" name="form_debug_active" value="1" {if $data_debug_active eq "1"}checked{/if} >
+				<form action="{$post_url|escape:'htmlall':'UTF-8'}" method="post">
+                    {if isset($errors.merchantERR)}
+                        <div class="error">
+                            <p>{$errors.merchantERR|escape:'htmlall':'UTF-8'}</p>
+                        </div>
+                    {/if}
+                    <label class="tbk_label" for="form_debug_active">{l s='Habilitar log detallado' mod='webpay'}</label>
+					<input  class="tbk_input" type="checkbox" name="form_debug_active" value="1" {if $data_debug_active eq "1"}checked{/if} >
+        
+                    <div class="tbk_right">
+                        <button class="tbk_button" type="submit" value="1" id="btn_common_update" name="btn_common_update" >{l s='Guardar Cambios' mod='webpay'}</button>
+                    </div>
+                </form>
 			</div>
 		</div>
 		{include file="$view_base/admin/diag_info.tpl"}

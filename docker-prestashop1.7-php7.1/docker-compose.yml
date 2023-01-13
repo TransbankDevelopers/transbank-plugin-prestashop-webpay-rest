@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    image: "prestashop/prestashop:1.7-7.1-apache"
+    image: "prestashop/prestashop:1.7.1.0"
     container_name: "webpay_prestashop_1.7-7.1"
     environment:
       - PS_LANGUAGE=es
@@ -16,6 +16,9 @@ services:
       - PS_COUNTRY=cl
       - DB_NAME=prestashop
       - DB_SERVER=webpay_mariadb_1.7-7.1
+    volumes:
+      - ./modules:/var/www/html/modules  
+      - ./log:/var/log
     ports:
       - "8080:80"
     links:
@@ -25,6 +28,8 @@ services:
   mariadb:
     image: mariadb
     container_name: webpay_mariadb_1.7-7.1
+    ports:
+      - "3306:3306"
     expose:
       - "3306"
     environment:

@@ -18,7 +18,8 @@ services:
       - DB_NAME=prestashop
       - DB_SERVER=webpay_mariadb_1.7.8.5-7.4
     volumes:
-      - ./modules:/var/www/html/modules
+      - ./modules:/var/www/html/modules  
+      - ./log:/var/log
     ports:
       - "8080:80"
     links:
@@ -28,6 +29,8 @@ services:
   mariadb:
     image: mariadb
     container_name: webpay_mariadb_1.7.8.5-7.4
+    ports:
+      - "3306:3306"
     expose:
       - "3306"
     environment:

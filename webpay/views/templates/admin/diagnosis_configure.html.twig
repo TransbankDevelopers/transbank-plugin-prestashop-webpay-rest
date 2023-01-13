@@ -1,0 +1,92 @@
+{% extends '@Modules/webpay/views/templates/admin/configure_layout.html.twig' %}
+
+{% block tab %}
+
+    {% include '@Modules/webpay/views/templates/admin/tabs.html.twig' with {'tabActive': 3} %}
+
+    {% form_theme diagnosisForm 'PrestaShopBundle:Admin/TwigTemplateForm:prestashop_ui_kit.html.twig' %}
+
+    {{ form_start(diagnosisForm, {attr : {class: 'form'}, action: path('ps_controller_webpay_configure_diagnosis_form_save') }) }}
+    <div class="card">
+        <h3 class="card-header">
+            <i class="material-icons">settings</i> {{ 'Diagnóstico'|trans({}, 'Modules.WebpayPlus.Admin') }}
+        </h3>
+        <div class="card-block row">
+            <div class="card-text">
+                {{ form_widget(diagnosisForm) }}
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-end">
+            <button class="btn btn-primary float-right" id="diagnosis-form-save-button">
+                {{ 'Save'|trans({}, 'Admin.Actions') }}
+            </button>
+            </div>
+        </div>
+    </div>
+    {{ form_end(diagnosisForm) }}
+
+    
+    <div class="card">
+        <div class="card-block row">
+            <table class="table" style="width: 100%; margin: 20px;">
+                <thead>
+                    <tr>
+                        <th colspan="2">{{ 'Información del plugin y el ambiente'|trans({}, 'Modules.WebpayPlus.Admin') }}</th>
+                    </tr>
+                    </thead>
+                <tr>
+                    <td>{{ 'Software E-commerce:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.plugin_info.ecommerce}}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'Version E-commerce:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.plugin_info.ecommerce_version}}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'Versión del plugin instalada:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.plugin_info.current_plugin_version}}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'Última versión del plugin disponible:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.plugin_info.last_plugin_version}}</td>
+                </tr>
+            </table>
+
+            <table class="table" style="width: 100%; margin: 20px;">
+                <thead>
+                    <tr>
+                        <th colspan="2">{{ 'Información del Servidor'|trans({}, 'Modules.WebpayPlus.Admin') }}</th>
+                    </tr>
+                    </thead>
+                <tr>
+                    <td>{{ 'Software Servidor:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.server_version.server_software}}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'Estado de PHP:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.php_version.status}}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'Versión PHP instalada:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.php_version.version}}</td>
+                </tr>
+            </table>
+
+            <table class="table" style="width: 100%; margin: 20px;">
+                <thead>
+                    <tr>
+                        <th colspan="2">{{ 'Extensiones PHP requeridas'|trans({}, 'Modules.WebpayPlus.Admin') }}</th>
+                    </tr>
+                    </thead>
+                <tr>
+                    <td>{{ 'openssl:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.php_extensions_status.openssl.version}}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'SimpleXml:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.php_extensions_status.SimpleXML.version}}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'dom:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.php_extensions_status.dom.version}}</td>
+                </tr>
+            </table>
+            
+        </div>
+        
+    </div>
+
+{% endblock %}
+    
+   

@@ -1,0 +1,51 @@
+version: '3'
+services:
+  web:
+    build: 
+      dockerfile: Dockerfile-prestashop
+    container_name: "webpay_prestashop_1.7.0.0"
+    depends_on:
+      - mysql
+    networks:
+      - prestashop_net
+    environment:
+      - PS_LANGUAGE=es
+      - PS_INSTALL_AUTO=1
+      - PS_ERASE_DB=1
+      - PS_DEV_MODE=1
+      - PS_DOMAIN=localhost:8080
+      - ADMIN_MAIL=admin@admin.com
+      - ADMIN_PASSWD=password
+      - PS_FOLDER_ADMIN=adminop
+      - PS_FOLDER_INSTALL=installop
+      - PS_COUNTRY=cl
+      - DB_NAME=prestashop
+      - DB_SERVER=webpay_mysql_5.7
+      - PHP_VERSION=7.2.34
+      - DB_PASSWD=MyEpicPassword
+
+    volumes:
+      - ./modules:/var/www/html/modules  
+      - ./log:/var/log
+      - ./config-files:/usr/local/etc/php
+    ports:
+      - "8080:80"
+
+  mysql:
+    image: mysql:5.7
+    container_name: webpay_mysql_5.7
+    networks:
+      - prestashop_net
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=MyEpicPassword
+      - MYSQL_DATABASE=prestashop
+
+networks:
+  prestashop_net:
+    name: prestashop_net
+
+

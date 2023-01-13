@@ -1,0 +1,162 @@
+services:
+  # Grid services
+  webpay.grid.definition.factory.products:
+    class: 'PrestaShop\Module\WebpayPlus\Grid\Definition\Factory\ProductGridDefinitionFactory'
+    parent: 'prestashop.core.grid.definition.factory.abstract_grid_definition'
+
+  webpay.grid.query_builder.product:
+    class: 'PrestaShop\Module\WebpayPlus\Grid\Query\ProductQueryBuilder'
+    parent: 'prestashop.core.grid.abstract_query_builder'
+    public: true
+    arguments:
+      - '@prestashop.core.query.doctrine_search_criteria_applicator'
+      - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
+      - "@=service('prestashop.adapter.legacy.context').getContext().shop.id"
+      - "@=service('prestashop.adapter.legacy.context').getContext().shop.id_shop_group"
+      - "@=service('prestashop.adapter.legacy.context').getContext().shop.getGroup().share_stock"
+      - '@prestashop.core.grid.query.filter.doctrine_filter_applicator'
+      - '@prestashop.adapter.legacy.configuration'
+
+  webpay.grid.data_provider.products:
+    class: '%prestashop.core.grid.data.factory.doctrine_grid_data_factory%'
+    arguments:
+      - '@webpay.grid.query_builder.product'
+      - '@prestashop.core.hook.dispatcher'
+      - '@prestashop.core.grid.query.doctrine_query_parser'
+      - 'product'
+
+  webpay.grid.factory.products:
+    class: 'PrestaShop\PrestaShop\Core\Grid\GridFactory'
+    public: true
+    arguments:
+      - '@webpay.grid.definition.factory.products'
+      - '@webpay.grid.data_provider.products'
+      - '@prestashop.core.grid.filter.form_factory'
+      - '@prestashop.core.hook.dispatcher'
+
+  # Transactions Grid services
+  webpay.grid.definition.factory.transactions:
+    class: 'PrestaShop\Module\WebpayPlus\Grid\Definition\Factory\TransactionGridDefinitionFactory'
+    parent: 'prestashop.core.grid.definition.factory.abstract_grid_definition'
+
+  webpay.grid.query_builder.transaction:
+    class: 'PrestaShop\Module\WebpayPlus\Grid\Query\TransactionQueryBuilder'
+    parent: 'prestashop.core.grid.abstract_query_builder'
+    public: true
+    arguments:
+      - '@prestashop.core.query.doctrine_search_criteria_applicator'
+      - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
+      - "@=service('prestashop.adapter.legacy.context').getContext().shop.id"
+      - "@=service('prestashop.adapter.legacy.context').getContext().shop.id_shop_group"
+      - "@=service('prestashop.adapter.legacy.context').getContext().shop.getGroup().share_stock"
+      - '@prestashop.core.grid.query.filter.doctrine_filter_applicator'
+      - '@prestashop.adapter.legacy.configuration'
+
+  webpay.grid.data_provider.transactions:
+    class: '%prestashop.core.grid.data.factory.doctrine_grid_data_factory%'
+    arguments:
+      - '@webpay.grid.query_builder.transaction'
+      - '@prestashop.core.hook.dispatcher'
+      - '@prestashop.core.grid.query.doctrine_query_parser'
+      - 'transaction'
+
+  webpay.grid.factory.transactions:
+    class: 'PrestaShop\PrestaShop\Core\Grid\GridFactory'
+    public: true
+    arguments:
+      - '@webpay.grid.definition.factory.transactions'
+      - '@webpay.grid.data_provider.transactions'
+      - '@prestashop.core.grid.filter.form_factory'
+      - '@prestashop.core.hook.dispatcher'
+
+  # webpayplus Form services
+
+  webpay.form.type.webpay_plus:
+    class: 'PrestaShop\Module\WebpayPlus\Form\WebpayPlusType'
+    arguments:
+      - "@translator"
+      - "@=service('prestashop.adapter.legacy.context').getLanguages()"
+      - '@prestashop.adapter.legacy.configuration'
+    public: true
+    tags:
+      - { name: form.type }
+
+  webpay.form.webpay_plus_form_data_provider:
+    class: 'PrestaShop\Module\WebpayPlus\Form\WebpayPlusFormDataProvider'
+    arguments:
+      - '@webpay.form.webpay_plus_data_configuration'
+
+  webpay.form.webpay_plus_form_data_handler:
+    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    arguments:
+      - '@form.factory'
+      - '@prestashop.core.hook.dispatcher'
+      - '@webpay.form.webpay_plus_form_data_provider'
+      - 'PrestaShop\Module\WebpayPlus\Form\WebpayPlusType'
+      - 'WebpayPlus'
+
+  webpay.form.webpay_plus_data_configuration:
+    class: PrestaShop\Module\WebpayPlus\Form\WebpayPlusDataConfiguration
+    arguments: [ '@prestashop.adapter.legacy.configuration' ]
+
+
+# oneclick Form services
+
+  webpay.form.type.oneclick:
+    class: 'PrestaShop\Module\WebpayPlus\Form\OneclickType'
+    arguments:
+      - "@translator"
+      - "@=service('prestashop.adapter.legacy.context').getLanguages()"
+      - '@prestashop.adapter.legacy.configuration'
+    public: true
+    tags:
+      - { name: form.type }
+    
+  webpay.form.oneclick_form_data_provider:
+    class: 'PrestaShop\Module\WebpayPlus\Form\OneclickFormDataProvider'
+    arguments:
+      - '@webpay.form.oneclick_data_configuration'
+
+  webpay.form.oneclick_form_data_handler:
+    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    arguments:
+      - '@form.factory'
+      - '@prestashop.core.hook.dispatcher'
+      - '@webpay.form.oneclick_form_data_provider'
+      - 'PrestaShop\Module\WebpayPlus\Form\OneclickType'
+      - 'WebpayPlus'
+
+  webpay.form.oneclick_data_configuration:
+    class: PrestaShop\Module\WebpayPlus\Form\OneclickDataConfiguration
+    arguments: [ '@prestashop.adapter.legacy.configuration' ]
+
+# diagnosis Form services
+
+  webpay.form.type.diagnosis:
+    class: 'PrestaShop\Module\WebpayPlus\Form\DiagnosisType'
+    arguments:
+      - "@translator"
+      - "@=service('prestashop.adapter.legacy.context').getLanguages()"
+      - '@prestashop.adapter.legacy.configuration'
+    public: true
+    tags:
+      - { name: form.type }
+    
+  webpay.form.diagnosis_form_data_provider:
+    class: 'PrestaShop\Module\WebpayPlus\Form\DiagnosisFormDataProvider'
+    arguments:
+      - '@webpay.form.diagnosis_data_configuration'
+
+  webpay.form.diagnosis_form_data_handler:
+    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    arguments:
+      - '@form.factory'
+      - '@prestashop.core.hook.dispatcher'
+      - '@webpay.form.diagnosis_form_data_provider'
+      - 'PrestaShop\Module\WebpayPlus\Form\DiagnosisType'
+      - 'WebpayPlus'
+
+  webpay.form.diagnosis_data_configuration:
+    class: PrestaShop\Module\WebpayPlus\Form\DiagnosisDataConfiguration
+    arguments: [ '@prestashop.adapter.legacy.configuration' ]
+    

@@ -1,36 +1,32 @@
 <?php
 
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithCommon;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
+use PrestaShop\Module\WebpayPlus\Utils\HealthCheck;
+use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
+use PrestaShop\Module\WebpayPlus\Telemetry\PluginVersion;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once(_PS_MODULE_DIR_ . 'webpay/src/Model/TransbankWebpayRestTransaction.php');
-require_once(_PS_MODULE_DIR_ . 'webpay/src/Helpers/InteractsWithWebpay.php');
-require_once(_PS_MODULE_DIR_ . 'webpay/src/Helpers/InteractsWithOneclick.php');
-require_once('libwebpay/HealthCheck.php');
-require_once('libwebpay/LogHandler.php');
-require_once("libwebpay/Telemetry/PluginVersion.php");
-require_once('libwebpay/Utils.php');
-
-if (Utils::isPrestashop_1_6()) {
-    require('vendor/autoload.php');
-}
-
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
-
+require_once __DIR__.'/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
     use InteractsWithWebpay;
     use InteractsWithOneclick;
+    use InteractsWithCommon;
+    use InteractsWithWebpayDb;
+    use InteractsWithTabs;
 
-    const DEBUG_MODE = true;
+    //const DEBUG_MODE = true;
     protected $_errors = array();
-    public $healthcheck;
     public $log;
     public $title = 'Pago con tarjetas de crédito o Redcompra';
-    protected $apiKeySecret_initial_value;
 
     private $paymentTypeCodearray = [
         "VD" => "Venta débito",
@@ -58,12 +54,20 @@ class WebPay extends PaymentModule
 
         $this->pluginValidation();
         try {
-            $this->healthcheck = new HealthCheck($this->getConfigForHealthCheck());
-            $this->datos_hc = json_decode($this->healthcheck->printFullResume());
             $this->log = new LogHandler();
         } catch (Exception $e) {
             print_r($e);
         }
+        $this->addTabs($this);
+    }
+
+    public function uninstall()
+    {
+        $this->uninstallTab();
+        if (!parent::uninstall() || !Configuration::deleteByName("webpay")) {
+            return false;
+        }
+        return true;
     }
 
     public function install()
@@ -71,17 +75,34 @@ class WebPay extends PaymentModule
         /* carga la configuracion por defecto al instalar el plugin */
         $this->setDebugActive("");
         $this->loadDefaultConfigurationWebpay();
+        $this->loadDefaultConfigurationOneclick();
 
-        $displayOrder = $this->getDisplayOrderHookName();
+        $result = parent::install();
+        /* Se instalan las tablas, si falla se sigue con la instalación */
+        $this->installWebpayTable();
+        $this->installOneclickTable();
+        $this->installTab();
 
-        return parent::install() &&
+        /* Si algo falla aqui se muestran los errores */
+        return  $result &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('displayPayment') &&
             $this->registerHook('displayPaymentReturn') &&
             $this->registerHook('displayAdminOrderLeft') &&
-            $this->registerHook($displayOrder) &&
-            $this->installWebpayTable();
+            $this->registerHook($this->getDisplayOrderHookName());
+    }
+
+    protected function installWebpayTable()
+    {
+        $installer = new \PrestaShop\Module\WebpayPlus\Install\WebpayPlusInstaller();
+        return $installer->installWebpayOrdersTable();
+    }
+
+    private function installOneclickTable()
+    {
+        $installer = new \PrestaShop\Module\WebpayPlus\Install\OneclickInstaller();
+        return $installer->installInscriptionsTable();
     }
 
     public function hookdisplayAdminOrderLeft($params)
@@ -106,9 +127,7 @@ class WebPay extends PaymentModule
             return;
         }
 
-        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `order_id` = "' . $orderId . '" AND status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED;
-        $transaction = \Db::getInstance()->getRow($sql);
-        $webpayTransaction = new TransbankWebpayRestTransaction($transaction['id']);
+        $webpayTransaction = $this->getTransbankWebpayRestTransactionByOrderId($orderId);
         $transbankResponse = json_decode($webpayTransaction->transbank_response, true);
         $transactionDate = strtotime($transbankResponse['transactionDate']);
         $paymentTypeCode = $transbankResponse['paymentTypeCode'];
@@ -182,35 +201,31 @@ class WebPay extends PaymentModule
         return $this->display(__FILE__, 'views/templates/admin/admin_order.tpl');
     }
 
-    protected function installWebpayTable()
-    {
-        $installer = new \PrestaShop\Module\WebpayPlus\Install\Installer();
-        return $installer->installWebpayOrdersTable();
-    }
-
-    public function uninstall()
-    {
-        if (!parent::uninstall() || !Configuration::deleteByName("webpay")) {
-            return false;
-        }
-        return true;
-    }
-
     public function hookPaymentReturn($params)
     {
+        if($this->getDebugActive()==1){
+            $this->logInfo('D.1. Retornando (hookPaymentReturn)');
+        }
         if (!$this->active) {
             return;
         }
 
         $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
         $orderId = $params[$nameOrderRef]->id;
+        
+        if($this->getDebugActive()==1){
+            $this->logInfo('D.2. Obteniendo TransbankWebpayRestTransaction desde la BD');
+            $this->logInfo('nameOrderRef: '.$nameOrderRef.', orderId: '.$orderId);
+        }
 
-        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `order_id` = "' . $orderId . '" AND status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED;
-        $transaction = \Db::getInstance()->getRow($sql);
-        $webpayTransaction = new TransbankWebpayRestTransaction($transaction['id']);
-
+        $webpayTransaction = $this->getTransbankWebpayRestTransactionByOrderId($orderId);
         if (!$webpayTransaction) {
-            (new LogHandler())->logError('Showing confirmation page, but there is no webpayTransaction object, so we cant find an approved transaction for this order.');
+            $this->logError('Showing confirmation page, but there is no webpayTransaction object, so we cant find an approved transaction for this order.');
+        }
+        
+        if($this->getDebugActive()==1){
+            $this->logInfo('D.3. TransbankWebpayRestTransaction obtenida');
+            $this->logInfo(isset($webpayTransaction) ? $webpayTransaction->transbank_response : 'No se encontro el registro');
         }
 
         $transbankResponse = json_decode($webpayTransaction->transbank_response, true);
@@ -262,14 +277,20 @@ class WebPay extends PaymentModule
             return;
         }
         Context::getContext()->smarty->assign(array(
-            'logo' => $this->_path . "logo.png",
+            'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'),
             'title' => $this->title
         ));
         return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
     }
 
+    /*
+        Muestra la opciones de pago disponibles
+    */
     public function hookPaymentOptions($params)
     {
+
+        $this->saveCookieData();
+
         if($this->getDebugActive()==1){
             $this->logInfo('*****************************************************');
             $this->logInfo('A.1. Mostrando medios de pago Webpay Plus');
@@ -283,9 +304,12 @@ class WebPay extends PaymentModule
         if (!$this->checkCurrency($params['cart'])) {
             return;
         }
+        /*Agregamos la opcion de pago Webpay Plus */
         $payment_options = [
             $this->getWebpayPaymentOption($this, $this->context)
         ];
+        /*Agregamos la opcion de pago Webpay Oneclick */
+        array_push($payment_options, ...$this->getGroupOneclickPaymentOption($this, $this->context));
         return $payment_options;
     }
 
@@ -303,24 +327,20 @@ class WebPay extends PaymentModule
         return false;
     }
 
+    
     public function getContent()
     {
         $activeShopID = (int)Context::getContext()->shop->id;
         $shopDomainSsl = Tools::getShopDomainSsl(true, true);
 
-        $webpayEnvironmentChanged = $this->updateSettings();
-        $config = $this->getConfigForHealthCheck();
-
-        $this->healthcheck = new HealthCheck($config);
-        if ($webpayEnvironmentChanged) {
-            $rs = $this->healthcheck->getpostinstallinfo();
-        }
+        $this->updateSettings();
+        $healthcheck = $this->createHealthCheck();
 
         if ($this->getFormWebpayEnvironment() === 'LIVE') {
-            $this->sendPluginVersion($config);
+            $this->sendPluginVersion($healthcheck);
         }
 
-        $this->datos_hc = json_decode($this->healthcheck->printFullResume());
+        $this->datos_hc = json_decode($healthcheck->printFullResume());
 
         $ostatus = new OrderState(1);
         $statuses = $ostatus->getOrderStates(1);
@@ -399,32 +419,7 @@ class WebPay extends PaymentModule
     {
         $this->_errors = array();
     }
-    /**
-     * @return array
-     */
-    public function getConfigForHealthCheck()
-    {
-        $config = array(
-            'ENVIRONMENT' => $this->getWebpayEnvironment(),
-            'COMMERCE_CODE' => $this->getWebpayCommerceCode(),
-            'API_KEY_SECRET' => $this->getWebpayApiKey(),
-            'ECOMMERCE' => 'prestashop'
-        );
-        return $config;
-    }
-    /**
-     * @param array $config
-     */
-    public function sendPluginVersion(array $config)
-    {
-        $telemetryData = $this->healthcheck->getPluginInfo($this->healthcheck->ecommerce);
-        (new \Transbank\Telemetry\PluginVersion())->registerVersion(
-            $config['COMMERCE_CODE'],
-            $telemetryData['current_plugin_version'],
-            $telemetryData['ecommerce_version'],
-            \Transbank\Telemetry\PluginVersion::ECOMMERCE_PRESTASHOP
-        );
-    }
+    
     /**
      * @return string
      */
@@ -443,8 +438,6 @@ class WebPay extends PaymentModule
         $this->_errors = array();
     }
 
-
-
     protected function logError($msg){
         (new LogHandler())->logError($msg);
     }
@@ -453,27 +446,40 @@ class WebPay extends PaymentModule
         (new LogHandler())->logInfo($msg);
     }
 
-    protected function getDebugActive(){
-        return Configuration::get('DEBUG_ACTIVE');
-    }
-
-    protected function setDebugActive($value){
-        return Configuration::updateValue('DEBUG_ACTIVE', $value);
-    }
-
-    protected function getFormDebugActive(){
-        return trim(Tools::getValue('form_debug_active'));
-    }
-
     public function updateSettings(){
-        $this->webpayUpdateSettings();
         $this->oneclickUpdateSettings();
-        if (Tools::getIsset('btn_webpay_update')) {
-            $this->setDebugActive($this->getFormDebugActive());
-            return $this->getFormWebpayEnvironment() !=  $this->getWebpayEnvironment();
-        }
-        return false;
+        $this->commonUpdateSettings();
+        return $this->webpayUpdateSettings();
+    }
+    
+    public function sendPluginVersion($healthcheck)
+    {
+        $config = $healthcheck->getConfig();
+        $telemetryData = $healthcheck->getPluginInfo($healthcheck->ecommerce);
+        (new PluginVersion())->registerVersion(
+            $config['COMMERCE_CODE'],
+            $telemetryData['current_plugin_version'],
+            $telemetryData['ecommerce_version'],
+            PluginVersion::ECOMMERCE_PRESTASHOP
+        );
     }
 
+    public function createHealthCheck(){
+        return new HealthCheck(array(
+            'ENVIRONMENT' => $this->getWebpayEnvironment(),
+            'COMMERCE_CODE' => $this->getWebpayCommerceCode(),
+            'API_KEY_SECRET' => $this->getWebpayApiKey(),
+            'ECOMMERCE' => 'prestashop'
+        ));
+    }
+
+    private function saveCookieData(){
+        $this->context->cookie->__set('webpay_cart_id', $this->context->cart->id);
+        if ($this->context->customer->isLogged()) {
+            $this->context->cookie->__set('webpay_email', $this->context->customer->email);
+            $this->context->cookie->__set('webpay_customer_id', $this->context->customer->id);
+        }
+    }
 
 }
+//https://github.com/PrestaShop/PrestaShop/issues/26785

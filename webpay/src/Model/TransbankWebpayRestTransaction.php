@@ -1,5 +1,9 @@
 <?php
 
+namespace PrestaShop\Module\WebpayPlus\Model;
+
+use ObjectModel;
+
 class TransbankWebpayRestTransaction extends ObjectModel
 {
     const TABLE_NAME = 'webpay_rest_transactions';
@@ -7,6 +11,9 @@ class TransbankWebpayRestTransaction extends ObjectModel
     const STATUS_FAILED = 2;
     const STATUS_ABORTED_BY_USER = 3;
     const STATUS_APPROVED = 4;
+
+    const PRODUCT_WEBPAY_PLUS = 'webpay_plus';
+    const PRODUCT_WEBPAY_ONECLICK = 'webpay_oneclick';
 
     public $id;
     public $cart_id;
@@ -21,6 +28,11 @@ class TransbankWebpayRestTransaction extends ObjectModel
     public $amount;
     public $vci;
     public $created_at;
+
+    public $environment;
+    public $commerce_code;
+    public $child_commerce_code;
+    public $product;
 
     public static $definition = [
         'table'     => self::TABLE_NAME,
@@ -39,6 +51,11 @@ class TransbankWebpayRestTransaction extends ObjectModel
             'amount'             => ['type' => self::TYPE_FLOAT, 'validate' => 'isPrice', 'required' => true],
             'vci'                => ['type' => self::TYPE_STRING, 'validate' => 'isString'],
             'created_at'         => ['type' => self::TYPE_DATE, 'validate' => 'isDate'],
+
+            'environment'               => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'required' => true],
+            'commerce_code'             => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'required' => true],
+            'child_commerce_code'       => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'allow_null' => true],
+            'product'                   => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'required' => true],
         ],
     ];
 }

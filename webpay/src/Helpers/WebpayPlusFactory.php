@@ -3,7 +3,7 @@
 namespace PrestaShop\Module\WebpayPlus\Helpers;
 
 use Configuration;
-use TransbankSdkWebpay;
+use PrestaShop\Module\WebpayPlus\Utils\TransbankSdkWebpay;
 
 class WebpayPlusFactory
 {
