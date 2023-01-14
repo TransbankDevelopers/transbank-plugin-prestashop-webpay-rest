@@ -5,6 +5,7 @@ use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Utils\Utils;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
+use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 
 class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleFrontController
 {
@@ -67,7 +68,7 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
     private function getInscriptionByToken($token)
     {
         $sql = 'SELECT * FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `token` = "'.pSQL($token).'"';
-        $result = \Db::getInstance()->getRow($sql);
+        $result = SqlHelper::getRow($sql);
         if ($result === false) {
             $this->throwErrorRedirect('Oneclick Token '.$token.' was not found on database');
         }

@@ -4,10 +4,12 @@ namespace PrestaShop\Module\WebpayPlus\Helpers;
 
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
-use Configuration;
-use Tools;
 use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
+use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
+use Configuration;
+use Tools;
+use Media;
 
 /**
  * Trait InteractsWithOneclick.
@@ -16,14 +18,15 @@ trait InteractsWithOneclick
 {
     public function getGroupOneclickPaymentOption($base, $context)
     {
-        if ($context->customer->isLogged()) {
+        if (!$context->customer->isLogged()){
+            return [];
+        }
+        if ($this->getCountCardsByUserId($this->getUserId($context)) > 0){
             return $this->getOneclickPaymentOption($base, $context);
         }
-        else {
-            return [
-                $this->getNewOneclickPaymentOption($base, $context)
-            ];
-        }
+        return [
+            $this->getNewOneclickPaymentOption($base, $context)
+        ];
     }
 
     public function getOneclickPaymentOption($base, $context)
@@ -33,20 +36,20 @@ trait InteractsWithOneclick
         $paymentController = $context->link->getModuleLink($base->name, 'oneclickpayvalidate', array(), true);
         $inscriptionsController = $context->link->getModuleLink($base->name, 'oneclickinscription', array(), true);
 
-        $r = $this->getCardsByUserId($this->getUserId($context));
-        foreach($r as $row){
+        $cards = $this->getCardsByUserId($this->getUserId($context));
+        foreach($cards as $card){
             $po = new PaymentOption();
-            $cardNumber = $row['card_number'];
-            $environment = $row['environment']=='TEST' ? '[TEST] ' : '';
+            $cardNumber = $card['card_number'];
+            $environment = $card['environment']=='TEST' ? '[TEST] ' : '';
             array_push($result,
-                $po->setCallToActionText($environment.$row['card_type'].' terminada en '.substr($cardNumber,- 4, 4))
+                $po->setCallToActionText($environment.$card['card_type'].' terminada en '.substr($cardNumber,- 4, 4))
                     ->setAction($paymentController)
                     ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'))
                     ->setInputs([
                         'token' => [
                             'name' =>'inscriptionId',
                             'type' =>'hidden',
-                            'value' => $row['id']
+                            'value' => $card['id']
                         ],
                     ])
                 );
@@ -80,18 +83,16 @@ trait InteractsWithOneclick
 
     public function getCardsByUserId($userId)
     {
-        $r = null;
-        try {
-            $sql = 'SELECT * FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"';
-            $r = \Db::getInstance()->ExecuteS($sql);
-        }
-        catch(\Exception $e) {
-
-        }
+        $r = SqlHelper::executeSql('SELECT * FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
         if (!isset($r)){
             return [];
         }
         return $r;
+    }
+
+    public function getCountCardsByUserId($userId)
+    {
+        return SqlHelper::getValue('SELECT count(1) FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
     }
 
     public function getUserId($context){

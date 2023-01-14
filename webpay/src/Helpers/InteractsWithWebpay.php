@@ -5,6 +5,7 @@ namespace PrestaShop\Module\WebpayPlus\Helpers;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use Configuration;
 use Tools;
+use Media;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\Webpay\Options;
 

@@ -9,6 +9,7 @@ use PrestaShop\Module\WebpayPlus\Utils\HealthCheck;
 use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 use PrestaShop\Module\WebpayPlus\Telemetry\PluginVersion;
 
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -277,7 +278,7 @@ class WebPay extends PaymentModule
             return;
         }
         Context::getContext()->smarty->assign(array(
-            'logo' => Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'),
+            'logo' => \Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'),
             'title' => $this->title
         ));
         return $this->display(__FILE__, 'views/templates/hook/payment.tpl');

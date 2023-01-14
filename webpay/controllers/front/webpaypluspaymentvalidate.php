@@ -1,6 +1,6 @@
 <?php
 
-use DB;
+use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use Transbank\Webpay\WebpayPlus\TransactionCommitResponse;
@@ -131,7 +131,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends BaseModuleFro
             $this->logError('Cart id was null. Redirecto to confirmation page of the last order');
             $id_usuario = Context::getContext()->customer->id;
             $sql = 'SELECT id_cart FROM '._DB_PREFIX_."cart p WHERE p.id_customer = $id_usuario ORDER BY p.id_cart DESC";
-            $cart->id = Db::getInstance()->getValue($sql, $use_cache = true);
+            $cart->id = SqlHelper::getValue($sql);
             $customer = $this->getCustomer($cart->id_customer);
             Tools::redirect('index.php?controller=order-confirmation&id_cart='.(int) $cart->id.'&id_module='.(int) $this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
             return false;
@@ -181,7 +181,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends BaseModuleFro
         $updateResult = $webpayTransaction->save(); // Guardar como fallida por si algo falla más adelante
 
         if (!$updateResult) {
-            $error = 'No se pudo guardar en base de datos el resultado de la transacción: '.\DB::getMsgError();
+            $error = 'No se pudo guardar en base de datos el resultado de la transacción: '.SqlHelper::getMsgError();
             $this->logError($error);
             $this->throwErrorRedirect($error);
         }
@@ -300,7 +300,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends BaseModuleFro
         if (!isset($_POST['TBK_TOKEN']) && !isset($_POST['token_ws']) && isset($_POST['TBK_ID_SESION'])) {
             $sessionId = $_POST['TBK_ID_SESION'];
             $sqlQuery = 'SELECT * FROM '._DB_PREFIX_.TransbankWebpayRestTransaction::TABLE_NAME.' WHERE `session_id` = "'.$sessionId.'"';
-            $transaction = \Db::getInstance()->getRow($sqlQuery);
+            $transaction = SqlHelper::getRow($sqlQuery);
             $errorMessage = 'Al parecer pasaron más de 15 minutos en el formulario de pago, por lo que la transacción se ha cancelado automáticamente';
             if (!$transaction) {
                 $this->setPaymentErrorPage($errorMessage);
@@ -324,7 +324,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends BaseModuleFro
             $token = $this->getTokenWs($_GET);
         }
         $sql = 'SELECT * FROM '._DB_PREFIX_.TransbankWebpayRestTransaction::TABLE_NAME.' WHERE `token` = "'.pSQL($token).'"';
-        $result = \Db::getInstance()->getRow($sql);
+        $result = SqlHelper::getRow($sql);
         if ($result === false) {
             $this->throwErrorRedirect('Webpay Token '.$token.' was not found on database');
         }
@@ -338,7 +338,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends BaseModuleFro
     private function getOtherApprovedTransactionsOfThisCart($webpayTransaction)
     {
         $sql = 'SELECT * FROM '._DB_PREFIX_.TransbankWebpayRestTransaction::TABLE_NAME.' WHERE `cart_id` = "'.pSQL($webpayTransaction->cart_id).'" and status = '.TransbankWebpayRestTransaction::STATUS_APPROVED;
-        return \Db::getInstance()->getRow($sql);
+        return SqlHelper::getRow($sql);
     }
 
     /**
