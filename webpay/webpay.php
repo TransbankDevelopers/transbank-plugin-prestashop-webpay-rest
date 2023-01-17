@@ -1,5 +1,7 @@
 <?php
 
+use Transbank\Utils\HttpClient;
+
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithCommon;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
@@ -361,7 +363,7 @@ class WebPay extends PaymentModule
         $healthcheck = $this->createHealthCheck();
 
         if ($this->getFormWebpayEnvironment() === 'LIVE') {
-            $this->sendPluginVersion($healthcheck);
+            $this->sendMetrics();
         }
 
         $this->datos_hc = json_decode($healthcheck->printFullResume());
@@ -495,5 +497,19 @@ class WebPay extends PaymentModule
             'API_KEY_SECRET' => $this->getWebpayApiKey(),
             'ECOMMERCE' => 'prestashop'
         ));
+    }
+
+    public function sendMetrics() {
+        // $headers = $options->getHeaders();
+        $headers = [];
+        $client = new GuzzleHttp\Client();
+
+        $response = $client->request('POST', 'https://tbk-app-y8unz.ondigitalocean.app/records/newRecord', [
+            'commerceCode' => $this->getWebpayCommerceCode(),
+            'plugin' => 'prestashop',
+            'environment' => $this->getWebpayEnvironment()
+        ]);
+
+        return json_decode($response->getBody(), true);
     }
 }
