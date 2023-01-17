@@ -33,6 +33,7 @@ class TransbankWebpayRestTransaction extends ObjectModel
     public $commerce_code;
     public $child_commerce_code;
     public $product;
+    public $card_number;
 
     public static $definition = [
         'table'     => self::TABLE_NAME,
@@ -56,6 +57,7 @@ class TransbankWebpayRestTransaction extends ObjectModel
             'commerce_code'             => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'required' => true],
             'child_commerce_code'       => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'allow_null' => true],
             'product'                   => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'required' => true],
+            'card_number'               => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'allow_null' => true],
         ],
     ];
 }

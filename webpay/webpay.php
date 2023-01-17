@@ -8,7 +8,7 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Utils\HealthCheck;
 use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 use PrestaShop\Module\WebpayPlus\Telemetry\PluginVersion;
-
+use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -128,68 +128,51 @@ class WebPay extends PaymentModule
             return;
         }
 
-        $webpayTransaction = $this->getTransbankWebpayRestTransactionByOrderId($orderId);
-        $transbankResponse = json_decode($webpayTransaction->transbank_response, true);
-        $transactionDate = strtotime($transbankResponse['transactionDate']);
-        $paymentTypeCode = $transbankResponse['paymentTypeCode'];
-
-        if ($paymentTypeCode == "VD") {
-            $paymentType = "Débito";
-        } elseif ($paymentTypeCode == "VP") {
-            $paymentType = "Prepago";
-        } else {
-            $paymentType = "Crédito";
-        }
-        if (in_array($paymentTypeCode, ["SI", "S2", "NC", "VC"])) {
-            $tipo_cuotas = $this->paymentTypeCodearray[$paymentTypeCode];
-        } else {
-            $tipo_cuotas = "Sin cuotas";
-        }
-
+        $tx = $this->getFormatTransbankWebpayRestTransactionByOrderId($orderId);
         $details = array(
             array(
                 'desc' => $this->l('Fecha de Transacción'),
-                'data' => date("d-m-Y", $transactionDate) . " " . date("H:i:s", $transactionDate),
+                'data' => $tx['transactionDate'] . " " . $tx['transactionHour'],
             ),
             array(
                 'desc' => $this->l('Tipo de Tarjeta'),
-                'data' => $paymentType,
+                'data' => $tx['paymentType'],
             ),
             array(
                 'desc' => $this->l('Tipo de Cuotas'),
-                'data' => $tipo_cuotas,
+                'data' => $tx['installmentType'],
             ),
             array(
                 'desc' => $this->l('Cantidad de Cuotas'),
-                'data' => $transbankResponse['installmentsNumber'],
+                'data' => $tx['installmentsNumber'],
             ),
             array(
                 'desc' => $this->l('Tarjeta'),
-                'data' => $transbankResponse['cardDetail']['card_number'],
+                'data' => $tx['cardNumber'],
             ),
             array(
                 'desc' => $this->l('Total Cobrado'),
-                'data' => "$" . number_format($transbankResponse['amount'], 0, ',', '.'),
+                'data' => "$" . $tx['totalPago'],
             ),
             array(
                 'desc' => $this->l('Código de Autorización'),
-                'data' => $transbankResponse['authorizationCode'],
+                'data' => $tx['authorizationCode'],
             ),
             array(
                 'desc' => $this->l('Respuesta del Banco'),
-                'data' => $transbankResponse['status'],
+                'data' => $tx['status'],
             ),
             array(
                 'desc' => $this->l('Orden de Compra'),
-                'data' => $transbankResponse['buyOrder'],
+                'data' => $tx['buyOrder'],
             ),
             array(
                 'desc' => $this->l('Código de Resultado'),
-                'data' => $webpayTransaction->response_code,
+                'data' => $tx['responseCode'],
             ),
             array(
                 'desc' => $this->l('Token'),
-                'data' => $webpayTransaction->token,
+                'data' => $tx['token'],
             ),
         );
 
@@ -198,8 +181,77 @@ class WebPay extends PaymentModule
             'title' => $this->displayName,
             'details' => $details,
         ));
-
         return $this->display(__FILE__, 'views/templates/admin/admin_order.tpl');
+    }
+
+    private function getFormatTransbankWebpayRestTransactionByOrderId($orderId){
+        $webpayTransaction = $this->getTransbankWebpayRestTransactionByOrderId($orderId);
+        if (!$webpayTransaction) {
+            $this->logError('Showing confirmation page, but there is no webpayTransaction object, so we cant find an approved transaction for this order.');
+        }
+        
+        if($this->getDebugActive()==1){
+            $this->logInfo('D.3. TransbankWebpayRestTransaction obtenida');
+            $this->logInfo(isset($webpayTransaction) ? $webpayTransaction->transbank_response : 'No se encontro el registro');
+        }
+
+        $transbankResponse = json_decode($webpayTransaction->transbank_response, true);
+        $transactionDate = strtotime($transbankResponse['transactionDate']);
+        $token = $webpayTransaction->token;
+
+        if ($webpayTransaction->product == TransbankWebpayRestTransaction::PRODUCT_WEBPAY_PLUS){
+            $amount = number_format($transbankResponse['amount'], 0, ',', '.');
+            $paymentTypeCode = $transbankResponse['paymentTypeCode'];
+            $cardNumber = $transbankResponse['cardDetail']['cardNumber'];
+            $installmentsNumber = $transbankResponse['installmentsNumber'] ? $transbankResponse['installmentsNumber'] : "0";
+            $authorizationCode = $transbankResponse['authorizationCode'];
+            $buyOrder = $transbankResponse['buyOrder'];
+            $installmentsAmount = $transbankResponse['installmentsAmount'] ? number_format($transbankResponse['installmentsAmount'], 0, ',', '.') : "0";
+            $responseCode = $transbankResponse['response_code'];
+            $status = $transbankResponse['status'];
+        }
+        else{
+            $cardNumber = $transbankResponse['cardNumber'];
+
+            $detail = $transbankResponse['details'][0];/* Se asume que el valor se extrae del primer elemento del details */
+            $amount = number_format($detail['amount'], 0, ',', '.');
+            $paymentTypeCode = $detail['paymentTypeCode'];
+            $installmentsNumber = $detail['installmentsNumber'] ? $detail['installmentsNumber'] : "0";
+            $authorizationCode = $detail['authorizationCode'];
+            $buyOrder = $detail['buyOrder'];
+            $installmentsAmount = $detail['installmentsAmount'] ? number_format($detail['installmentsAmount'], 0, ',', '.') : "0";
+            $responseCode = $detail['responseCode'];
+            $status = $detail['status'];
+        }
+        
+        if ($paymentTypeCode == "VD") {
+            $paymentType = "Débito";
+        } elseif ($paymentTypeCode == "VP") {
+            $paymentType = "Prepago";
+        } else {
+            $paymentType = "Crédito";
+        }
+        if (in_array($paymentTypeCode, ["SI", "S2", "NC", "VC"])) {
+            $installmentType = $this->paymentTypeCodearray[$paymentTypeCode];
+        } else {
+            $installmentType = "Sin cuotas";
+        }
+
+        return [
+            'cardNumber' => $cardNumber,
+            'paymentType' => $paymentType,
+            'totalPago' => $amount,
+            'transactionDate' => date("d-m-Y", $transactionDate),
+            'transactionHour' => date("H:i:s", $transactionDate),
+            'buyOrder' => $buyOrder,
+            'authorizationCode' => $authorizationCode,
+            'installmentType' => $installmentType,
+            'installmentsNumber' => $installmentsNumber,
+            'installmentsAmount' => $installmentsAmount,
+            'responseCode' => $responseCode,
+            'status' => $status,
+            'token' => $token
+        ];
     }
 
     public function hookPaymentReturn($params)
@@ -219,32 +271,7 @@ class WebPay extends PaymentModule
             $this->logInfo('nameOrderRef: '.$nameOrderRef.', orderId: '.$orderId);
         }
 
-        $webpayTransaction = $this->getTransbankWebpayRestTransactionByOrderId($orderId);
-        if (!$webpayTransaction) {
-            $this->logError('Showing confirmation page, but there is no webpayTransaction object, so we cant find an approved transaction for this order.');
-        }
-        
-        if($this->getDebugActive()==1){
-            $this->logInfo('D.3. TransbankWebpayRestTransaction obtenida');
-            $this->logInfo(isset($webpayTransaction) ? $webpayTransaction->transbank_response : 'No se encontro el registro');
-        }
-
-        $transbankResponse = json_decode($webpayTransaction->transbank_response, true);
-        $transactionDate = strtotime($transbankResponse['transactionDate']);
-        $paymentTypeCode = $transbankResponse['paymentTypeCode'];
-        if ($paymentTypeCode == "VD") {
-            $paymentType = "Débito";
-        } elseif ($paymentTypeCode == "VP") {
-            $paymentType = "Prepago";
-        } else {
-            $paymentType = "Crédito";
-        }
-        if (in_array($paymentTypeCode, ["SI", "S2", "NC", "VC"])) {
-            $tipo_cuotas = $this->paymentTypeCodearray[$paymentTypeCode];
-        } else {
-            $tipo_cuotas = "Sin cuotas";
-        }
-
+        $tx = $this->getFormatTransbankWebpayRestTransactionByOrderId($orderId);
 
         $this->smarty->assign(array(
             'shop_name' => $this->context->shop->name,
@@ -252,23 +279,22 @@ class WebPay extends PaymentModule
             'status' => 'ok',
             'id_order' => $orderId,
             'WEBPAY_RESULT_DESC' => "Transacción aprobada",
-            'WEBPAY_VOUCHER_NROTARJETA' => $transbankResponse['cardDetail']['card_number'],
-            'WEBPAY_VOUCHER_TXDATE_FECHA' => date("d-m-Y", $transactionDate),
-            'WEBPAY_VOUCHER_TXDATE_HORA' => date("H:i:s", $transactionDate),
-            'WEBPAY_VOUCHER_TOTALPAGO' => number_format($transbankResponse['amount'], 0, ',', '.'),
-            'WEBPAY_VOUCHER_ORDENCOMPRA' => $transbankResponse['buyOrder'],
-            'WEBPAY_VOUCHER_AUTCODE' => $transbankResponse['authorizationCode'],
-            'WEBPAY_VOUCHER_TIPOCUOTAS' => $tipo_cuotas,
-            'WEBPAY_VOUCHER_TIPOPAGO' => $paymentType,
-            'WEBPAY_VOUCHER_NROCUOTAS' => $transbankResponse['installmentsNumber'] ? $transbankResponse['installmentsNumber'] : "0",
-            'WEBPAY_VOUCHER_AMOUNT_CUOTAS' => $transbankResponse['installmentsAmount'] ? number_format($transbankResponse['installmentsAmount'], 0, ',', '.') : "0",
-            'WEBPAY_RESULT_CODE' => $webpayTransaction->response_code
+            'WEBPAY_VOUCHER_NROTARJETA' => $tx['cardNumber'],
+            'WEBPAY_VOUCHER_TXDATE_FECHA' => $tx['transactionDate'],
+            'WEBPAY_VOUCHER_TXDATE_HORA' => $tx['transactionHour'],
+            'WEBPAY_VOUCHER_TOTALPAGO' => $tx['totalPago'],
+            'WEBPAY_VOUCHER_ORDENCOMPRA' => $tx['buyOrder'],
+            'WEBPAY_VOUCHER_AUTCODE' => $tx['authorizationCode'],
+            'WEBPAY_VOUCHER_TIPOCUOTAS' => $tx['installmentType'],
+            'WEBPAY_VOUCHER_TIPOPAGO' => $tx['paymentType'],
+            'WEBPAY_VOUCHER_NROCUOTAS' => $tx['installmentsNumber'],
+            'WEBPAY_VOUCHER_AMOUNT_CUOTAS' => $tx['installmentsAmount'],
+            'WEBPAY_RESULT_CODE' => $tx['responseCode'],
         ));
 
         if (isset($params[$nameOrderRef]->reference) && !empty($params[$nameOrderRef]->reference)) {
             $this->smarty->assign('reference', $params[$nameOrderRef]->reference);
         }
-
         return $this->display(__FILE__, 'views/templates/hook/payment_return.tpl');
     }
 
@@ -289,9 +315,6 @@ class WebPay extends PaymentModule
     */
     public function hookPaymentOptions($params)
     {
-
-        $this->saveCookieData();
-
         if($this->getDebugActive()==1){
             $this->logInfo('*****************************************************');
             $this->logInfo('A.1. Mostrando medios de pago Webpay Plus');
@@ -473,14 +496,4 @@ class WebPay extends PaymentModule
             'ECOMMERCE' => 'prestashop'
         ));
     }
-
-    private function saveCookieData(){
-        $this->context->cookie->__set('webpay_cart_id', $this->context->cart->id);
-        if ($this->context->customer->isLogged()) {
-            $this->context->cookie->__set('webpay_email', $this->context->customer->email);
-            $this->context->cookie->__set('webpay_customer_id', $this->context->customer->id);
-        }
-    }
-
 }
-//https://github.com/PrestaShop/PrestaShop/issues/26785

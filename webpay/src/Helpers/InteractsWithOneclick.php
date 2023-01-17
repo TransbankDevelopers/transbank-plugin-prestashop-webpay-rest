@@ -32,10 +32,7 @@ trait InteractsWithOneclick
     public function getOneclickPaymentOption($base, $context)
     {
         $result = [];
-
-        $paymentController = $context->link->getModuleLink($base->name, 'oneclickpayvalidate', array(), true);
-        $inscriptionsController = $context->link->getModuleLink($base->name, 'oneclickinscription', array(), true);
-
+        $paymentController = $context->link->getModuleLink($base->name, 'oneclickpaymentvalidate', array(), true);
         $cards = $this->getCardsByUserId($this->getUserId($context));
         foreach($cards as $card){
             $po = new PaymentOption();
@@ -55,30 +52,29 @@ trait InteractsWithOneclick
                 );
         }
 
-        $po = new PaymentOption();
-        array_push($result,
-                $po->setCallToActionText('Usar un nuevo método de pago')
-                    ->setAction($inscriptionsController)
-                    ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'))
-                    ->setInputs([
-                        'token' => [
-                            'name' =>'inscriptionId',
-                            'type' =>'hidden',
-                            'value' => 0
-                        ],
-                    ])
-                );
+        array_push($result, $this->getOneclickInscriptionOption($base, $context, 'Usar un nuevo método de pago'));
         return $result;
     }
 
     public function getNewOneclickPaymentOption($base, $context)
     {
+        return $this->getOneclickInscriptionOption($base, $context, 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick');
+    }
+
+    public function getOneclickInscriptionOption($base, $context, $description)
+    {
         $po = new PaymentOption();
         $controller = $context->link->getModuleLink($base->name, 'oneclickinscription', array(), true);
-
-        return $po->setCallToActionText('Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick')
+        return $po->setCallToActionText($description)
             ->setAction($controller)
-            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'));
+            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'))
+            ->setInputs([
+                'token' => [
+                    'name' =>'inscriptionId',
+                    'type' =>'hidden',
+                    'value' => 0
+                ],
+            ]);
     }
 
     public function getCardsByUserId($userId)

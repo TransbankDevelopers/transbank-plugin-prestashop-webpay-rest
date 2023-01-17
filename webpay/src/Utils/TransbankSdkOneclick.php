@@ -139,26 +139,25 @@ class TransbankSdkOneclick
      *
      * @return array|Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse
      */
-    public function authorizeTransaction($username, $tbkUser, $buyOrder, $amount)
+    public function authorizeTransaction($username, $tbkUser, $parentBuyOrder, $childBuyOrder, $amount)
     {
         $result = [];
-
         try {
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
-            $this->log->logInfo('authorizeTransaction => username: ' . $username . ' buyOrder: ' . $buyOrder . ', amount: ' . $amount .
+            $this->log->logInfo('authorizeTransaction => username: ' . $username . ' parentBuyOrder: ' . $parentBuyOrder. ' childBuyOrder: ' . $childBuyOrder . ', amount: ' . $amount .
                 ', txDate: ' . $txDate . ', txTime: ' . $txTime);
 
             $details = [
                 [
                     'commerce_code'       => $this->getChildCommerceCode(),
-                    'buy_order'           => 'C'.$buyOrder,
+                    'buy_order'           => $childBuyOrder,
                     'amount'              => $amount,
                     'installments_number' => 1,
                 ],
             ];
 
-            $resp = $this->transaction->authorize($username, $tbkUser, $buyOrder, $details);
+            $resp = $this->transaction->authorize($username, $tbkUser, $parentBuyOrder, $details);
             $this->log->logInfo('authorizeTransaction - resp: ' . json_encode($resp));
             return $resp;
         } catch (Exception $e) {

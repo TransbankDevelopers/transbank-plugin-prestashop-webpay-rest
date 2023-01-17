@@ -32,12 +32,13 @@ class WebpayPlusInstaller
 
                 `commerce_code` varchar(60),
                 `child_commerce_code` varchar(60),
-                `product` varchar(30),
-                `environment` varchar(20),
+                `product` varchar(60),
+                `environment` varchar(60),
+                `card_number` varchar(60),
                 PRIMARY KEY (id)
         ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;');
         //actualizamos la tabla para darle soporte a Oneclick
-        $this->updateDatabase(_DB_PREFIX_.TransbankWebpayRestTransaction::TABLE_NAME, array('commerce_code', 'child_commerce_code', 'transbank_response', 'product', 'environment'));
+        $this->updateDatabase(_DB_PREFIX_.TransbankWebpayRestTransaction::TABLE_NAME, array('commerce_code', 'child_commerce_code', 'transbank_response', 'product', 'environment', 'card_number'));
         return $result;
     }
 
@@ -52,7 +53,7 @@ class WebpayPlusInstaller
                 }
             }
             if(!$found){
-                Db::getInstance()->execute('ALTER TABLE `'.$tableName.'` ADD `'.$newColumn.'` text DEFAULT NULL');
+                Db::getInstance()->execute('ALTER TABLE `'.$tableName.'` ADD `'.$newColumn.'` varchar(60) DEFAULT NULL');
             }
         }
     }

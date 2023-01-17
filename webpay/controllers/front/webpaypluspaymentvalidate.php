@@ -1,7 +1,7 @@
 <?php
 
 use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
-use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
+use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use Transbank\Webpay\WebpayPlus\TransactionCommitResponse;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
@@ -9,7 +9,7 @@ use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 /**
  * Class WebPayValidateModuleFrontController.
  */
-class WebPayWebpayplusPaymentValidateModuleFrontController extends BaseModuleFrontController
+class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModuleFrontController
 {
     protected $responseData = [];
     /**
@@ -178,6 +178,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends BaseModuleFro
 
         $webpayTransaction->transbank_response = json_encode($result);
         $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
+        $webpayTransaction->card_number = is_array($result) ? '' : $result->cardDetail['card_number'];
         $updateResult = $webpayTransaction->save(); // Guardar como fallida por si algo falla más adelante
 
         if (!$updateResult) {
@@ -217,15 +218,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends BaseModuleFro
             }
 
             $order = new Order($this->module->currentOrder);
-            $payment = $order->getOrderPaymentCollection();
-            if (isset($payment[0])) {
-                $payment[0]->transaction_id = $cart->id;
-                $payment[0]->card_number = '**** **** **** '.$result->cardDetail['card_number'];
-                $payment[0]->card_brand = '';
-                $payment[0]->card_expiration = '';
-                $payment[0]->card_holder = '';
-                $payment[0]->save();
-            }
+            $this->saveOrderPayment($order, $cart, $webpayTransaction->card_number);
 
             $webpayTransaction->response_code = $result->responseCode;
             $webpayTransaction->order_id = $order->id;
