@@ -70,7 +70,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             if($this->getDebugActive()==1){
                 $this->logInfo('Transacción ya estaba aprobada');
             }
-            return $this->redirectToSuccessPage($cart);
+            return $this->redirectToPaidSuccessPaymentPage($cart);
         }
 
         if ($webpayTransaction->status != TransbankWebpayRestTransaction::STATUS_INITIALIZED) {
@@ -230,7 +230,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
                 $this->logInfo('C.6. Procesando pago - se actualizó la transacción como STATUS_APPROVED');
             }
 
-            return $this->redirectToSuccessPage($cart);
+            return $this->redirectToPaidSuccessPaymentPage($cart);
         } else {
 
             $webpayTransaction->response_code = isset($result->responseCode) ? $result->responseCode : null;
@@ -267,21 +267,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         return $this->setPaymentErrorPage($error);
     }
 
-    
-
-    private function toRedirect($url, $data = [])
-    {
-        echo "<form action='".$url."' method='POST' name='webpayForm'>";
-        foreach ($data as $name => $value) {
-            echo "<input type='hidden' name='".htmlentities($name)."' value='".htmlentities($value)."'>";
-        }
-        echo '</form>'."<script language='JavaScript'>".'document.webpayForm.submit();'.'</script>';
-    }
-
-   
-
-    
-
     /**
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
@@ -301,7 +286,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $webpayTransaction = new TransbankWebpayRestTransaction($transaction['id']);
             if ($webpayTransaction->status == TransbankWebpayRestTransaction::STATUS_APPROVED) {
                 $cart = $this->getCart($webpayTransaction->cart_id);
-                return $this->redirectToSuccessPage($cart);
+                return $this->redirectToPaidSuccessPaymentPage($cart);
             }
             $this->updateTransactionStatus($webpayTransaction, TransbankWebpayRestTransaction::STATUS_FAILED, json_encode(['error' => $errorMessage]));
             $this->setPaymentErrorPage($errorMessage);
@@ -332,16 +317,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     {
         $sql = 'SELECT * FROM '._DB_PREFIX_.TransbankWebpayRestTransaction::TABLE_NAME.' WHERE `cart_id` = "'.pSQL($webpayTransaction->cart_id).'" and status = '.TransbankWebpayRestTransaction::STATUS_APPROVED;
         return SqlHelper::getRow($sql);
-    }
-
-    /**
-     * @param Cart $cart
-     */
-    private function redirectToSuccessPage(Cart $cart)
-    {
-        $customer = $this->getCustomer($cart->id_customer);
-        $dataUrl = 'id_cart='.(int) $cart->id.'&id_module='.(int) $this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key;
-        return Tools::redirect('index.php?controller=order-confirmation&'.$dataUrl);
     }
 
     private function getOkStatus(){

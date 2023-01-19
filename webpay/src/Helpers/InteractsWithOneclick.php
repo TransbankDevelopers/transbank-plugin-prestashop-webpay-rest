@@ -217,4 +217,13 @@ trait InteractsWithOneclick
         return Configuration::get('PS_OS_PREPARATION');
     }
 
+    private function loadDefaultOneclick()
+    {
+        $this->setOneclickMallCommerceCode($this->getDefaultOneclickMallCommerceCode());
+        $this->setOneclickChildCommerceCode($this->getDefaultOneclickChildCommerceCode());
+        $this->setOneclickApiKey($this->getDefaultOneclickApiKey());
+        $this->setOneclickEnvironment($this->getDefaultOneclickEnvironment());
+        $this->setOneclickOrderAfterPayment($this->getDefaultOneclickOrderAfterPayment());
+    }
+
 }

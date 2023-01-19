@@ -124,4 +124,12 @@ trait InteractsWithWebpay
         // as the default order status after payment for our plugin
         return Configuration::get('PS_OS_PREPARATION');
     }
+
+    private function loadDefaultWebpay()
+    {
+        $this->setWebpayEnvironment($this->getDefaultWebpayEnvironment());
+        $this->setWebpayCommerceCode($this->getDefaultWebpayCommerceCode());
+        $this->setWebpayApiKey($this->getDefaultWebpayApiKey());
+        $this->setWebpayOrderAfterPayment($this->getDefaultWebpayOrderAfterPayment());
+    }
 }

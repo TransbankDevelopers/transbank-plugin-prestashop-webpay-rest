@@ -11,6 +11,9 @@ use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use PrestaShop\PrestaShop\Adapter\Configuration;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Transbank\Webpay\Options;
 
 class OneclickType extends TranslatorAwareType
@@ -45,12 +48,27 @@ class OneclickType extends TranslatorAwareType
             ])
             ->add('form_oneclick_mall_commerce_code', TextType::class, [
                 'label' => $this->trans('Código de Comercio Mall', 'Modules.WebpayPlus.Admin'),
+                'error_bubbling' => true,
+                'constraints' => [
+                    new NotBlank(),
+                    new Length(['min' => 12, 'max' => 12]),
+                ]
             ])
             ->add('form_oneclick_child_commerce_code', TextType::class, [
                 'label' => $this->trans('Código de Comercio Tienda', 'Modules.WebpayPlus.Admin'),
+                'error_bubbling' => true,
+                'constraints' => [
+                    new NotBlank(),
+                    new Length(['min' => 12, 'max' => 12]),
+                ]
             ])
             ->add('form_oneclick_api_key', TextType::class, [
                 'label' => $this->trans('API Key (llave secreta)', 'Modules.WebpayPlus.Admin'),
+                'error_bubbling' => true,
+                'constraints' => [
+                    new NotBlank(),
+                    new Length(['min' => 12]),
+                ]
             ])
             ->add('form_oneclick_order_after_payment', ChoiceType::class, [
                 'label' => $this->trans('Estado Pago Aceptado', 'Modules.WebpayPlus.Admin'),
@@ -58,6 +76,9 @@ class OneclickType extends TranslatorAwareType
                     $this->trans('Pago aceptado', 'Modules.WebpayPlus.Admin') => $this->configuration->get('PS_OS_PAYMENT'),
                     $this->trans('Preparación en curso', 'Modules.WebpayPlus.Admin') => $this->configuration->get('PS_OS_PREPARATION'),
                 ],
-            ]);
+            ])
+            ->add('oneclick_form_save_button', SubmitType::class, ['label' => $this->trans('Save', 'Modules.WebpayPlus.Admin')])
+            ->add('oneclick_form_reset_button', SubmitType::class, ['label' => $this->trans('Reset', 'Modules.WebpayPlus.Admin')])
+            ;
     }
 }

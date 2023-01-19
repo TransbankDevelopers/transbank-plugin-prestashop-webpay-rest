@@ -13,7 +13,7 @@
                     </tr>
                 </thead>
                 <tr>
-                    <td>{{ 'Directorio de logs:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{resume.log_dir}}</td>
+                    <td style="width: 300px;">{{ 'Directorio de logs:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{resume.log_dir}}</td>
                 </tr>
                 <tr>
                     <td>{{ 'Cantidad de logs en directorio:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{resume.logs_count.log_count}}</td>
@@ -34,7 +34,7 @@
                     </tr>
                 </thead>
                 <tr>
-                    <td>{{ 'Último Documento:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{lastLog.log_file}}</td>
+                    <td style="width: 300px;">{{ 'Último Documento:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{lastLog.log_file}}</td>
                 </tr>
                 <tr>
                     <td>{{ 'Peso del Documento:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{lastLog.log_weight}}</td>
@@ -48,7 +48,9 @@
 
         <div class="card-block row">
             <div class="col">
-                {{lastLog.log_content}}
+<pre>
+{{lastLog.log_content}}
+</pre>
             </div>
         </div>
         

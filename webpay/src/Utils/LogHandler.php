@@ -187,6 +187,19 @@ class LogHandler
         return $this->logList;
     }
 
+    public function getAllLogs()
+    {
+        $arr = array_diff(scandir($this->logDir), ['.', '..']);
+        $dira = str_replace($_SERVER['DOCUMENT_ROOT'], '', $this->logDir);
+        foreach ($arr as $key => $value) {
+            $var[] = "{$dira}/{$value}";
+        }
+        if (isset($var)) {
+            return $var;
+        }
+        return [];
+    }
+
     public function setLastLog()
     {
         $files = glob($this->logDir.'/*.log');
@@ -406,7 +419,7 @@ class LogHandler
             'config'     => $this->getValidateLockFile(),
             'log_dir'    => $this->setLogDir(),
             'logs_count' => $this->setLogCount(),
-            'logs_list'  => $this->setLogList(),
+            'logs_list'  => $this->getAllLogs(),
             'last_log'   => $this->setLastLog(),
         ];
     }

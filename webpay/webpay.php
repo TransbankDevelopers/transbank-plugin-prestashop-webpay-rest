@@ -10,6 +10,7 @@ use PrestaShop\Module\WebpayPlus\Utils\HealthCheck;
 use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 use PrestaShop\Module\WebpayPlus\Telemetry\PluginVersion;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
+use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -355,6 +356,10 @@ class WebPay extends PaymentModule
     
     public function getContent()
     {
+        $route = SymfonyContainer::getInstance()->get('router')->generate('ps_controller_webpay_configure');
+        Tools::redirectAdmin($route);
+
+        /*
         $activeShopID = (int)Context::getContext()->shop->id;
         $shopDomainSsl = Tools::getShopDomainSsl(true, true);
 
@@ -437,7 +442,7 @@ class WebPay extends PaymentModule
             )
         );
 
-        return $this->display($this->name, 'views/templates/admin/config.tpl');
+        return $this->display($this->name, 'views/templates/admin/config.tpl');*/
     }
 
     private function pluginValidation()
@@ -501,6 +506,7 @@ class WebPay extends PaymentModule
     public function sendMetrics() {
         $healthcheck = $this->createHealthCheck();
         $datos_hc = json_decode($healthcheck->printFullResume());
+        //$shops = Shop::getShops();
         return MetricsUtil::sendMetrics(
             $datos_hc->server_resume->php_version->version,//$phpVersion, 
             'prestashop',//$plugin, 

@@ -20,18 +20,20 @@
                 Cuando un usuario inscribe su tarjeta, la asocia al código de comercio Mall, pero cuando se realiza una transacción, se pagará al código de comercio “tienda” y no al “mall”.<br>
             </div>
             <div class="col tbk_column_line_left">
-                {{ form_widget(oneclickForm) }}
+                {{ form_row(oneclickForm.form_oneclick_environment) }}
+                {{ form_row(oneclickForm.form_oneclick_mall_commerce_code) }}
+                {{ form_row(oneclickForm.form_oneclick_child_commerce_code) }}
+                {{ form_row(oneclickForm.form_oneclick_api_key) }}
+                {{ form_row(oneclickForm.form_oneclick_order_after_payment) }}
             </div>
         </div>
         <div class="card-footer">
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-primary float-right tbk_button" id="oneclick-form-save-button">
-                    {{ 'Save'|trans({}, 'Admin.Actions') }}
-                </button>
-                &nbsp; &nbsp;  
-                <button class="btn btn-primary float-right tbk_button" id="webpay-plus-form-reset-button">
-                    {{ 'Reset'|trans({}, 'Admin.Actions') }}
-                </button>
+            <div class="card-block">
+                <div class="d-flex justify-content-end">
+                    {{ form_widget(oneclickForm.oneclick_form_save_button, { 'attr': {'class': 'btn btn-primary float-right tbk_button'} }) }}
+                    &nbsp; &nbsp;  
+                    {{ form_widget(oneclickForm.oneclick_form_reset_button, { 'attr': {'class': 'btn btn-primary float-right tbk_button'} }) }}
+                </div>
             </div>
         </div>
     </div>

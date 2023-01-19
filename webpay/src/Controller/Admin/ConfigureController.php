@@ -9,9 +9,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use PrestaShop\Module\WebpayPlus\Utils\HealthCheck;
 use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
+
 
 class ConfigureController extends FrameworkBundleAdminController
 {
+    use InteractsWithWebpay;
+    use InteractsWithOneclick;
     const TAB_CLASS_NAME = 'WebpayPlusConfigure';
 
     public function webpayplus(Request $request)
@@ -69,15 +74,21 @@ class ConfigureController extends FrameworkBundleAdminController
             'enableSidebar' => true,
             'layoutTitle' => $this->trans('Configuración Webpay', 'Modules.WebpayPlus.Admin'),
             'resume' => $res,
-            'lastLog' => $lastLog,
-            'logsList' => json_encode($res['logs_list'], JSON_PRETTY_PRINT)
+            'lastLog' => $lastLog
         ]);
     }
 
     public function info(Request $request)
     {
+
+        ob_start();
+        phpinfo();
+        $phpinfo = ob_get_contents();
+        ob_end_clean();
+        $phpinfo = preg_replace('~<style(.*?)</style>~Usi', "", $phpinfo); 
         return $this->render('@Modules/webpay/views/templates/admin/info_configure.html.twig', [
             'enableSidebar' => true,
+            'phpinfo' => $phpinfo,
             'layoutTitle' => $this->trans('Configuración Webpay', 'Modules.WebpayPlus.Admin'),
             
         ]);
@@ -90,13 +101,24 @@ class ConfigureController extends FrameworkBundleAdminController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            $errors = $formDataHandler->save($form->getData());
-
-            if (empty($errors)) {
+            if ($form->getClickedButton() === $form->get('webpay_plus_form_reset_button')){
+                $this->loadDefaultWebpay();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
-            } else {
+            }
+            else if (!$form->isValid()){
+                foreach ($form->getErrors() as $key => $error) {
+                    $errors[] = $error->getMessage();
+                }
                 $this->flashErrors($errors);
             }
+            else if ($form->getClickedButton() === $form->get('webpay_plus_form_save_button')){
+                $errors = $formDataHandler->save($form->getData());
+                if (empty($errors)) {
+                    $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
+                } else {
+                    $this->flashErrors($errors);
+                }
+            } 
         }
 
         return $this->redirectToRoute('ps_controller_webpay_configure_webpayplus');
@@ -109,13 +131,24 @@ class ConfigureController extends FrameworkBundleAdminController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            $errors = $formDataHandler->save($form->getData());
-
-            if (empty($errors)) {
+            if ($form->getClickedButton() === $form->get('oneclick_form_reset_button')){
+                $this->loadDefaultOneclick();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
-            } else {
+            }
+            else if (!$form->isValid()){
+                foreach ($form->getErrors() as $key => $error) {
+                    $errors[] = $error->getMessage();
+                }
                 $this->flashErrors($errors);
             }
+            else if ($form->getClickedButton() === $form->get('oneclick_form_save_button')){
+                $errors = $formDataHandler->save($form->getData());
+                if (empty($errors)) {
+                    $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
+                } else {
+                    $this->flashErrors($errors);
+                }
+            } 
         }
 
         return $this->redirectToRoute('ps_controller_webpay_configure_oneclick');

@@ -19,6 +19,7 @@ class MetricsUtil
             'product' => $product,
             'environment' => $enviroment,
             'commerceCode' => $commerceCode,
+            'metadata' => $meta
         ], ['Content-Type' => 'application/json']);
 
         return json_decode($response->getBody(), true);

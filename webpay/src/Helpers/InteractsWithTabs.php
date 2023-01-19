@@ -19,7 +19,7 @@ trait InteractsWithTabs
         }
         TabsHelper::removeTab('WebPay');
         TabsHelper::AddTab(ConfigureController::TAB_CLASS_NAME, $this->getNamesToManualInstall('Configuración Webpay', 'Modules.WebpayPlus.Config'), 'WebPay', 'AdminParentPayment');
-        TabsHelper::AddTab(OrdersController::TAB_CLASS_NAME, $this->getNamesToManualInstall('Órdenes Webpay', 'Modules.WebpayPlus.Orders'), 'WebPay', 'AdminParentOrders');
+        //TabsHelper::AddTab(OrdersController::TAB_CLASS_NAME, $this->getNamesToManualInstall('Órdenes Webpay', 'Modules.WebpayPlus.Orders'), 'WebPay', 'AdminParentOrders');
     }
     
     protected function uninstallTab()
@@ -39,14 +39,14 @@ trait InteractsWithTabs
                 'visible' => true,
                 'name' => $this->getNames('Configuración Webpay', 'Modules.WebpayPlus.Config'),
                 'parent_class_name' => 'AdminParentPayment',
-            ],
+            ],/*
             [
                 'route_name' => 'ps_controller_webpay_orders',
                 'class_name' => OrdersController::TAB_CLASS_NAME,
                 'visible' => true,
                 'name' => $this->getNames('Órdenes Webpay', 'Modules.WebpayPlus.Orders'),
                 'parent_class_name' => 'AdminParentOrders',
-            ],
+            ],*/
         ];
     }
 

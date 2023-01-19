@@ -5,7 +5,7 @@
     {% include '@Modules/webpay/views/templates/admin/tabs.html.twig' with {'tabActive': 1} %}
 
     {% form_theme webpayPlusForm 'PrestaShopBundle:Admin/TwigTemplateForm:prestashop_ui_kit.html.twig' %}
-
+    
     {{ form_start(webpayPlusForm, {attr : {class: 'form'}, action: path('ps_controller_webpay_configure_webpay_plus_form_save') }) }}
     <div class="card">
         <h3 class="card-header">
@@ -19,18 +19,19 @@
                 Este plugin funciona en modalidad Webpay Plus (no modalidad Mall), significa que tienes un código de comercio y un apikey.
             </div>
             <div class="col tbk_column_line_left">
-                {{ form_widget(webpayPlusForm) }}
+                {{ form_row(webpayPlusForm.form_webpay_environment) }}
+                {{ form_row(webpayPlusForm.form_webpay_commerce_code) }}
+                {{ form_row(webpayPlusForm.form_webpay_api_key) }}
+                {{ form_row(webpayPlusForm.form_webpay_order_after_payment) }}
             </div>
         </div>
         <div class="card-footer">
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-primary float-right tbk_button" id="webpay-plus-form-save-button">
-                    {{ 'Save'|trans({}, 'Admin.Actions') }}
-                </button>
-                &nbsp; &nbsp;  
-                <button class="btn btn-primary float-right tbk_button" id="webpay-plus-form-reset-button">
-                    {{ 'Reset'|trans({}, 'Admin.Actions') }}
-                </button>
+            <div class="card-block">
+                <div class="d-flex justify-content-end">
+                    {{ form_widget(webpayPlusForm.webpay_plus_form_save_button, { 'attr': {'class': 'btn btn-primary float-right tbk_button'} }) }}
+                    &nbsp; &nbsp;  
+                    {{ form_widget(webpayPlusForm.webpay_plus_form_reset_button, { 'attr': {'class': 'btn btn-primary float-right tbk_button'} }) }}
+                </div>
             </div>
         </div>
     </div>
