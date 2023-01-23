@@ -1,0 +1,31 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col">
+            <form method="post" class="form-horizontal">
+                <div class="card">
+                    <h3 class="card-header">
+                        <i class="material-icons">settings</i> {% block controllerTitle %}{{ 'Configure controller'|trans({}, 'Modules.WebpayPlus.Config') }}{% endblock %}
+                    </h3>
+                    <div class="card-block row">
+                        <div class="card-text">
+                            {% block body %}
+                            {% endblock %}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}

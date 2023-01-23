@@ -66,3 +66,10 @@ En ese PR deben incluirse los siguientes cambios:
 Luego de obtener aprobación del pull request, debes mezclar a master e inmediatamente generar un release en GitHub con el tag `vX.Y.Z`. En la descripción del release debes poner lo mismo que agregaste al changelog.
 
 Con eso Travis CI generará automáticamente una nueva versión del plugin y actualizará el Release de Github con el zip del plugin.
+
+
+https://www.figma.com/file/9zPZdDGcQPExGfLDOtGgzb/Transbank-Developers?node-id=534%3A18507
+
+
+
+https://github.com/PrestaShop/docker-templates

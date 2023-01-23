@@ -5,6 +5,9 @@ namespace PrestaShop\Module\WebpayPlus\Helpers;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use Configuration;
 use Tools;
+use Media;
+use Transbank\Webpay\WebpayPlus;
+use Transbank\Webpay\Options;
 
 /**
  * Trait InteractsWithWebpay.
@@ -14,26 +17,37 @@ trait InteractsWithWebpay
     public function getWebpayPaymentOption($base, $context)
     {
         $WPOption = new PaymentOption();
-        $paymentController = $context->link->getModuleLink($base->name, 'payment', array(), true);
+        $paymentController = $context->link->getModuleLink($base->name, 'webpaypluspayment', array(), true);
 
         return $WPOption->setCallToActionText('Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus')
             ->setAction($paymentController)
-            ->setLogo('/modules/webpay/images/webpay_plus.svg');
+            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/webpay_plus_80px.svg'));
     }
 
     private function loadDefaultConfigurationWebpay()
     {
-        $this->setWebpayCommerceCode($this->getDefaultWebpayCommerceCode());
-        $this->setWebpayApiKey($this->getDefaultWebpayApiKey());
-        $this->setWebpayEnvironment($this->getDefaultWebpayEnvironment());
-        // We assume that the default state is "PREPARATION" and then set it
-        // as the default order status after payment for our plugin
-        $this->setWebpayOrderAfterPayment(Configuration::get('PS_OS_PREPARATION'));
+        /* Si ya existe alguna configuracion la copiara */
+        $webpayEnviroment = $this->getWebpayEnvironment();
+        $webpayCommerceCode = $this->getWebpayCommerceCode();
+        $webpayApikey = $this->getWebpayApiKey();
+        $webpayDefaultOrderStateIdAfterPayment = $this->getWebpayOrderAfterPayment();
+
+        $webpayEnviroment = isset($webpayEnviroment) ? $webpayEnviroment : Options::DEFAULT_INTEGRATION_TYPE;
+        if ($webpayEnviroment == Options::DEFAULT_INTEGRATION_TYPE){/* Si es el entorno de integración y no existen parámetros, cargamos los valores por defecto */
+            $webpayCommerceCode = $this->getDefaultWebpayCommerceCode();
+            $webpayApikey = $this->getDefaultWebpayApiKey();
+            $webpayDefaultOrderStateIdAfterPayment = $this->getDefaultWebpayOrderAfterPayment();
+        }
+
+        $this->setWebpayEnvironment($webpayEnviroment);
+        $this->setWebpayCommerceCode($webpayCommerceCode);
+        $this->setWebpayApiKey($webpayApikey);
+        $this->setWebpayOrderAfterPayment($webpayDefaultOrderStateIdAfterPayment);
     }
 
     public function webpayUpdateSettings(){
         $theEnvironmentChanged = false;
-        if (Tools::getIsset('webpay_updateSettings')) {
+        if (Tools::getIsset('btn_webpay_update')) {
             if ($this->getFormWebpayEnvironment() !=  $this->getWebpayEnvironment()) {
                 $theEnvironmentChanged = true;
             }
@@ -54,7 +68,7 @@ trait InteractsWithWebpay
     }
 
     protected function getFormWebpayEnvironment(){
-        return Tools::getValue('form_environment');
+        return Tools::getValue('form_webpay_environment');
     }
 
     protected function getFormWebpayOrderAfterPayment(){
@@ -94,14 +108,36 @@ trait InteractsWithWebpay
     }
 
     protected function getDefaultWebpayCommerceCode(){
-        return \Transbank\Webpay\WebpayPlus::DEFAULT_COMMERCE_CODE;
+        return WebpayPlus::DEFAULT_COMMERCE_CODE;
     }
 
     protected function getDefaultWebpayApiKey(){
-        return \Transbank\Webpay\WebpayPlus::DEFAULT_API_KEY;
+        return WebpayPlus::DEFAULT_API_KEY;
     }
 
     protected function getDefaultWebpayEnvironment(){
-        return "TEST";
+        return  Options::DEFAULT_INTEGRATION_TYPE;
+    }
+
+    protected function getDefaultWebpayOrderAfterPayment(){
+        // We assume that the default state is "PREPARATION" and then set it
+        // as the default order status after payment for our plugin
+        return Configuration::get('PS_OS_PREPARATION');
+    }
+
+    private function loadDefaultWebpay()
+    {
+        $this->setWebpayEnvironment($this->getDefaultWebpayEnvironment());
+        $this->setWebpayCommerceCode($this->getDefaultWebpayCommerceCode());
+        $this->setWebpayApiKey($this->getDefaultWebpayApiKey());
+        $this->setWebpayOrderAfterPayment($this->getDefaultWebpayOrderAfterPayment());
+    }
+
+    private function getWebpayOkStatus(){
+        $OKStatus = Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
+        if ($OKStatus === '0') {
+            $OKStatus = Configuration::get('PS_OS_PREPARATION');
+        }
+        return $OKStatus;
     }
 }

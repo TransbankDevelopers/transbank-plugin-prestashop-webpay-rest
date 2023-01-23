@@ -25,6 +25,7 @@
  */
 
 use PrestaShop\Module\WebpayPlus\Install\Installer;
+use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 
 if (!defined('_PS_VERSION_')) {
     exit;
