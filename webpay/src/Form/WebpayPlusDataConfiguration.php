@@ -38,15 +38,6 @@ final class WebpayPlusDataConfiguration implements DataConfigurationInterface
         $webpayCommerceCode = $this->configuration->get(static::WEBPAY_STOREID);
         $webpayApikey = $this->configuration->get(static::WEBPAY_API_KEY_SECRET);
         $webpayDefaultOrderStateIdAfterPayment = $this->configuration->get(static::WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT);
-
-        /*
-        $webpayEnviroment = isset($webpayEnviroment) ? $webpayEnviroment : Options::DEFAULT_INTEGRATION_TYPE;
-        if ($webpayEnviroment == Options::DEFAULT_INTEGRATION_TYPE){
-            $webpayCommerceCode = isset($webpayCommerceCode) ? $webpayCommerceCode : WebpayPlus::DEFAULT_COMMERCE_CODE;
-            $webpayApikey = isset($webpayApikey) ? $webpayApikey : WebpayPlus::DEFAULT_API_KEY;
-            $webpayDefaultOrderStateIdAfterPayment = isset($webpayDefaultOrderStateIdAfterPayment) ? $webpayDefaultOrderStateIdAfterPayment : $this->configuration->get('PS_OS_PREPARATION');
-        }*/
-        
         return [
             'form_webpay_environment' => $webpayEnviroment,
             'form_webpay_commerce_code' => $webpayCommerceCode,

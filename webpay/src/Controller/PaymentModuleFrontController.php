@@ -30,7 +30,6 @@ class PaymentModuleFrontController extends BaseModuleFrontController
     {
         $customer = $this->getCustomer($cart->id_customer);
         $dataUrl = 'id_cart='.(int) $cart->id.'&id_module='.(int) $this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key;
-
         return Tools::redirect('index.php?controller=order-confirmation&'.$dataUrl);
     }
 

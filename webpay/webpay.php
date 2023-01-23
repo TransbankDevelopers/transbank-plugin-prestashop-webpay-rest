@@ -48,20 +48,18 @@ class WebPay extends PaymentModule
         $this->author = 'Transbank';
         $this->need_instance = 1;
         $this->bootstrap = true;
-
+        $this->addTabs($this);
         parent::__construct();
         $this->displayName = 'Webpay Plus';
-        $this->description = 'Recibe pagos en línea con tarjetas de crédito y Redcompra en tu Prestashop a través de Webpay Plus';
-        $this->controllers = array('payment', 'validate');
+        $this->description = 'Recibe pagos en línea con tarjetas de crédito y Redcompra en tu Prestashop a través de Webpay Plus y Oneclick';
         $this->confirmUninstall = '¿Estás seguro/a que deseas desinstalar este módulo de pago?';
-
+        $this->ps_versions_compliancy = array('min' => '1.7.6.0', 'max' => _PS_VERSION_);
         $this->pluginValidation();
         try {
             $this->log = new LogHandler();
         } catch (Exception $e) {
             print_r($e);
         }
-        $this->addTabs($this);
     }
 
     public function uninstall()
@@ -272,7 +270,7 @@ class WebPay extends PaymentModule
             $this->logInfo('D.2. Obteniendo TransbankWebpayRestTransaction desde la BD');
             $this->logInfo('nameOrderRef: '.$nameOrderRef.', orderId: '.$orderId);
         }
-
+        
         $tx = $this->getFormatTransbankWebpayRestTransactionByOrderId($orderId);
 
         $this->smarty->assign(array(
@@ -469,11 +467,13 @@ class WebPay extends PaymentModule
     }
 
     protected function logError($msg){
-        (new LogHandler())->logError($msg);
+        if (isset($this->log))
+            $this->log->logError($msg);
     }
 
     protected function logInfo($msg){
-        (new LogHandler())->logInfo($msg);
+        if (isset($this->log))
+            $this->log->logInfo($msg);
     }
 
     public function updateSettings(){

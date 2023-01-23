@@ -17,6 +17,9 @@ services:
       - PS_COUNTRY=cl
       - DB_NAME=prestashop
       - DB_SERVER=webpay_mariadb_1.7.6.9-7.1
+    volumes:
+      - ./modules:/var/www/html/modules  
+      - ./log:/var/log
     ports:
       - "8080:80"
     links:

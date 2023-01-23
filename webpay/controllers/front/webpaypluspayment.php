@@ -4,24 +4,24 @@ use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use PrestaShop\Module\WebpayPlus\Utils\Utils;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
+use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 
+/**
+ * Class WebPayWebpayplusPaymentModuleFrontController.
+ */
 class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontController
 {
+    use InteractsWithFullLog;
+
     public function initContent()
     {
         parent::initContent();
-
-        if($this->getDebugActive()==1){
-            $this->logInfo('B.1. Iniciando medio de pago Webpay Plus');
-        }
-
+        $this->logWebpayPlusIniciando();
         $cart = $this->getCartFromContext();
-        if($this->getDebugActive()==1){
-            $this->cartToLog($cart);
-        }
+        $this->logPrintCart($cart);
         $cartId = $cart->id;
         $webpay = WebpayPlusFactory::create();
-
         $amount = $this->getOrderTotalRound($cart); 
         $buyOrder = 'Order:'.$cartId;
         $sessionId = uniqid();
@@ -29,31 +29,20 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         //patch for error with parallels carts
         $recoverQueryParams = ['token_cart' => md5(_COOKIE_KEY_.'recover_cart_'.$cartId), 'recover_cart' => $cartId];
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', $recoverQueryParams, true);
-
-        if($this->getDebugActive()==1){
-            $this->logInfo('B.2. Preparando datos antes de crear la transacción en Transbank');
-            $this->logInfo('amount: '.$amount.', sessionId: '.$sessionId.', buyOrder: '.$buyOrder.', returnUrl: '.$returnUrl);
-        }
-
+        $this->logWebpayPlusAntesCrearTx($amount, $sessionId, $buyOrder, $returnUrl);
         $result = $webpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
-
-        if($this->getDebugActive()==1){
-            $this->logInfo('B.3. Transacción creada en Transbank');
-            $this->logInfo(json_encode($result));
-        }
-
+        
         if (isset($result['token_ws'])) {
-            if($this->getDebugActive()==1){
-                $this->logInfo('B.4. Preparando datos antes de crear la transacción en la tabla webpay_transactions');
+            $this->logWebpayPlusDespuesCrearTx($result);
+            $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
+            if (SqlHelper::getMsgError()!=null) {
+                $this->logWebpayPlusDespuesCrearTxEnTablaError(SqlHelper::getMsgError(), $transaction);
+                return $this->setErrorTemplate(['error' => 'No se pudo crear la transacción en la tabla webpay_transactions']);
             }
-            $saved = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
-            if (!$saved) {
-                $msg = 'No se pudo crear la transacción en la tabla webpay_transactions';
-                $this->logError($msg);
-                return $this->setErrorTemplate(['error' => $msg]);
-            }
+            $this->logWebpayPlusDespuesCrearTxEnTabla($transaction);
             $this->setRedirectionTemplate($result, $amount);
         } else {
+            $this->logWebpayPlusDespuesCrearTxError($result);
             $this->setErrorTemplate($result);
         }
     }
@@ -90,8 +79,6 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $error = isset($result['error']) ? $result['error'] : '';
         $detail = isset($result['detail']) ? $result['detail'] : '';
 
-        $this->logError('No se pudo inicializar el pago: '.$detail);
-
         Context::getContext()->smarty->assign([
             'WEBPAY_RESULT_CODE'          => 500,
             'WEBPAY_RESULT_DESC'          => $error.' ('.$detail.')',
@@ -122,7 +109,10 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $transaction->commerce_code =  $webpay->getCommerceCode();
         $transaction->environment = $webpay->getEnviroment();
         $transaction->product = TransbankWebpayRestTransaction::PRODUCT_WEBPAY_PLUS;
-        return $transaction->save();
+
+        $this->logWebpayPlusAntesCrearTxEnTabla($transaction);
+        $transaction->save();
+        return $transaction;
     }
     
 }

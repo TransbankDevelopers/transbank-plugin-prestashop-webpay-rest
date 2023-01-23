@@ -2,7 +2,7 @@
 
 #  Prestashop Docker para desarrollo
 
-### PHP 5.6 + Mariadb + Prestashop 1.7
+### PHP 7.1.33 + Mariadb + Prestashop 1.7.6.9
 
 ### Requerimientos
 

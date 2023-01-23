@@ -33,25 +33,18 @@ final class OneclickDataConfiguration implements DataConfigurationInterface
      */
     public function getConfiguration(): array
     {
-        $return = [];
-
-        if ($oneclickMallCommerceCode = $this->configuration->get(static::ONECLICK_MALL_COMMERCE_CODE)) {
-            $return['form_oneclick_mall_commerce_code'] = $oneclickMallCommerceCode;
-        }
-        if ($oneclickChildCommerceCode = $this->configuration->get(static::ONECLICK_CHILD_COMMERCE_CODE)) {
-            $return['form_oneclick_child_commerce_code'] = $oneclickChildCommerceCode;
-        }
-        if ($oneclickApikey = $this->configuration->get(static::ONECLICK_API_KEY)) {
-            $return['form_oneclick_api_key'] = $oneclickApikey;
-        }
-        if ($oneclickEnviroment = $this->configuration->get(static::ONECLICK_ENVIRONMENT)) {
-            $return['form_oneclick_environment'] = $oneclickEnviroment;
-        }
-        if ($oneclickDefaultOrderStateIdAfterPayment = $this->configuration->get(static::ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT)) {
-            $return['form_oneclick_order_after_payment'] = $oneclickDefaultOrderStateIdAfterPayment;
-        }
-
-        return $return;
+        $oneclickEnviroment = $this->configuration->get(static::ONECLICK_ENVIRONMENT);
+        $oneclickMallCommerceCode = $this->configuration->get(static::ONECLICK_MALL_COMMERCE_CODE);
+        $oneclickChildCommerceCode = $this->configuration->get(static::ONECLICK_CHILD_COMMERCE_CODE);
+        $oneclickApikey = $this->configuration->get(static::ONECLICK_API_KEY);
+        $oneclickDefaultOrderStateIdAfterPayment = $this->configuration->get(static::ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT);
+        return [
+            'form_oneclick_environment' => $oneclickEnviroment,
+            'form_oneclick_mall_commerce_code' => $oneclickMallCommerceCode,
+            'form_oneclick_child_commerce_code' => $oneclickChildCommerceCode,
+            'form_oneclick_api_key' => $oneclickApikey,
+            'form_oneclick_order_after_payment' => $oneclickDefaultOrderStateIdAfterPayment
+        ];
     }
 
     /**

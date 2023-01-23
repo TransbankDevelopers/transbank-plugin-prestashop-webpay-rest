@@ -65,26 +65,27 @@ class TransbankSdkWebpay
         try {
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
-            $this->log->logInfo('initTransaction - amount: ' . $amount . ', sessionId: ' . $sessionId .
-                ', buyOrder: ' . $buyOrder . ', txDate: ' . $txDate . ', txTime: ' . $txTime);
-
+            $this->log->logInfo('createTransaction : amount: ' . $amount . ', sessionId: ' . $sessionId .', buyOrder: ' . $buyOrder . ', txDate: ' . $txDate . ', txTime: ' . $txTime);
             $initResult = $this->transaction->create($buyOrder, $sessionId, $amount, $returnUrl);
-
-            $this->log->logInfo('initTransaction - initResult: ' . json_encode($initResult));
+            $this->log->logInfo('createTransaction.result: ' . json_encode($initResult));
             if (isset($initResult) && isset($initResult->url) && isset($initResult->token)) {
                 $result = [
                     'url'      => $initResult->url,
                     'token_ws' => $initResult->token,
                 ];
             } else {
-                throw new Exception('No se ha creado la transacción para, amount: ' . $amount . ', sessionId: ' . $sessionId . ', buyOrder: ' . $buyOrder);
+                $result = [
+                    'error'  => 'Error al crear la transacción',
+                    'detail' => 'No se ha creado la transacción para, amount: ' . $amount . ', sessionId: ' . $sessionId . ', buyOrder: ' . $buyOrder,
+                ];
+                $this->log->logError('createTransaction.error: '.json_encode($result));
             }
         } catch (Exception $e) {
             $result = [
                 'error'  => 'Error al crear la transacción',
                 'detail' => $e->getMessage(),
             ];
-            $this->log->logError(json_encode($result));
+            $this->log->logError('createTransaction.error: '.json_encode($result));
         }
 
         return $result;
@@ -103,7 +104,7 @@ class TransbankSdkWebpay
         $result = [];
 
         try {
-            $this->log->logInfo('getTransactionResult - tokenWs: ' . $tokenWs);
+            $this->log->logInfo('commitTransaction : tokenWs: ' . $tokenWs);
             if ($tokenWs == null) {
                 throw new Exception('El token webpay es requerido');
             }

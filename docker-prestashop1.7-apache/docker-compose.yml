@@ -1,51 +1,46 @@
-version: '3'
+version: '2.1'
+
+volumes:
+  db-data:
+  vendor:
+  var:
+
 services:
-  web:
-    build: 
-      dockerfile: Dockerfile-prestashop
-    container_name: "webpay_prestashop_1.7.0.0"
-    depends_on:
-      - mysql
-    networks:
-      - prestashop_net
-    environment:
-      - PS_LANGUAGE=es
-      - PS_INSTALL_AUTO=1
-      - PS_ERASE_DB=1
-      - PS_DEV_MODE=1
-      - PS_DOMAIN=localhost:8080
-      - ADMIN_MAIL=admin@admin.com
-      - ADMIN_PASSWD=password
-      - PS_FOLDER_ADMIN=adminop
-      - PS_FOLDER_INSTALL=installop
-      - PS_COUNTRY=cl
-      - DB_NAME=prestashop
-      - DB_SERVER=webpay_mysql_5.7
-      - PHP_VERSION=7.2.34
-      - DB_PASSWD=MyEpicPassword
-
-    volumes:
-      - ./modules:/var/www/html/modules  
-      - ./log:/var/log
-      - ./config-files:/usr/local/etc/php
-    ports:
-      - "8080:80"
-
   mysql:
-    image: mysql:5.7
-    container_name: webpay_mysql_5.7
-    networks:
-      - prestashop_net
+    image: mysql:5
     ports:
-      - "3306:3306"
-    expose:
       - "3306"
+    volumes:
+      - db-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=MyEpicPassword
-      - MYSQL_DATABASE=prestashop
-
-networks:
-  prestashop_net:
-    name: prestashop_net
-
-
+      MYSQL_ROOT_PASSWORD: prestashop
+      MYSQL_DATABASE: prestashop
+    restart: always
+  prestashop-git:
+    build:
+      dockerfile: Dockerfile-prestashop
+      context: .
+      args:
+        - VERSION=${VERSION:-8.1-apache}
+        - USER_ID=${USER_ID:-1000}
+        - GROUP_ID=${GROUP_ID:-1000}
+    environment:
+      DISABLE_MAKE: ${DISABLE_MAKE:-0}
+      PS_INSTALL_AUTO: ${PS_INSTALL_AUTO:-1}
+      DB_PASSWD: ${DB_PASSWD:-prestashop}
+      DB_NAME: ${DB_NAME:-prestashop}
+      DB_SERVER: ${DB_SERVER:-mysql}
+      DB_PREFIX: ${DB_PREFIX:-ps_}
+      PS_DOMAIN: ${PS_DOMAIN:-localhost:8001}
+      PS_FOLDER_INSTALL: ${PS_FOLDER_INSTALL:-install-dev}
+      PS_FOLDER_ADMIN: ${PS_FOLDER_ADMIN:-admin-dev}
+      PS_COUNTRY: ${PS_COUNTRY:-fr}
+      PS_LANGUAGE: ${PS_LANGUAGE:-fr}
+      PS_DEV_MODE: ${PS_DEV_MODE:-0}
+      ADMIN_MAIL: ${ADMIN_MAIL:-demo@prestashop.com}
+      ADMIN_PASSWD: ${ADMIN_PASSWD:-Correct Horse Battery Staple}
+    command: ["/tmp/wait-for-it.sh", "--timeout=60", "--strict", "mysql:3306", "--", "/tmp/docker_run_git.sh"]
+    ports:
+      - "8001:80"
+    volumes:
+      - ./:/var/www/html:delegated

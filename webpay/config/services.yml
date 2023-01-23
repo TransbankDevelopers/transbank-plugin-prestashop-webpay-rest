@@ -1,73 +1,5 @@
 services:
   # Grid services
-  webpay.grid.definition.factory.products:
-    class: 'PrestaShop\Module\WebpayPlus\Grid\Definition\Factory\ProductGridDefinitionFactory'
-    parent: 'prestashop.core.grid.definition.factory.abstract_grid_definition'
-
-  webpay.grid.query_builder.product:
-    class: 'PrestaShop\Module\WebpayPlus\Grid\Query\ProductQueryBuilder'
-    parent: 'prestashop.core.grid.abstract_query_builder'
-    public: true
-    arguments:
-      - '@prestashop.core.query.doctrine_search_criteria_applicator'
-      - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
-      - "@=service('prestashop.adapter.legacy.context').getContext().shop.id"
-      - "@=service('prestashop.adapter.legacy.context').getContext().shop.id_shop_group"
-      - "@=service('prestashop.adapter.legacy.context').getContext().shop.getGroup().share_stock"
-      - '@prestashop.core.grid.query.filter.doctrine_filter_applicator'
-      - '@prestashop.adapter.legacy.configuration'
-
-  webpay.grid.data_provider.products:
-    class: '%prestashop.core.grid.data.factory.doctrine_grid_data_factory%'
-    arguments:
-      - '@webpay.grid.query_builder.product'
-      - '@prestashop.core.hook.dispatcher'
-      - '@prestashop.core.grid.query.doctrine_query_parser'
-      - 'product'
-
-  webpay.grid.factory.products:
-    class: 'PrestaShop\PrestaShop\Core\Grid\GridFactory'
-    public: true
-    arguments:
-      - '@webpay.grid.definition.factory.products'
-      - '@webpay.grid.data_provider.products'
-      - '@prestashop.core.grid.filter.form_factory'
-      - '@prestashop.core.hook.dispatcher'
-
-  # Transactions Grid services
-  webpay.grid.definition.factory.transactions:
-    class: 'PrestaShop\Module\WebpayPlus\Grid\Definition\Factory\TransactionGridDefinitionFactory'
-    parent: 'prestashop.core.grid.definition.factory.abstract_grid_definition'
-
-  webpay.grid.query_builder.transaction:
-    class: 'PrestaShop\Module\WebpayPlus\Grid\Query\TransactionQueryBuilder'
-    parent: 'prestashop.core.grid.abstract_query_builder'
-    public: true
-    arguments:
-      - '@prestashop.core.query.doctrine_search_criteria_applicator'
-      - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
-      - "@=service('prestashop.adapter.legacy.context').getContext().shop.id"
-      - "@=service('prestashop.adapter.legacy.context').getContext().shop.id_shop_group"
-      - "@=service('prestashop.adapter.legacy.context').getContext().shop.getGroup().share_stock"
-      - '@prestashop.core.grid.query.filter.doctrine_filter_applicator'
-      - '@prestashop.adapter.legacy.configuration'
-
-  webpay.grid.data_provider.transactions:
-    class: '%prestashop.core.grid.data.factory.doctrine_grid_data_factory%'
-    arguments:
-      - '@webpay.grid.query_builder.transaction'
-      - '@prestashop.core.hook.dispatcher'
-      - '@prestashop.core.grid.query.doctrine_query_parser'
-      - 'transaction'
-
-  webpay.grid.factory.transactions:
-    class: 'PrestaShop\PrestaShop\Core\Grid\GridFactory'
-    public: true
-    arguments:
-      - '@webpay.grid.definition.factory.transactions'
-      - '@webpay.grid.data_provider.transactions'
-      - '@prestashop.core.grid.filter.form_factory'
-      - '@prestashop.core.hook.dispatcher'
 
   # webpayplus Form services
 
@@ -87,7 +19,7 @@ services:
       - '@webpay.form.webpay_plus_data_configuration'
 
   webpay.form.webpay_plus_form_data_handler:
-    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    class: 'PrestaShop\Module\WebpayPlus\Form\CustomHandler'
     arguments:
       - '@form.factory'
       - '@prestashop.core.hook.dispatcher'
@@ -118,7 +50,7 @@ services:
       - '@webpay.form.oneclick_data_configuration'
 
   webpay.form.oneclick_form_data_handler:
-    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    class: 'PrestaShop\Module\WebpayPlus\Form\CustomHandler'
     arguments:
       - '@form.factory'
       - '@prestashop.core.hook.dispatcher'
@@ -148,7 +80,7 @@ services:
       - '@webpay.form.diagnosis_data_configuration'
 
   webpay.form.diagnosis_form_data_handler:
-    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    class: 'PrestaShop\Module\WebpayPlus\Form\CustomHandler'
     arguments:
       - '@form.factory'
       - '@prestashop.core.hook.dispatcher'

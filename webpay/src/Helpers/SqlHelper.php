@@ -35,7 +35,8 @@ class SqlHelper
 
 
     public static function getMsgError(){
-        return Db::getMsgError();
+        //return Db::getMsgError();
+        return '';
     }
     
 }
