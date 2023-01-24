@@ -4,6 +4,16 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-Beta] 2023-01-24
+- Se realiza un refactor de la totalidad del código para mejorar su legibilidad
+- Se migran los formularios del módulo de administración a Symfony.
+- Se sube la versión minima soportada a 1.7.6.0
+- Se mejora el log detallado para darle seguimiento a los errores.
+- Se mejora visualmente el módulo de administracion para Webpay.
+- Se agrego un módulo de administración para Oneclick.
+- Se agrego la opción de inscribir tarjetas utilizando Oneclick.
+- Se agrego soporte para agregar multiples tarjetas por usuario para Oneclick.
+
 ## [1.1.3] 2022-11-16
 - Se agrega un log detallado para darle seguimiento a los errores.
 - Se agrega un try catch en la inicialización del servicio de telemetría.
