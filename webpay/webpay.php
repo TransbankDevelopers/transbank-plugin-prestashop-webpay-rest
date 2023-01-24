@@ -11,6 +11,7 @@ use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 use PrestaShop\Module\WebpayPlus\Telemetry\PluginVersion;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -20,11 +21,13 @@ require_once __DIR__.'/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
+    use InteractsWithFullLog;
     use InteractsWithWebpay;
     use InteractsWithOneclick;
     use InteractsWithCommon;
     use InteractsWithWebpayDb;
     use InteractsWithTabs;
+    
 
     //const DEBUG_MODE = true;
     protected $_errors = array();
@@ -73,12 +76,12 @@ class WebPay extends PaymentModule
 
     public function install()
     {
+        $result = parent::install();
         /* carga la configuracion por defecto al instalar el plugin */
         $this->setDebugActive("");
         $this->loadDefaultConfigurationWebpay();
         $this->loadDefaultConfigurationOneclick();
 
-        $result = parent::install();
         /* Se instalan las tablas, si falla se sigue con la instalación */
         $this->installWebpayTable();
         $this->installOneclickTable();
@@ -130,6 +133,10 @@ class WebPay extends PaymentModule
 
         $tx = $this->getFormatTransbankWebpayRestTransactionByOrderId($orderId);
         $details = array(
+            array(
+                'desc' => $this->l('Producto'),
+                'data' => $tx['product'] ,
+            ),
             array(
                 'desc' => $this->l('Fecha de Transacción'),
                 'data' => $tx['transactionDate'] . " " . $tx['transactionHour'],
@@ -202,17 +209,16 @@ class WebPay extends PaymentModule
         if ($webpayTransaction->product == TransbankWebpayRestTransaction::PRODUCT_WEBPAY_PLUS){
             $amount = number_format($transbankResponse['amount'], 0, ',', '.');
             $paymentTypeCode = $transbankResponse['paymentTypeCode'];
-            $cardNumber = $transbankResponse['cardDetail']['cardNumber'];
+            $cardNumber = $transbankResponse['cardDetail']['card_number'];
             $installmentsNumber = $transbankResponse['installmentsNumber'] ? $transbankResponse['installmentsNumber'] : "0";
             $authorizationCode = $transbankResponse['authorizationCode'];
             $buyOrder = $transbankResponse['buyOrder'];
             $installmentsAmount = $transbankResponse['installmentsAmount'] ? number_format($transbankResponse['installmentsAmount'], 0, ',', '.') : "0";
-            $responseCode = $transbankResponse['response_code'];
+            $responseCode = $transbankResponse['responseCode'];
             $status = $transbankResponse['status'];
         }
         else{
             $cardNumber = $transbankResponse['cardNumber'];
-
             $detail = $transbankResponse['details'][0];/* Se asume que el valor se extrae del primer elemento del details */
             $amount = number_format($detail['amount'], 0, ',', '.');
             $paymentTypeCode = $detail['paymentTypeCode'];
@@ -238,6 +244,7 @@ class WebPay extends PaymentModule
         }
 
         return [
+            'product' => $webpayTransaction->product,
             'cardNumber' => $cardNumber,
             'paymentType' => $paymentType,
             'totalPago' => $amount,
@@ -328,12 +335,26 @@ class WebPay extends PaymentModule
         if (!$this->checkCurrency($params['cart'])) {
             return;
         }
-        /*Agregamos la opcion de pago Webpay Plus */
-        $payment_options = [
-            $this->getWebpayPaymentOption($this, $this->context)
-        ];
-        /*Agregamos la opcion de pago Webpay Oneclick */
-        array_push($payment_options, ...$this->getGroupOneclickPaymentOption($this, $this->context));
+        $payment_options = [];
+        if ($this->configWebpayIsOk()){
+            /*Agregamos la opcion de pago Webpay Plus */
+            $payment_options = [
+                $this->getWebpayPaymentOption($this, $this->context)
+            ];
+        }
+        else{
+            $this->logWebpayPlusConfigError();
+        }
+
+        if ($this->configOneclickIsOk()){
+            /*Agregamos la opcion de pago Webpay Oneclick */
+            array_push($payment_options, ...$this->getGroupOneclickPaymentOption($this, $this->context));
+        }
+        else{
+            $this->logOneclickConfigError();
+        }
+        
+        
         return $payment_options;
     }
 

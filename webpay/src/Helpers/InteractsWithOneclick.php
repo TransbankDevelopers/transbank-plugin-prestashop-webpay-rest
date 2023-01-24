@@ -10,13 +10,14 @@ use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 use Configuration;
 use Tools;
 use Media;
-
+use PrestaShop\Module\WebpayPlus\Utils\StringUtils;
+ 
 /**
  * Trait InteractsWithOneclick.
  */
 trait InteractsWithOneclick
 {
-    public function getGroupOneclickPaymentOption($base, $context)
+    protected function getGroupOneclickPaymentOption($base, $context)
     {
         if (!$context->customer->isLogged()){
             return [];
@@ -29,7 +30,7 @@ trait InteractsWithOneclick
         ];
     }
 
-    public function getOneclickPaymentOption($base, $context)
+    protected function getOneclickPaymentOption($base, $context)
     {
         $result = [];
         $paymentController = $context->link->getModuleLink($base->name, 'oneclickpaymentvalidate', array(), true);
@@ -56,12 +57,12 @@ trait InteractsWithOneclick
         return $result;
     }
 
-    public function getNewOneclickPaymentOption($base, $context)
+    protected function getNewOneclickPaymentOption($base, $context)
     {
         return $this->getOneclickInscriptionOption($base, $context, 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick');
     }
 
-    public function getOneclickInscriptionOption($base, $context, $description)
+    protected function getOneclickInscriptionOption($base, $context, $description)
     {
         $po = new PaymentOption();
         $controller = $context->link->getModuleLink($base->name, 'oneclickinscription', array(), true);
@@ -77,7 +78,7 @@ trait InteractsWithOneclick
             ]);
     }
 
-    public function getCardsByUserId($userId)
+    protected function getCardsByUserId($userId)
     {
         $r = SqlHelper::executeSql('SELECT * FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
         if (!isset($r)){
@@ -86,43 +87,52 @@ trait InteractsWithOneclick
         return $r;
     }
 
-    public function getCountCardsByUserId($userId)
+    protected function getCountCardsByUserId($userId)
     {
         return SqlHelper::getValue('SELECT count(1) FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
     }
 
-    public function getUserId($context){
+    protected function getUserId($context){
         if ($context->customer->isLogged()) {
             return $context->customer->id;
         }
         return null;
     }
 
-    private function loadDefaultConfigurationOneclick()
+    protected function loadDefaultConfigurationOneclick()
     {
-        /* Si ya existe alguna configuracion la copiara */
         $oneclickEnviroment = $this->getDefaultOneclickEnvironment();
-        $oneclickMallCommerceCode = $this->getOneclickMallCommerceCode();
-        $oneclickChildCommerceCode = $this->getOneclickChildCommerceCode();
-        $oneclickApikey = $this->getOneclickApiKey();
-        $oneclickDefaultOrderStateIdAfterPayment = $this->getDefaultOneclickOrderAfterPayment();
-
-        $oneclickEnviroment = isset($oneclickEnviroment) ? $oneclickEnviroment : Options::DEFAULT_INTEGRATION_TYPE;
-        if ($oneclickEnviroment == Options::DEFAULT_INTEGRATION_TYPE){/* Si es el entorno de integración y no existen parámetros, cargamos los valores por defecto */
-            $oneclickMallCommerceCode = $this->getDefaultOneclickMallCommerceCode();
-            $oneclickChildCommerceCode = $this->getDefaultOneclickChildCommerceCode();
-            $oneclickApikey = $this->getDefaultOneclickApiKey();
+        /* Si existe configuración de producción se copiara */
+        if (isset($oneclickEnviroment) && $oneclickEnviroment == Options::ENVIRONMENT_PRODUCTION){
+            $oneclickMallCommerceCode = $this->getOneclickMallCommerceCode();
+            $oneclickChildCommerceCode = $this->getOneclickChildCommerceCode();
+            $oneclickApikey = $this->getOneclickApiKey();
             $oneclickDefaultOrderStateIdAfterPayment = $this->getDefaultOneclickOrderAfterPayment();
+            //si alguno de los datos falta se resetea
+            if (
+                StringUtils::isNotBlankOrNull($oneclickMallCommerceCode)
+                && StringUtils::isNotBlankOrNull($oneclickChildCommerceCode)
+                && StringUtils::isNotBlankOrNull($oneclickApikey)
+                && StringUtils::isNotBlankOrNull($oneclickDefaultOrderStateIdAfterPayment)
+            ){
+                $this->setOneclickMallCommerceCode($oneclickMallCommerceCode);
+                $this->setOneclickChildCommerceCode($oneclickChildCommerceCode);
+                $this->setOneclickApiKey($oneclickApikey);
+                $this->setOneclickOrderAfterPayment($oneclickDefaultOrderStateIdAfterPayment);
+                $this->logOneclickInstallConfigLoad($oneclickMallCommerceCode, $oneclickChildCommerceCode, $oneclickDefaultOrderStateIdAfterPayment);
+            }
+            else{
+                $this->loadDefaultOneclick();
+                $this->logOneclickInstallConfigLoadDefaultPorIncompleta();               
+            }
         }
-
-        $this->setOneclickEnvironment($oneclickEnviroment);
-        $this->setOneclickMallCommerceCode($oneclickMallCommerceCode);
-        $this->setOneclickChildCommerceCode($oneclickChildCommerceCode);
-        $this->setOneclickApiKey($oneclickApikey);
-        $this->setOneclickOrderAfterPayment($oneclickDefaultOrderStateIdAfterPayment);
+        else{
+            $this->loadDefaultOneclick();
+            $this->logOneclickInstallConfigLoadDefault();
+        }
     }
 
-    public function oneclickUpdateSettings(){
+    protected function oneclickUpdateSettings(){
         $theEnvironmentChanged = false;
         if (Tools::getIsset('btn_oneclick_update')) {
             if ($this->getFormOneclickEnvironment() !=  $this->getOneclickEnvironment()) {
@@ -217,7 +227,7 @@ trait InteractsWithOneclick
         return Configuration::get('PS_OS_PREPARATION');
     }
 
-    private function loadDefaultOneclick()
+    protected function loadDefaultOneclick()
     {
         $this->setOneclickMallCommerceCode($this->getDefaultOneclickMallCommerceCode());
         $this->setOneclickChildCommerceCode($this->getDefaultOneclickChildCommerceCode());
@@ -225,5 +235,33 @@ trait InteractsWithOneclick
         $this->setOneclickEnvironment($this->getDefaultOneclickEnvironment());
         $this->setOneclickOrderAfterPayment($this->getDefaultOneclickOrderAfterPayment());
     }
+
+    protected function getOneclickOkStatus(){
+        $OKStatus = Configuration::get('ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
+        if ($OKStatus === '0') {
+            $OKStatus = Configuration::get('PS_OS_PREPARATION');
+        }
+        return $OKStatus;
+    }
+
+    protected function configOneclickIsOk(){
+        $oneclickEnviroment = $this->getDefaultOneclickEnvironment();
+        $oneclickMallCommerceCode = $this->getOneclickMallCommerceCode();
+        $oneclickChildCommerceCode = $this->getOneclickChildCommerceCode();
+        $oneclickApikey = $this->getOneclickApiKey();
+        $oneclickDefaultOrderStateIdAfterPayment = $this->getDefaultOneclickOrderAfterPayment();
+
+        if (
+            StringUtils::isNotBlankOrNull($oneclickEnviroment) 
+            && StringUtils::isNotBlankOrNull($oneclickMallCommerceCode)
+            && StringUtils::isNotBlankOrNull($oneclickChildCommerceCode)
+            && StringUtils::isNotBlankOrNull($oneclickApikey)
+            && StringUtils::isNotBlankOrNull($oneclickDefaultOrderStateIdAfterPayment)
+        ){
+            return true;
+        }
+        return false;
+    }
+
 
 }

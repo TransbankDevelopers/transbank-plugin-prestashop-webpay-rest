@@ -30,10 +30,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         //3. Pago abortado (con botón anular compra en el formulario de Webpay): llegan TBK_TOKEN, TBK_ID_SESION, TBK_ORDEN_COMPRA
         //4. Caso atipico: llega todos token_ws, TBK_TOKEN, TBK_ID_SESION, TBK_ORDEN_COMPRA
         $params = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
-        $tokenWs = isset($params['token_ws']) ? $params['token_ws'] : '';
-        $tbktoken = isset($params['TBK_TOKEN']) ? $params['TBK_TOKEN'] : '';
-        $tbkOrdenCompra = isset($params['TBK_ORDEN_COMPRA']) ? $params['TBK_ORDEN_COMPRA'] : '';
-        $tbkIdSesion = isset($params['TBK_ID_SESION']) ? $params['TBK_ID_SESION'] : '';
+        $tokenWs = isset($params['token_ws']) && $params['token_ws']!==null ? $params['token_ws'] : null;
+        $tbktoken = isset($params['TBK_TOKEN']) && $params['TBK_TOKEN']!==null ? $params['TBK_TOKEN'] : null;
+        $tbkOrdenCompra = isset($params['TBK_ORDEN_COMPRA']) && $params['TBK_ORDEN_COMPRA']!==null ? $params['TBK_ORDEN_COMPRA'] : null;
+        $tbkIdSesion = isset($params['TBK_ID_SESION'])&& $params['TBK_ID_SESION']!==null ? $params['TBK_ID_SESION'] : null;
         $this->logWebpayPlusRetornandoDesdeTbk($_SERVER['REQUEST_METHOD'], $params);
 
         if (isset($tokenWs) && !isset($tbktoken)) {//Flujo 1 => Confirmar Transacción
@@ -64,24 +64,24 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->processPayment($tokenWs, $webpayTransaction, $cart);
         }
         else if (!isset($tokenWs) && !isset($tbktoken)) {//Flujo 2 => El pago fue anulado por tiempo de espera.
+            $this->logWebpayPlusRetornandoDesdeTbkFujo2Error($tbkIdSesion);
             $this->stopIfComingFromAnTimeoutErrorOnWebpay($tbkIdSesion);
         }
         else if (!isset($tokenWs) && isset($tbktoken)) {//Flujo 3 => El pago fue anulado por el usuario.
+            $this->logWebpayPlusRetornandoDesdeTbkFujo3Error($tbktoken);
             $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($tbktoken);
             $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER;
+            $this->logWebpayPlusRetornandoDesdeTbkFujo3TxError($tbktoken, $webpayTransaction);
             $webpayTransaction->save();
             $msg = 'Transacción abortada desde el formulario de pago. Puedes reintentar el pago. ';
-            $this->logError($msg);
             return $this->setPaymentErrorPage($msg);
         }
         else if (isset($tokenWs) && isset($tbktoken)) {//Flujo 4 => El pago es inválido.
+            $this->logWebpayPlusRetornandoDesdeTbkFujo4Error($tokenWs, $tbktoken);
             $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($tokenWs);
             $msg = 'Al parecer ocurrió un error durante el proceso de pago. Puedes volver a intentar. ';
             $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
             $webpayTransaction->save();
-            if($this->getDebugActive()==1){
-                $this->logError($msg);
-            }
             return $this->setPaymentErrorPage($msg);
         }
         
@@ -90,11 +90,14 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     private function validateData($cart)
     {
         if (!$this->module->active) {
-            $this->throwErrorRedirect('El módulo no esta activo');
+            $error = 'El módulo no esta activo';
+            $this->logError($error);
+            $this->throwErrorRedirect($error);
         } 
 
         if ($cart->id == null) {
-            $this->logError('Cart id was null. Redirecto to confirmation page of the last order');
+            $error = 'Cart id was null. Redirecto to confirmation page of the last order';
+            $this->logError($error);
             $id_usuario = Context::getContext()->customer->id;
             $sql = 'SELECT id_cart FROM '._DB_PREFIX_."cart p WHERE p.id_customer = $id_usuario ORDER BY p.id_cart DESC";
             $cart->id = SqlHelper::getValue($sql);
@@ -103,18 +106,26 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
 
         if ($cart->id_customer == 0) {
-            $this->throwErrorRedirect('id_customer es cero');
+            $error = 'id_customer es cero';
+            $this->logError($error);
+            $this->throwErrorRedirect($error);
         } 
         else if ($cart->id_address_delivery == 0) {
-            $this->throwErrorRedirect('id_address_delivery es cero');
+            $error = 'id_address_delivery es cero';
+            $this->logError($error);
+            $this->throwErrorRedirect($error);
         }
         else if ($cart->id_address_invoice == 0) {
-            $this->throwErrorRedirect('id_address_invoice es cero');
+            $error = 'id_address_invoice es cero';
+            $this->logError($error);
+            $this->throwErrorRedirect($error);
         }
 
         $customer = $this->getCustomer($cart->id_customer);
         if (!Validate::isLoadedObject($customer)) {
-            $this->throwErrorRedirect('Customer not load');
+            $error = 'Customer not load';
+            $this->logError($error);
+            $this->throwErrorRedirect($error);
         }
     }
 
@@ -138,11 +149,11 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $webpayTransaction->transbank_response = json_encode($result);
         $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
         $webpayTransaction->card_number = is_array($result) ? '' : $result->cardDetail['card_number'];
-        $webpayTransaction->save(); // Guardar como fallida por si algo falla más adelante
+        $saved = $webpayTransaction->save(); // Guardar como fallida por si algo falla más adelante
 
-        if (SqlHelper::getMsgError()!=null) {
+        if (!$saved) {
             $this->logWebpayPlusGuardandoCommitError($token, $webpayTransaction);
-            $error = 'No se pudo guardar en base de datos el resultado de la transacción: '.SqlHelper::getMsgError();
+            $error = 'No se pudo guardar en base de datos el resultado de la transacción';
             $this->throwErrorRedirect($error);
         }
         else if (!is_array($result) && isset($result->buyOrder) && $result->responseCode === 0) {
