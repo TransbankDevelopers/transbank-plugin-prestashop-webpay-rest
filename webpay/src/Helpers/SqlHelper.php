@@ -32,11 +32,5 @@ class SqlHelper
             return null;
         }
     }
-
-
-    public static function getMsgError(){
-        //return Db::getMsgError();
-        return '';
-    }
     
 }

@@ -18,13 +18,15 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
     {
         parent::initContent();
         $this->logWebpayPlusIniciando();
+
+        $randomNumber = uniqid();
         $cart = $this->getCartFromContext();
         $this->logPrintCart($cart);
         $cartId = $cart->id;
         $webpay = WebpayPlusFactory::create();
         $amount = $this->getOrderTotalRound($cart); 
-        $buyOrder = 'Order:'.$cartId;
-        $sessionId = uniqid();
+        $buyOrder = 'ps:'.$randomNumber;
+        $sessionId = 'ps:sessionId:'.$randomNumber;
 
         //patch for error with parallels carts
         $recoverQueryParams = ['token_cart' => md5(_COOKIE_KEY_.'recover_cart_'.$cartId), 'recover_cart' => $cartId];
@@ -35,10 +37,6 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         if (isset($result['token_ws'])) {
             $this->logWebpayPlusDespuesCrearTx($result);
             $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
-            if (SqlHelper::getMsgError()!=null) {
-                $this->logWebpayPlusDespuesCrearTxEnTablaError(SqlHelper::getMsgError(), $transaction);
-                return $this->setErrorTemplate(['error' => 'No se pudo crear la transacción en la tabla webpay_transactions']);
-            }
             $this->logWebpayPlusDespuesCrearTxEnTabla($transaction);
             $this->setRedirectionTemplate($result, $amount);
         } else {
@@ -111,7 +109,11 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $transaction->product = TransbankWebpayRestTransaction::PRODUCT_WEBPAY_PLUS;
 
         $this->logWebpayPlusAntesCrearTxEnTabla($transaction);
-        $transaction->save();
+        $saved = $transaction->save();
+        if (!$saved) {
+            $this->logWebpayPlusDespuesCrearTxEnTablaError($transaction);
+            return $this->setErrorTemplate(['error' => 'No se pudo crear la transacción en la tabla webpay_transactions']);
+        }
         return $transaction;
     }
     

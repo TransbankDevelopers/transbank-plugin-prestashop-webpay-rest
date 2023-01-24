@@ -4,12 +4,17 @@ use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 
 /**
  * Class WebPayOneclickPaymentValidateModuleFrontController.
  */
 class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFrontController
 {
+    use InteractsWithFullLog;
+    use InteractsWithOneclick;
+    
     protected $responseData = [];
 
     /**
@@ -17,6 +22,8 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
      */
     public function postProcess()
     {
+        $this->logOneclickPaymentIniciando();
+        
         $cart = $this->context->cart;
         $customer = new Customer($cart->id_customer);
         $moduleId = $this->module->id;
@@ -26,8 +33,9 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
 
         $data = $_REQUEST;
-        $webpayTransaction = $this->authorizeTransaction($data['inscriptionId'], $cart, $total);
-        $OKStatus = $this->getOkStatus();
+        $inscriptionId = $data['inscriptionId'];
+        $webpayTransaction = $this->authorizeTransaction($inscriptionId, $cart, $total);
+        $OKStatus = $this->getOneclickOkStatus();
 
         if($this->getDebugActive()==1){
             $this->logInfo('C.4. Procesando pago - antes de validateOrder');
@@ -46,6 +54,8 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
             $customer->secure_key
         );
 
+        $this->logOneclickPaymentDespuesValidateOrderPrestashop($inscriptionId, $webpayTransaction);
+
         $order = new Order($this->module->currentOrder);
         $this->saveOrderPayment($order, $cart, $webpayTransaction->card_number);
 
@@ -54,15 +64,8 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_APPROVED;
         $webpayTransaction->save();
 
+        $this->logOneclickPaymentTodoOk($inscriptionId, $webpayTransaction);
         return $this->redirectToPaidSuccessPaymentPage($cart);
-    }
-
-    private function getOkStatus(){
-        $OKStatus = Configuration::get('ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
-        if ($OKStatus === '0') {
-            $OKStatus = Configuration::get('PS_OS_PREPARATION');
-        }
-        return $OKStatus;
     }
 
     private function authorizeTransaction($inscriptionId, $cart, $amount){
@@ -70,7 +73,9 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $randomNumber = uniqid();
         $parentBuyOrder = 'ps:parent:'.$randomNumber;
         $childBuyOrder = 'ps:child:'.$randomNumber;
+        $this->logOneclickPaymentAntesObtenerInscripcion($inscriptionId, $cart->id, $amount);
         $ins = new TransbankInscriptions($inscriptionId); //recuperamos la inscripcion de la tarjeta por el id
+        $this->logOneclickPaymentDespuesObtenerInscripcion($inscriptionId, $ins);
         $webpay = OneclickFactory::create(); //creamos un objeto Oneclick y autorizamos la transacción con la tarjeta recuperada
         
         /*Creamos la transaccion antes de autorizarla */
@@ -89,24 +94,26 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $transaction->token = $childBuyOrder;
         $transaction->buy_order = $parentBuyOrder;
         $transaction->status = TransbankWebpayRestTransaction::STATUS_FAILED; // Guardar como fallida por si algo falla más adelante
+
+        $this->logOneclickPaymentAntesCrearTxBd($inscriptionId, $transaction);
         $saved = $transaction->save();
 
         if (!$saved) {
-            $error = 'No se pudo guardar en base de datos el resultado de la transacción: '.SqlHelper::getMsgError();
-            $this->logError($error);
-            return $this->setPaymentErrorPage($error);
+            $this->logOneclickPaymentCrearTxBdError($inscriptionId, $transaction);
+            return $this->setPaymentErrorPage('No se pudo guardar en base de datos el resultado de la transacción ');
         }
 
+        $this->logOneclickPaymentAntesAutorizarTx($ins->username, $ins->tbk_token, $parentBuyOrder, $childBuyOrder, $amount);
         /* 2. Autorizamos la transacción */
         $resp = $webpay->authorizeTransaction($ins->username, $ins->tbk_token, $parentBuyOrder, $childBuyOrder, $amount);
+        $this->logOneclickPaymentDespuesAutorizarTx($ins->username, $ins->tbk_token, $parentBuyOrder, $childBuyOrder, $amount, $resp);
         /* Si arroja un error */
         if (is_array($resp) && isset($resp['error'])) {
+            $this->logOneclickPaymentDespuesAutorizarTxError($parentBuyOrder, $childBuyOrder, $resp);
             /* 2.1. Si arroja un error y guardamos el error*/
-            $error = 'Error: '.$resp['detail'];
             $transaction->transbank_response = json_encode($resp);
             $saved = $transaction->save();
-            $this->logError($error);
-            $this->throwErrorRedirect($error);
+            $this->throwErrorRedirect('Error: '.$resp['detail']);
         }
 
         /* 2.2 no arrojo error pero la operación podria haber sido rechazada */
@@ -117,9 +124,8 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
 
         /* Si no se aprueba la orden */
         if (!$resp->isApproved()){    
-            $error = 'Pago rechazado';
-            $this->logError($error);
-            $this->throwErrorRedirect($error);
+            $this->logOneclickPaymentDespuesAutorizarRechazadoTxError($parentBuyOrder, $childBuyOrder, $resp);
+            $this->throwErrorRedirect('Pago rechazado');
         }
         return $transaction;
     }
