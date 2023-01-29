@@ -57,7 +57,6 @@ final class OneclickDataConfiguration implements DataConfigurationInterface
         $this->configuration->set(static::ONECLICK_API_KEY, $configuration['form_oneclick_api_key']);
         $this->configuration->set(static::ONECLICK_ENVIRONMENT, $configuration['form_oneclick_environment']);
         $this->configuration->set(static::ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT, $configuration['form_oneclick_order_after_payment']);
-
         return [];
     }
 
@@ -73,4 +72,5 @@ final class OneclickDataConfiguration implements DataConfigurationInterface
     {
         return true;
     }
+
 }

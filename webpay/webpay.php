@@ -1,14 +1,11 @@
 <?php
 
-use PrestaShop\Module\WebpayPlus\Utils\MetricsUtil;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithCommon;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
-use PrestaShop\Module\WebpayPlus\Utils\HealthCheck;
 use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
-use PrestaShop\Module\WebpayPlus\Telemetry\PluginVersion;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
@@ -503,43 +500,6 @@ class WebPay extends PaymentModule
         return $this->webpayUpdateSettings();
     }
     
-    public function sendPluginVersion($healthcheck)
-    {
-        $config = $healthcheck->getConfig();
-        $telemetryData = $healthcheck->getPluginInfo($healthcheck->ecommerce);
-        (new PluginVersion())->registerVersion(
-            $config['COMMERCE_CODE'],
-            $telemetryData['current_plugin_version'],
-            $telemetryData['ecommerce_version'],
-            PluginVersion::ECOMMERCE_PRESTASHOP
-        );
-    }
-
-    public function createHealthCheck(){
-        return new HealthCheck(array(
-            'ENVIRONMENT' => $this->getWebpayEnvironment(),
-            'COMMERCE_CODE' => $this->getWebpayCommerceCode(),
-            'API_KEY_SECRET' => $this->getWebpayApiKey(),
-            'ECOMMERCE' => 'prestashop'
-        ));
-    }
-
-    public function sendMetrics() {
-        $healthcheck = $this->createHealthCheck();
-        $datos_hc = json_decode($healthcheck->printFullResume());
-        //$shops = Shop::getShops();
-        return MetricsUtil::sendMetrics(
-            $datos_hc->server_resume->php_version->version,//$phpVersion, 
-            'prestashop',//$plugin, 
-            $datos_hc->server_resume->plugin_info->current_plugin_version,//$pluginVersion, 
-            $datos_hc->server_resume->plugin_info->ecommerce_version,//$ecommerceVersion, 
-            1,//$ecommerceId, 
-            'webpay',//$product, 
-            $this->getWebpayEnvironment(), 
-            $this->getWebpayCommerceCode(),//$commerceCode
-            []
-        );
-    }
 }
 
 
