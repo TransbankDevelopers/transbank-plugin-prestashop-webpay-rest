@@ -23,7 +23,7 @@ A continuación, encontrarás información necesaria para el desarrollo de este 
 
 ## Requisitos 
 * PHP 7.0+ o superior
-* Prestashop 1.6 o superior
+* Prestashop 1.7 o superior
 
 ## Dependencias
 
@@ -31,7 +31,7 @@ El plugin depende de las siguientes librerías:
 
 * transbank/transbank-sdk
 * tecnickcom/tcpdf
-* apache/log4php
+* monolog/monolog
 
 Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.org), e instalarlas con el comando `composer install`.
 
@@ -48,8 +48,6 @@ Para apoyar el levantamiento rápido de un ambiente de desarrollo, hemos creado 
 Para usarlo seguir el siguiente [README Prestashop 1.7.8.5 con php 7.4](./docker-prestashop1.7.8.5-php7.4)  
 Para usarlo seguir el siguiente [README Prestashop 1.7 con php 7.2](./docker-prestashop1.7-php7.2)  
 Para usarlo seguir el siguiente [README Prestashop 1.7 con php 7.1](./docker-prestashop1.7-php7.1)  
-Para usarlo seguir el siguiente [README Prestashop 1.7 con php 5.6](./docker-prestashop1.7-php5.6)  
-Para usarlo seguir el siguiente [README Prestashop 1.6 con php 5.6](./docker-prestashop1.6-php5.6)  
 
 ### Crear el instalador del plugin
 
