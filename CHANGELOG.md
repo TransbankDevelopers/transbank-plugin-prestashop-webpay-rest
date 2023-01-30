@@ -4,6 +4,9 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.1-Beta] 2023-01-30
+- Se agrega un servicio para recolectar datos que nos permitira darle mayor seguimiento a las versiones del plugin y las versiones de Prestashop mas usadas.
+
 ## [2.0.0-Beta] 2023-01-24
 - Se realiza un refactor de la totalidad del código para mejorar su legibilidad
 - Se migran los formularios del módulo de administración a Symfony.
