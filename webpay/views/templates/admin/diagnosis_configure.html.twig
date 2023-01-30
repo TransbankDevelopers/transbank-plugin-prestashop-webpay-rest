@@ -36,16 +36,16 @@
                     </tr>
                 </thead>
                 <tr>
-                    <td style="width: 300px;">{{ 'Software E-commerce:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.plugin_info.ecommerce}}</td>
+                    <td style="width: 300px;">{{ 'Software E-commerce:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.commerce_info.ecommerce}}</td>
                 </tr>
                 <tr>
-                    <td>{{ 'Version E-commerce:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.plugin_info.ecommerce_version}}</td>
+                    <td>{{ 'Version E-commerce:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.commerce_info.current_ecommerce_version}}</td>
                 </tr>
                 <tr>
-                    <td>{{ 'Versión del plugin instalada:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.plugin_info.current_plugin_version}}</td>
+                    <td>{{ 'Versión del plugin instalada:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.commerce_info.current_plugin_version}}</td>
                 </tr>
                 <tr>
-                    <td>{{ 'Última versión del plugin disponible:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.plugin_info.last_plugin_version}}</td>
+                    <td>{{ 'Última versión del plugin disponible:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.commerce_info.last_plugin_version}}</td>
                 </tr>
             </table>
 
@@ -54,15 +54,15 @@
                     <tr>
                         <th colspan="2">{{ 'Información del Servidor'|trans({}, 'Modules.WebpayPlus.Admin') }}</th>
                     </tr>
-                    </thead>
+                </thead>
                 <tr>
-                    <td style="width: 300px;">{{ 'Software Servidor:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.server_version.server_software}}</td>
+                    <td style="width: 300px;">{{ 'Software Servidor:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume}}</td>
                 </tr>
                 <tr>
-                    <td>{{ 'Estado de PHP:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.php_version.status}}</td>
+                    <td>{{ 'Estado de PHP:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.php.status}}</td>
                 </tr>
                 <tr>
-                    <td>{{ 'Versión PHP instalada:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.server_resume.php_version.version}}</td>
+                    <td>{{ 'Versión PHP instalada:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.php.version}}</td>
                 </tr>
             </table>
 
@@ -71,7 +71,7 @@
                     <tr>
                         <th colspan="2">{{ 'Extensiones PHP requeridas'|trans({}, 'Modules.WebpayPlus.Admin') }}</th>
                     </tr>
-                    </thead>
+                </thead>
                 <tr>
                     <td style="width: 300px;">{{ 'openssl:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{data.php_extensions_status.openssl.version}}</td>
                 </tr>
