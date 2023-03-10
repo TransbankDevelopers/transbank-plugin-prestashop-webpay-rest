@@ -4,6 +4,9 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] 2023-03-10
+- Se libera una versión estable.
+
 ## [2.0.1-Beta] 2023-01-30
 - Se agrega un servicio para recolectar datos que nos permitira darle mayor seguimiento a las versiones del plugin y las versiones de Prestashop mas usadas.
 
