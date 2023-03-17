@@ -20,6 +20,7 @@
                 Cuando un usuario inscribe su tarjeta, la asocia al código de comercio Mall, pero cuando se realiza una transacción, se pagará al código de comercio “tienda” y no al “mall”.<br>
             </div>
             <div class="col tbk_column_line_left">
+                {{ form_row(oneclickForm.form_oneclick_active) }}
                 {{ form_row(oneclickForm.form_oneclick_environment) }}
                 {{ form_row(oneclickForm.form_oneclick_mall_commerce_code) }}
                 {{ form_row(oneclickForm.form_oneclick_child_commerce_code) }}
