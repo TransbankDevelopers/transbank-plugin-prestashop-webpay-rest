@@ -45,7 +45,7 @@ trait InteractsWithOneclick
             array_push($result,
                 $po->setCallToActionText($environment.$card['card_type'].' terminada en '.substr($cardNumber,- 4, 4))
                     ->setAction($paymentController)
-                    ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'))
+                    ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_small.png'))
                     ->setInputs([
                         'token' => [
                             'name' =>'inscriptionId',
@@ -71,7 +71,7 @@ trait InteractsWithOneclick
         $controller = $context->link->getModuleLink($base->name, 'oneclickinscription', array(), true);
         return $po->setCallToActionText($description)
             ->setAction($controller)
-            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'))
+            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_small.png'))
             ->setInputs([
                 'token' => [
                     'name' =>'inscriptionId',

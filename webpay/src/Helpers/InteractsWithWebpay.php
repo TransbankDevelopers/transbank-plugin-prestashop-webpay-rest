@@ -25,7 +25,7 @@ trait InteractsWithWebpay
 
         return [ $WPOption->setCallToActionText('Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus')
             ->setAction($paymentController)
-            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/webpay_plus_80px.svg')) ];
+            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/wpplus_small.png')) ];
     }
 
     protected function loadDefaultConfigurationWebpay()
