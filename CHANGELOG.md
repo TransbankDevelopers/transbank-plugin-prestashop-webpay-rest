@@ -4,6 +4,10 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] 2023-03-20
+- Se agrega la posibilidad a activar/desactivar WebpayPlus y Oneclick.
+- Se reducen las imágenes de WebpayPlus y Oneclick que se muestran en la pantalla de pago.
+
 ## [2.0.2] 2023-03-10
 - Se libera una versión estable.
 
