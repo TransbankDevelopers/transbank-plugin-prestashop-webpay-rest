@@ -71,7 +71,7 @@ trait InteractsWithOneclick
         $controller = $context->link->getModuleLink($base->name, 'oneclickinscription', array(), true);
         return $po->setCallToActionText($description)
             ->setAction($controller)
-            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_small.svg'))
+            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_small.png'))
             ->setInputs([
                 'token' => [
                     'name' =>'inscriptionId',
