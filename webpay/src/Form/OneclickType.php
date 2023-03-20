@@ -39,6 +39,13 @@ class OneclickType extends TranslatorAwareType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('form_oneclick_active', SwitchType::class, [
+                'label' => $this->trans('Activo', 'Modules.WebpayPlus.Admin'),
+                'choices' => [
+                    $this->trans('No', 'Modules.WebpayPlus.Admin') => 2,
+                    $this->trans('Si', 'Modules.WebpayPlus.Admin') => 1,
+                ],
+            ])
             ->add('form_oneclick_environment', SwitchType::class, [
                 'label' => $this->trans('Producción', 'Modules.WebpayPlus.Admin'),
                 'choices' => [

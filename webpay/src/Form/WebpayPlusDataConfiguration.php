@@ -15,6 +15,7 @@ final class WebpayPlusDataConfiguration implements DataConfigurationInterface
     public const WEBPAY_API_KEY_SECRET = 'WEBPAY_API_KEY_SECRET';
     public const WEBPAY_ENVIRONMENT = 'WEBPAY_ENVIRONMENT';
     public const WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT = 'WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT';
+    public const WEBPAY_ACTIVE = 'WEBPAY_ACTIVE';
 
     /**
      * @var ConfigurationInterface
@@ -34,11 +35,13 @@ final class WebpayPlusDataConfiguration implements DataConfigurationInterface
      */
     public function getConfiguration(): array
     {
+        $webpayActive = $this->configuration->get(static::WEBPAY_ACTIVE);
         $webpayEnviroment = $this->configuration->get(static::WEBPAY_ENVIRONMENT);
         $webpayCommerceCode = $this->configuration->get(static::WEBPAY_STOREID);
         $webpayApikey = $this->configuration->get(static::WEBPAY_API_KEY_SECRET);
         $webpayDefaultOrderStateIdAfterPayment = $this->configuration->get(static::WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT);
         return [
+            'form_webpay_active' => $webpayActive,
             'form_webpay_environment' => $webpayEnviroment,
             'form_webpay_commerce_code' => $webpayCommerceCode,
             'form_webpay_api_key' => $webpayApikey,
@@ -51,6 +54,7 @@ final class WebpayPlusDataConfiguration implements DataConfigurationInterface
      */
     public function updateConfiguration(array $configuration): array
     {
+        $this->configuration->set(static::WEBPAY_ACTIVE, $configuration['form_webpay_active']);
         $this->configuration->set(static::WEBPAY_STOREID, $configuration['form_webpay_commerce_code']);
         $this->configuration->set(static::WEBPAY_API_KEY_SECRET, $configuration['form_webpay_api_key']);
         $this->configuration->set(static::WEBPAY_ENVIRONMENT, $configuration['form_webpay_environment']);

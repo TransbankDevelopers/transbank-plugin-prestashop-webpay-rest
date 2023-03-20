@@ -17,12 +17,15 @@ trait InteractsWithWebpay
 {
     protected function getWebpayPaymentOption($base, $context)
     {
+        if ($this->getWebpayActive()!=1){
+            return [];
+        }
         $WPOption = new PaymentOption();
         $paymentController = $context->link->getModuleLink($base->name, 'webpaypluspayment', array(), true);
 
-        return $WPOption->setCallToActionText('Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus')
+        return [ $WPOption->setCallToActionText('Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus')
             ->setAction($paymentController)
-            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/webpay_plus_80px.svg'));
+            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/webpay_plus_80px.svg')) ];
     }
 
     protected function loadDefaultConfigurationWebpay()
@@ -30,6 +33,8 @@ trait InteractsWithWebpay
         $webpayEnviroment = $this->getWebpayEnvironment();
         /* Si existe configuración de producción se copiara */
         if (isset($webpayEnviroment) && $webpayEnviroment == Options::ENVIRONMENT_PRODUCTION){
+            $webpayActive = $this->getWebpayActive();
+            $webpayActive = isset($webpayActive) ? $webpayActive : 1;
             $webpayCommerceCode = $this->getWebpayCommerceCode();
             $webpayApikey = $this->getWebpayApiKey();
             $webpayDefaultOrderStateIdAfterPayment = $this->getWebpayOrderAfterPayment();
@@ -39,6 +44,7 @@ trait InteractsWithWebpay
                 && StringUtils::isNotBlankOrNull($webpayApikey)
                 && StringUtils::isNotBlankOrNull($webpayDefaultOrderStateIdAfterPayment)
             ){
+                $this->setWebpayActive($webpayActive);
                 $this->setWebpayCommerceCode($webpayCommerceCode);
                 $this->setWebpayApiKey($webpayApikey);
                 $this->setWebpayOrderAfterPayment($webpayDefaultOrderStateIdAfterPayment);
@@ -101,6 +107,10 @@ trait InteractsWithWebpay
         return Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
     }
 
+    protected function getWebpayActive(){
+        return Configuration::get('WEBPAY_ACTIVE');
+    }
+
     protected function setWebpayApiKey($value){
         return Configuration::updateValue('WEBPAY_API_KEY_SECRET', $value);
     }
@@ -117,6 +127,10 @@ trait InteractsWithWebpay
         return Configuration::updateValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', $value);
     }
 
+    protected function setWebpayActive($value){
+        return Configuration::updateValue('WEBPAY_ACTIVE', $value);
+    }
+
     protected function getDefaultWebpayCommerceCode(){
         return WebpayPlus::DEFAULT_COMMERCE_CODE;
     }
@@ -129,6 +143,10 @@ trait InteractsWithWebpay
         return  Options::DEFAULT_INTEGRATION_TYPE;
     }
 
+    protected function getDefaultWebpaykActive(){
+        return 1;
+    }
+
     protected function getDefaultWebpayOrderAfterPayment(){
         // We assume that the default state is "PREPARATION" and then set it
         // as the default order status after payment for our plugin
@@ -137,6 +155,7 @@ trait InteractsWithWebpay
 
     protected function loadDefaultWebpay()
     {
+        $this->setWebpayActive($this->getDefaultWebpaykActive());
         $this->setWebpayEnvironment($this->getDefaultWebpayEnvironment());
         $this->setWebpayCommerceCode($this->getDefaultWebpayCommerceCode());
         $this->setWebpayApiKey($this->getDefaultWebpayApiKey());

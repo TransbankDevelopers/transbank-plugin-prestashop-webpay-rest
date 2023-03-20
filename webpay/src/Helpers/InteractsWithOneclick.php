@@ -22,6 +22,9 @@ trait InteractsWithOneclick
         if (!$context->customer->isLogged()){
             return [];
         }
+        if ($this->getOneclickActive()!=1){
+            return [];
+        }
         if ($this->getCountCardsByUserId($this->getUserId($context)) > 0){
             return $this->getOneclickPaymentOption($base, $context);
         }
@@ -104,6 +107,8 @@ trait InteractsWithOneclick
         $oneclickEnviroment = $this->getDefaultOneclickEnvironment();
         /* Si existe configuración de producción se copiara */
         if (isset($oneclickEnviroment) && $oneclickEnviroment == Options::ENVIRONMENT_PRODUCTION){
+            $oneclickActive = $this->getOneclickActive();
+            $oneclickActive = isset($oneclickActive) ? $oneclickActive : 1;
             $oneclickMallCommerceCode = $this->getOneclickMallCommerceCode();
             $oneclickChildCommerceCode = $this->getOneclickChildCommerceCode();
             $oneclickApikey = $this->getOneclickApiKey();
@@ -115,6 +120,7 @@ trait InteractsWithOneclick
                 && StringUtils::isNotBlankOrNull($oneclickApikey)
                 && StringUtils::isNotBlankOrNull($oneclickDefaultOrderStateIdAfterPayment)
             ){
+                $this->setOneclickActive($oneclickActive);
                 $this->setOneclickMallCommerceCode($oneclickMallCommerceCode);
                 $this->setOneclickChildCommerceCode($oneclickChildCommerceCode);
                 $this->setOneclickApiKey($oneclickApikey);
@@ -187,6 +193,10 @@ trait InteractsWithOneclick
         return Configuration::get('ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
     }
 
+    protected function getOneclickActive(){
+        return Configuration::get('ONECLICK_ACTIVE');
+    }
+
     protected function setOneclickApiKey($value){
         return Configuration::updateValue('ONECLICK_API_KEY', $value);
     }
@@ -205,6 +215,10 @@ trait InteractsWithOneclick
 
     protected function setOneclickOrderAfterPayment($value){
         return Configuration::updateValue('ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', $value);
+    }
+
+    protected function setOneclickActive($value){
+        return Configuration::updateValue('ONECLICK_ACTIVE', $value);
     }
 
     protected function getDefaultOneclickMallCommerceCode(){
@@ -227,8 +241,13 @@ trait InteractsWithOneclick
         return Configuration::get('PS_OS_PREPARATION');
     }
 
+    protected function getDefaultOneclickActive(){
+        return 1;
+    }
+
     protected function loadDefaultOneclick()
     {
+        $this->setOneclickActive($this->getDefaultOneclickActive());
         $this->setOneclickMallCommerceCode($this->getDefaultOneclickMallCommerceCode());
         $this->setOneclickChildCommerceCode($this->getDefaultOneclickChildCommerceCode());
         $this->setOneclickApiKey($this->getDefaultOneclickApiKey());

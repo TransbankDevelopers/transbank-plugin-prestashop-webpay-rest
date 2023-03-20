@@ -335,9 +335,7 @@ class WebPay extends PaymentModule
         $payment_options = [];
         if ($this->configWebpayIsOk()){
             /*Agregamos la opcion de pago Webpay Plus */
-            $payment_options = [
-                $this->getWebpayPaymentOption($this, $this->context)
-            ];
+            array_push($payment_options, ...$this->getWebpayPaymentOption($this, $this->context));
         }
         else{
             $this->logWebpayPlusConfigError();
