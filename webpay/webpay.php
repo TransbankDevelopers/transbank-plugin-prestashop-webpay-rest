@@ -88,7 +88,6 @@ class WebPay extends PaymentModule
         return  $result &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
-            $this->registerHook('displayPayment') &&
             $this->registerHook('displayPaymentReturn') &&
             $this->registerHook('displayAdminOrderLeft') &&
             $this->registerHook($this->getDisplayOrderHookName());
