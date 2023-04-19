@@ -4,8 +4,6 @@
 
     {% include '@Modules/webpay/views/templates/admin/tabs.html.twig' with {'tabActive': 2} %}
 
-    {% form_theme oneclickForm 'PrestaShopBundle:Admin/TwigTemplateForm:prestashop_ui_kit.html.twig' %}
-
     {{ form_start(oneclickForm, {attr : {class: 'form'}, action: path('ps_controller_webpay_configure_oneclick_form_save') }) }}
     <div class="card">
         <h3 class="card-header">
