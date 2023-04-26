@@ -1,0 +1,50 @@
+name: Prestashop upload binaries to release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    strategy:
+      matrix:
+        php-versions: ['7.4', '8.0']
+    name: PHP ${{ matrix.php-versions }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: 1. Install dependencies 
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+      - run: |
+          cd webpay
+          if [ "${{ matrix.php-versions }}" = "8.0" ]
+          then
+            sed -i.bkp "s/\"php\": \"7.0\"/\"php\": \"8.0\"/g" "composer.json"
+            composer require guzzlehttp/guzzle:^7.0
+          fi
+          composer update --no-dev
+          composer install --no-dev
+      - name: 2. Replace versión
+        run: |
+          GITHUB_TAG="${{github.ref_name}}"
+          sed -i.bkp "s/$this->version = '1.0.0'/$this->version = '${GITHUB_TAG#"v"}'/g" "webpay/webpay.php"
+          sed -i.bkp "s/\[1.0.0\]/\[${GITHUB_TAG#"v"}\]/g" "webpay/config.xml"
+          sed -i.bkp "s/\[1.0.0\]/\[${GITHUB_TAG#"v"}\]/g" "webpay/config_es.xml"
+      - name: 3. Archive Release
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: 'plugin-prestashop${{ matrix.php-versions }}-webpay-rest-${{github.ref_name}}.zip'
+          path: './webpay'    
+      - name: 4. Upload binaries to release
+        uses: svenstaro/upload-release-action@2.5.0
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: './plugin-prestashop${{ matrix.php-versions }}-webpay-rest-${{github.ref_name}}.zip'
+          tag: ${{ github.ref }}
+          overwrite: true
