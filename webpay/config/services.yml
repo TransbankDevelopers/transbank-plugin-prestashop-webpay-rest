@@ -1,4 +1,6 @@
 services:
+  _defaults:
+    public: true
   # Grid services
 
   # webpayplus Form services

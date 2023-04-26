@@ -1,8 +1,6 @@
-![Prestashop](https://www.prestashop.com/sites/all/themes/prestashop/images/logo_ps_second.svg)
-
 #  Prestashop Docker para desarrollo
 
-### PHP 7.1 + Mariadb + Prestashop 1.7
+### PHP 7.4 + Mariadb + Prestashop 1.7.8.6
 
 ### Requerimientos
 
@@ -18,7 +16,7 @@ Instalar [Docker](https://docs.docker.com/docker-for-windows/install/), [Docker-
 
 Instalar [Docker](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/) y [Docker-compose](https://docs.docker.com/compose/install/#install-compose).
 
-### Bajar dependencias del proyecto
+### Bajar dependencias del proyecto (en la carpeta Webpay)
 
 ```
 cd ..
@@ -27,35 +25,16 @@ composer install && composer update
 
 ### Como usar
 
-De forma automática se creará una imagen Prestashop, se creará un producto de ejemplo y finalmente se activará este plugin.
+De forma automática se creará una imagen Prestashop, se creará un producto de ejemplo.
 
 Para instalar Prestashop, hacer lo siguiente:
 
-**NOTA:** La primera vez que se ejecuta ./start o ./build demorará en instalar todo, esperar al menos unos 5 minutos.
-
-### Construir el contenedor desde cero
-
 ```
-./build
+cd docker-prestashop-php7.4-pres1.7.8.6-apache
+docker compose up
 ```
 
-### Iniciar el contenedor construido anteriormente
-
-```
-./start
-```
-
-### Acceder al contenedor
-
-```
-./shell
-```
-
-### Logs
-
-```
-tail -f /var/www/html/var/logs/Transbank_webpay/log_transbank_prestashop_*.log
-```
+Para instalra el plugin comprimir la carpeta webpay en zip y subir como plugin
 
 ### Paneles
 

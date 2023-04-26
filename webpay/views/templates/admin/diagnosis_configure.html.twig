@@ -4,16 +4,16 @@
 
     {% include '@Modules/webpay/views/templates/admin/tabs.html.twig' with {'tabActive': 3} %}
 
-    {% form_theme diagnosisForm 'PrestaShopBundle:Admin/TwigTemplateForm:prestashop_ui_kit.html.twig' %}
-
     {{ form_start(diagnosisForm, {attr : {class: 'form'}, action: path('ps_controller_webpay_configure_diagnosis_form_save') }) }}
     <div class="card">
         <h3 class="card-header">
             <i class="material-icons">settings</i> {{ 'Diagnóstico'|trans({}, 'Modules.WebpayPlus.Admin') }}
         </h3>
         <div class="card-block row">
-            <div class="card-text">
-                {{ form_widget(diagnosisForm) }}
+            <div class="col">
+                <div class="card-text">
+                    {{ form_widget(diagnosisForm) }}
+                </div>
             </div>
         </div>
         <div class="card-footer">

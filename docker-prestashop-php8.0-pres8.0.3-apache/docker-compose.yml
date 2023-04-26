@@ -1,11 +1,12 @@
 version: '3'
 services:
   web:
-    image: "prestashop/prestashop:1.7.1.0"
-    container_name: "webpay_prestashop_1.7-7.1"
+    image: "prestashop/prestashop:8.0.3-8.0-apache"
+    container_name: "php8.0-pres8.0.3-apache_prestashop"
     environment:
       - PS_LANGUAGE=es
       - PS_INSTALL_AUTO=1
+      - PS_INSTALL_DB=1
       - PS_ERASE_DB=1
       - PS_DEV_MODE=1
       - PS_DOMAIN=localhost:8080
@@ -15,7 +16,7 @@ services:
       - PS_FOLDER_INSTALL=installop
       - PS_COUNTRY=cl
       - DB_NAME=prestashop
-      - DB_SERVER=webpay_mariadb_1.7-7.1
+      - DB_SERVER=php8.0-pres8.0.3-apache_mariadb
     volumes:
       - ./modules:/var/www/html/modules  
       - ./log:/var/log
@@ -26,8 +27,8 @@ services:
     depends_on:
       - mariadb
   mariadb:
-    image: mariadb
-    container_name: webpay_mariadb_1.7-7.1
+    image: mariadb:10.7.8
+    container_name: php8.0-pres8.0.3-apache_mariadb
     ports:
       - "3306:3306"
     expose:
@@ -35,3 +36,4 @@ services:
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_ROOT_PASSWORD=admin
+
