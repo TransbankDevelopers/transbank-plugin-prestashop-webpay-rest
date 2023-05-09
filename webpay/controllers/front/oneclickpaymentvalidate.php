@@ -30,7 +30,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $this->validate($cart, $customer);
 
         $currency = $this->context->currency;
-        $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
+        $total = (int) $cart->getOrderTotal(true, Cart::BOTH);
 
         $data = $_REQUEST;
         $inscriptionId = $data['inscriptionId'];
@@ -71,7 +71,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
     private function authorizeTransaction($inscriptionId, $cart, $amount){
         /* 1. Creamos la transaccion antes de intentar autorizarla con tbk */
         $randomNumber = uniqid();
-        $parentBuyOrder = 'ps:parent:'.$randomNumber;
+        $parentBuyOrder = $cart->id;
         $childBuyOrder = 'ps:child:'.$randomNumber;
         $this->logOneclickPaymentAntesObtenerInscripcion($inscriptionId, $cart->id, $amount);
         $ins = new TransbankInscriptions($inscriptionId); //recuperamos la inscripcion de la tarjeta por el id
