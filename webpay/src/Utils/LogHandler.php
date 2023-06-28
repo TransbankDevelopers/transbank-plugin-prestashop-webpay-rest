@@ -379,7 +379,7 @@ class LogHandler
         $status = $this->getValidateLockFile();
         if ($method == 'initTransaction') {
             $cookie_value = (string) $id;
-            setcookie('buyorder', $cookie_value, time() + 30, '/'); // 86400 = 1 day
+            setcookie('buyorder', $cookie_value, time() + 30, '/', true, true); // 86400 = 1 day
         } elseif ($method == 'acknowledgeTransaction' and isset($_COOKIE['buyorder'])) {
             $id = $_COOKIE['buyorder'];
         }
