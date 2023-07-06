@@ -139,7 +139,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $amount = $this->getOrderTotal($cart);
         if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
             $this->logWebpayPlusCommitTxCarroManipuladoError($token, $webpayTransaction);
-            return $this->handleCartManipulated($token, $webpayTransaction);
+            $this->handleCartManipulated($token, $webpayTransaction);
         }
 
         $transbankSdkWebpay = WebpayPlusFactory::create();
