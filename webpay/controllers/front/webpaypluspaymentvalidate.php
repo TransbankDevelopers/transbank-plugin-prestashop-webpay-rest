@@ -50,7 +50,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             else if ($webpayTransaction->status != TransbankWebpayRestTransaction::STATUS_INITIALIZED) {
                 $this->logWebpayPlusCommitTxNoInicializadoError($tokenWs, $webpayTransaction);
                 $msg = 'Esta compra se encuentra en estado rechazado o cancelado y no se puede aceptar el pago';
-                return $this->setPaymentErrorPage($msg);
+                $this->setPaymentErrorPage($msg);
             }
 
             if ($this->getTransactionApprovedByCartId($webpayTransaction->cart_id) && !isset($_GET['final'])) {
@@ -58,7 +58,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
                 $msg = 'Otra transacción de este carro de compras ya fue aprobada. Se rechazo este pago para no generar un cobro duplicado';
                 $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
                 $webpayTransaction->save();
-                return $this->setPaymentErrorPage($msg);
+                $this->setPaymentErrorPage($msg);
             }
 
             $this->processPayment($tokenWs, $webpayTransaction, $cart);
@@ -74,7 +74,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->logWebpayPlusRetornandoDesdeTbkFujo3TxError($tbktoken, $webpayTransaction);
             $webpayTransaction->save();
             $msg = 'Transacción abortada desde el formulario de pago. Puedes reintentar el pago. ';
-            return $this->setPaymentErrorPage($msg);
+            $this->setPaymentErrorPage($msg);
         }
         else if (isset($tokenWs) && isset($tbktoken)) {//Flujo 4 => El pago es inválido.
             $this->logWebpayPlusRetornandoDesdeTbkFujo4Error($tokenWs, $tbktoken);
@@ -82,7 +82,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $msg = 'Al parecer ocurrió un error durante el proceso de pago. Puedes volver a intentar. ';
             $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
             $webpayTransaction->save();
-            return $this->setPaymentErrorPage($msg);
+            $this->setPaymentErrorPage($msg);
         }
         
     }
@@ -139,7 +139,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $amount = $this->getOrderTotal($cart);
         if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
             $this->logWebpayPlusCommitTxCarroManipuladoError($token, $webpayTransaction);
-            return $this->handleCartManipulated($token, $webpayTransaction);
+            $this->handleCartManipulated($token, $webpayTransaction);
         }
 
         $transbankSdkWebpay = WebpayPlusFactory::create();
@@ -214,7 +214,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         cargo será realizado en su tarjeta. Por favor, reintente el pago.';
         $message = 'Carro ha sido manipulado durante el proceso de pago';
         $this->updateTransactionStatus($webpayTransaction, TransbankWebpayRestTransaction::STATUS_FAILED, json_encode(['error' => $message]));
-        return $this->setPaymentErrorPage($error);
+        $this->setPaymentErrorPage($error);
     }
 
     /**

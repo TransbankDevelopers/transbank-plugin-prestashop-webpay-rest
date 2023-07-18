@@ -52,7 +52,7 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
             $saved = $ins->save();
             if (!$saved) {
                 $this->logError('Could not create record on transbank_inscriptions database');
-                return $this->setErrorTemplate(['error' => 'No se pudo crear la transacción en la tabla transbank_inscriptions']);
+                $this->setErrorTemplate(['error' => 'No se pudo crear la transacción en la tabla transbank_inscriptions']);
             }
             $this->setRedirectionTemplate($resp, $this->getOrderTotalRound($cart));
         } else {

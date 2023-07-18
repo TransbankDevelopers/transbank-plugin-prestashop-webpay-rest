@@ -121,8 +121,8 @@ class BaseModuleFrontController extends ModuleFrontController
     }
 
     protected function loadCartFromCookie(){
-        $this->$context->cart = new Cart($this->context->cookie->webpay_cart_id);
-        return $this->$context->cart;
+        $this->context->cart = new Cart($this->context->cookie->webpay_cart_id);
+        return $this->context->cart;
     }
 
     protected function getUserIdFromCookie(){

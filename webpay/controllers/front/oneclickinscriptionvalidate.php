@@ -21,7 +21,7 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         $tbkOrdenCompra = isset($data["TBK_ORDEN_COMPRA"]) ? $data['TBK_ORDEN_COMPRA'] : null;
 
         if ($tbkOrdenCompra && $tbkSessionId && !$token){
-            return $this->setErrorTemplate(['error' => 'Timeout Error.']);
+            $this->setErrorTemplate(['error' => 'Timeout Error.']);
         }
 
         //validar si se registro la tarjeta correctamente correctamente
@@ -34,7 +34,7 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         if (isset($tbkOrdenCompra)) {//se abandono la inscripcion al haber presionado la opción 'Abandonar y volver al comercio'
             $ins->status = TransbankInscriptions::STATUS_FAILED;
             $ins->save();
-            return $this->setErrorTemplate(['error' => 'Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ']);//.', token: '.$token.', tbkSessionId: '.$tbkSessionId.', tbkOrdenCompra: '.$tbkOrdenCompra
+            $this->setErrorTemplate(['error' => 'Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ']);//.', token: '.$token.', tbkSessionId: '.$tbkSessionId.', tbkOrdenCompra: '.$tbkOrdenCompra
         }
 
         //registro correcto
