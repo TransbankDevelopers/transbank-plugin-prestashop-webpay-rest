@@ -1,0 +1,26 @@
+{
+    "require": {
+        "transbank/transbank-sdk": "~2.0",
+        "monolog/monolog": "^1.27",
+        "guzzlehttp/guzzle": "^5",
+        "ext-json": "*",
+        "php": ">=7.0"
+    },
+    "config": {
+        "platform": {
+            "php": "7.0"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "PrestaShop\\Module\\WebpayPlus\\": "src/",
+            "Transbank\\Plugin\\": "shared/"
+        },
+        "config": {
+            "prepend-autoloader": false
+        },
+        "type": "prestashop-module"
+    },
+    "description": "Transbank Prestashop Plugin",
+    "name": "transbank/prestashop-plugin"
+}
