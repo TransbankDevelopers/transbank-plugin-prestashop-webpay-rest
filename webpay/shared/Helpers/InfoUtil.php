@@ -58,120 +58,15 @@ class InfoUtil
         return $result;
     }
 
-    /**
-     * Este método obtiene las últimas versiones publicas de los ecommerces en github
-     * (no compatible con virtuemart) lo ideal es que el :usuario/:repo sean entregados como string,
-     * permite un maximo de 60 consultas por hora
-     *
-     * @param string $ecommerce Es el nombre del ecommerce a validar.
-     * @return array
-     */
-    public static function getLastGitHubReleaseVersion($ecommerce)
-    {
-        $baseurl = 'https://api.github.com/repos/'.$ecommerce.'/releases/latest';
-        $agent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)';
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $baseurl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $agent);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 2);
-        $content = curl_exec($ch);
-        curl_close($ch);
-        $con = json_decode($content, true);
-        return array_key_exists('tag_name', $con) ? $con['tag_name'] : '';
-    }
-
     public static function getEcommerceInfo($ecommerce){
         switch ($ecommerce) {
             case TbkConstans::ECOMMERCE_WOOCOMERCE:
-              return InfoUtil::getWoocomerceEcommerceInfo();
+              return WoocommerceInfoUtil::getEcommerceInfo();
             case TbkConstans::ECOMMERCE_PRESTASHOP:
-                return InfoUtil::getPrestashopEcommerceInfo();
+                return PrestashopInfoUtil::getEcommerceInfo();
             default:
               return [];
         }
-    }
-
-    public static function getPrestashopVersion()
-    {
-        if (!defined('_PS_VERSION_')) {
-            exit;
-        }
-        return _PS_VERSION_;
-    }
-
-    public static function getPluginPrestashopVersion()
-    {
-        if (!file_exists(_PS_ROOT_DIR_.'/modules/webpay/config.xml')) {
-            exit;
-        }
-        $xml = simplexml_load_file(_PS_ROOT_DIR_.'/modules/webpay/config.xml',
-            null, LIBXML_NOCDATA);
-        $json = json_encode($xml);
-        $arr = json_decode($json, true);
-        return $arr['version'];
-    }
-
-    public static function getWoocomerceVersion()
-    {
-        if (!class_exists('WooCommerce')) {
-            exit;
-        }
-        global $woocommerce;
-        if (!$woocommerce->version) {
-            exit;
-        }
-        return $woocommerce->version;
-    }
-
-    public static function getPluginWoocomerceVersion()
-    {
-        $file = __DIR__.'/../../webpay-rest.php';
-        $search = ' * Version:';
-        $lines = file($file);
-        foreach ($lines as $line) {
-            if (strpos($line, $search) !== false) {
-                return str_replace(' * Version:', '', $line);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Este método obtiene un resumen de información del ecommerce Prestashop
-     *
-     * @return array
-     */
-    public static function getPrestashopEcommerceInfo()
-    {
-        $result = [];
-        $result['ecommerce'] = TbkConstans::ECOMMERCE_PRESTASHOP;
-        $result['currentEcommerceVersion'] = InfoUtil::getWoocomerceVersion();
-        $result['lastEcommerceVersion'] = InfoUtil::getLastGitHubReleaseVersion(
-            TbkConstans::REPO_OFFICIAL_PRESTASHOP);
-        $result['currentPluginVersion'] = InfoUtil::getPluginPrestashopVersion();
-        $result['lastPluginVersion'] = InfoUtil::getLastGitHubReleaseVersion(
-            TbkConstans::REPO_PRESTASHOP);
-        return $result;
-    }
-
-    /**
-     * Este método obtiene un resumen de información del ecommerce Woocommerce
-     *
-     * @return array
-     */
-    public static function getWoocomerceEcommerceInfo()
-    {
-        $result = [];
-        $result['ecommerce'] = TbkConstans::ECOMMERCE_WOOCOMERCE;
-        $result['currentEcommerceVersion'] = InfoUtil::getWoocomerceVersion();
-        $result['lastEcommerceVersion'] = InfoUtil::getLastGitHubReleaseVersion(
-            TbkConstans::REPO_OFFICIAL_WOOCOMERCE);
-        $result['currentPluginVersion'] = InfoUtil::getPluginWoocomerceVersion();
-        $result['lastPluginVersion'] = InfoUtil::getLastGitHubReleaseVersion(
-            TbkConstans::REPO_WOOCOMERCE);
-        return $result;
     }
 
     /**
