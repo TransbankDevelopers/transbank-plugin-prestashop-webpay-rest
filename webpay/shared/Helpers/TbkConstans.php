@@ -78,4 +78,6 @@ class TbkConstans
 
     const REPO_WOOCOMERCE = 'TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest';
     const REPO_PRESTASHOP = 'TransbankDevelopers/transbank-plugin-prestashop-webpay-rest';
+    const REPO_OFFICIAL_WOOCOMERCE = 'woocommerce/woocommerce';
+    const REPO_OFFICIAL_PRESTASHOP = 'PrestaShop/PrestaShop';
 }

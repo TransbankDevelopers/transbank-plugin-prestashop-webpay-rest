@@ -93,6 +93,51 @@ class InfoUtil
         }
     }
 
+    public static function getPrestashopVersion()
+    {
+        if (!defined('_PS_VERSION_')) {
+            exit;
+        }
+        return _PS_VERSION_;
+    }
+
+    public static function getPluginPrestashopVersion()
+    {
+        if (!file_exists(_PS_ROOT_DIR_.'/modules/webpay/config.xml')) {
+            exit;
+        }
+        $xml = simplexml_load_file(_PS_ROOT_DIR_.'/modules/webpay/config.xml',
+            null, LIBXML_NOCDATA);
+        $json = json_encode($xml);
+        $arr = json_decode($json, true);
+        return $arr['version'];
+    }
+
+    public static function getWoocomerceVersion()
+    {
+        if (!class_exists('WooCommerce')) {
+            exit;
+        }
+        global $woocommerce;
+        if (!$woocommerce->version) {
+            exit;
+        }
+        return $woocommerce->version;
+    }
+
+    public static function getPluginWoocomerceVersion()
+    {
+        $file = __DIR__.'/../../webpay-rest.php';
+        $search = ' * Version:';
+        $lines = file($file);
+        foreach ($lines as $line) {
+            if (strpos($line, $search) !== false) {
+                return str_replace(' * Version:', '', $line);
+            }
+        }
+        return null;
+    }
+
     /**
      * Este método obtiene un resumen de información del ecommerce Prestashop
      *
@@ -100,29 +145,15 @@ class InfoUtil
      */
     public static function getPrestashopEcommerceInfo()
     {
-        if (!defined('_PS_VERSION_')) {
-            exit;
-        } else {
-            $actualversion = _PS_VERSION_;
-            $lastversion = InfoUtil::getLastGitHubReleaseVersion('PrestaShop/PrestaShop');
-            if (!file_exists(_PS_ROOT_DIR_.'/modules/webpay/config.xml')) {
-                exit;
-            } else {
-                $xml = simplexml_load_file(_PS_ROOT_DIR_.'/modules/webpay/config.xml',
-                    null, LIBXML_NOCDATA);
-                $json = json_encode($xml);
-                $arr = json_decode($json, true);
-                $currentplugin = $arr['version'];
-            }
-        }
-        $pv = InfoUtil::getLastGitHubReleaseVersion(TbkConstans::REPO_PRESTASHOP);
-        return [
-            'ecommerce' => 'prestashop',
-            'currentEcommerceVersion' => $actualversion,
-            'lastEcommerceVersion'    => $lastversion,
-            'currentPluginVersion'    => $currentplugin,
-            'lastPluginVersion'       => $pv
-        ];
+        $result = [];
+        $result['ecommerce'] = TbkConstans::ECOMMERCE_PRESTASHOP;
+        $result['currentEcommerceVersion'] = InfoUtil::getWoocomerceVersion();
+        $result['lastEcommerceVersion'] = InfoUtil::getLastGitHubReleaseVersion(
+            TbkConstans::REPO_OFFICIAL_PRESTASHOP);
+        $result['currentPluginVersion'] = InfoUtil::getPluginPrestashopVersion();
+        $result['lastPluginVersion'] = InfoUtil::getLastGitHubReleaseVersion(
+            TbkConstans::REPO_PRESTASHOP);
+        return $result;
     }
 
     /**
@@ -132,33 +163,15 @@ class InfoUtil
      */
     public static function getWoocomerceEcommerceInfo()
     {
-        if (!class_exists('WooCommerce')) {
-            exit;
-        } else {
-            global $woocommerce;
-            if (!$woocommerce->version) {
-                exit;
-            } else {
-                $actualversion = $woocommerce->version;
-                $lastversion = InfoUtil::getLastGitHubReleaseVersion('woocommerce/woocommerce');
-                $file = __DIR__.'/../../webpay-rest.php';
-                $search = ' * Version:';
-                $lines = file($file);
-                foreach ($lines as $line) {
-                    if (strpos($line, $search) !== false) {
-                        $currentplugin = str_replace(' * Version:', '', $line);
-                    }
-                }
-            }
-        }
-        $pv = InfoUtil::getLastGitHubReleaseVersion(TbkConstans::REPO_WOOCOMERCE);
-        return [
-            'ecommerce' => 'woocommerce',
-            'currentEcommerceVersion'   => $actualversion,
-            'lastEcommerceVersion'      => $lastversion,
-            'currentPluginVersion'      => $currentplugin,
-            'lastPluginVersion'         => $pv
-        ];
+        $result = [];
+        $result['ecommerce'] = TbkConstans::ECOMMERCE_WOOCOMERCE;
+        $result['currentEcommerceVersion'] = InfoUtil::getWoocomerceVersion();
+        $result['lastEcommerceVersion'] = InfoUtil::getLastGitHubReleaseVersion(
+            TbkConstans::REPO_OFFICIAL_WOOCOMERCE);
+        $result['currentPluginVersion'] = InfoUtil::getPluginWoocomerceVersion();
+        $result['lastPluginVersion'] = InfoUtil::getLastGitHubReleaseVersion(
+            TbkConstans::REPO_WOOCOMERCE);
+        return $result;
     }
 
     /**
