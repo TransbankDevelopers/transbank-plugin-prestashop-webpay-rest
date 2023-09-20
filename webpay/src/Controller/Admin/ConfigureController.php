@@ -12,8 +12,9 @@ use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Utils\MetricsUtil;
-use PrestaShop\Module\WebpayPlus\Utils\InfoUtil;
 use Configuration;
+use Transbank\Plugin\Helpers\InfoUtil;
+use Transbank\Plugin\Helpers\TbkConstans;
 use Transbank\Webpay\Options;
 
 class ConfigureController extends FrameworkBundleAdminController
@@ -50,7 +51,7 @@ class ConfigureController extends FrameworkBundleAdminController
     {
         $diagnosisFormDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
         $diagnosisForm = $diagnosisFormDataHandler->getForm();
-        $data = InfoUtil::getFullResume();
+        $data = InfoUtil::getResume(TbkConstans::ECOMMERCE_PRESTASHOP);
 
         return $this->render('@Modules/webpay/views/templates/admin/diagnosis_configure.html.twig', [
             'diagnosisForm' => $diagnosisForm->createView(),
@@ -176,7 +177,7 @@ class ConfigureController extends FrameworkBundleAdminController
         {
             return;
         }
-        $info = InfoUtil::getFullResume();
+        $info = InfoUtil::getResume(TbkConstans::ECOMMERCE_PRESTASHOP);
         //$shops = Shop::getShops();
         return MetricsUtil::sendMetrics(
             $info['php']['version'],//$phpVersion, 
