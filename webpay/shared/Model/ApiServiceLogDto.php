@@ -2,20 +2,10 @@
 
 namespace Transbank\Plugin\Model;
 
-class ApiServiceLogDto
+class ApiServiceLogDto extends TbkLogDtoBase
 {
-    public $id;
-    public $buyOrder;
-    public $service;
-    public $product;
-    public $environment;
-    public $commerceCode;
     public $input;
     public $response;
-    public $error;
-    public $originalError;
-    public $customError;
-    public $createdAt;
 
     /**
      * @param array $data
@@ -37,54 +27,6 @@ class ApiServiceLogDto
         }
     }
 
-    public function getId() {
-        return $this->id;
-    }
-
-    public function setId($id) {
-        $this->id = $id;
-    }
-
-    public function getBuyOrder() {
-        return $this->buyOrder;
-    }
-
-    public function setBuyOrder($buyOrder) {
-        $this->buyOrder = $buyOrder;
-    }
-
-    public function getService() {
-        return $this->service;
-    }
-
-    public function setService($service) {
-        $this->service = $service;
-    }
-
-    public function getProduct() {
-        return $this->product;
-    }
-
-    public function setProduct($product) {
-        $this->product = $product;
-    }
-
-    public function getEnvironment() {
-        return $this->environment;
-    }
-
-    public function setEnvironment($environment) {
-        $this->environment = $environment;
-    }
-
-    public function getCommerceCode() {
-        return $this->commerceCode;
-    }
-
-    public function setCommerceCode($commerceCode) {
-        $this->commerceCode = $commerceCode;
-    }
-
     public function getInput() {
         return $this->input;
     }
@@ -101,35 +43,4 @@ class ApiServiceLogDto
         $this->response = $response;
     }
 
-    public function getError() {
-        return $this->error;
-    }
-
-    public function setError($error) {
-        $this->error = $error;
-    }
-
-    public function getOriginalError() {
-        return $this->originalError;
-    }
-
-    public function setOriginalError($originalError) {
-        $this->originalError = $originalError;
-    }
-
-    public function getCustomError() {
-        return $this->customError;
-    }
-
-    public function setCustomError($customError) {
-        $this->customError = $customError;
-    }
-
-    public function getCreatedAt() {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt($createdAt) {
-        $this->createdAt = $createdAt;
-    }
 }
