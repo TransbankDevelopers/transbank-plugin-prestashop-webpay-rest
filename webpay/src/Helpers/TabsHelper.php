@@ -2,11 +2,10 @@
 namespace PrestaShop\Module\WebpayPlus\Helpers;
 
 use Tab;
-use Language;
 
 class TabsHelper
 {
-    public static function AddTab($className, $tabName, $moduleName, $parentClassName, $icon = null)
+    public static function addTab($className, $tabName, $moduleName, $parentClassName, $icon = null)
     {
         $tab             = new Tab();
         $tab->active     = 1;
@@ -28,11 +27,6 @@ class TabsHelper
             $tab    = new Tab($id_tab);
             $tab->delete();
         }
-        /*
-        if ($tab->name !== '') {
-            $tab->delete();
-        }*/
-
         return true;
     }
 
