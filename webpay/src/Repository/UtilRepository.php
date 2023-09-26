@@ -17,7 +17,7 @@ class UtilRepository implements IUtilRepository {
     }
 
     public function getValue($sql){
-        return Db::getInstance()->getValue($sql, $use_cache = true);
+        return Db::getInstance()->getValue($sql, true);
     }
 
     public function sanitizeValue($value){
