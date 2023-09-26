@@ -1,16 +1,20 @@
 {% extends '@PrestaShop/Admin/layout.html.twig' %}
-   
+
 {% block content %}
-    {% include '@Modules/webpay/views/templates/admin/webpay_configure.html.twig'%}
-    {% include '@Modules/webpay/views/templates/admin/oneclick_configure.html.twig'%}
+    <div class="tbk-plugin-config-widget"
+        data-env="production"
+        data-img="/modules/webpay/views/img"
+        data-ecommerce="prestashop">
+    </div>
 {% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('../modules/webpay/views/css/config.css') }}">
+    <link href="{{ asset('../modules/webpay/views/css/index.css') }}" rel="stylesheet"/>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
+    <script src="{{ asset('../modules/webpay/views/js/index.js') }}"></script>
 {% endblock %}
-   
+
