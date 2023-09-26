@@ -19,6 +19,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
      */
     public function postProcess()
     {
+        $errorTitle = 'Ocurrio un error al autorizar el pago';
         $this->logger = TbkFactory::createLogger();
         try {
             $cart = $this->context->cart;
@@ -49,15 +50,15 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
             }
             $this->redirectToPaidSuccessPaymentPage($cart);
         } catch (CreateTransactionDbException $e) {
-            $this->throwErrorRedirect('Pago rechazado', $e->getMessage());
+            $this->throwErrorRedirect($errorTitle, $e->getMessage());
         } catch (AuthorizeTbkOneclickException $e) {
-            $this->throwErrorRedirect('Pago rechazado', $e->getMessage());
+            $this->throwErrorRedirect($errorTitle, $e->getMessage());
         } catch (RejectedAuthorizeOneclickException $e) {
-            $this->throwErrorRedirect('Pago rechazado', $e->getMessage());
+            $this->throwErrorRedirect($errorTitle, $e->getMessage());
         } catch (ConstraintsViolatedAuthorizeOneclickException $e) {
-            $this->throwErrorRedirect('Pago rechazado', $e->getMessage());
+            $this->throwErrorRedirect($errorTitle, $e->getMessage());
         } catch (\Exception $e) {
-            $this->throwErrorRedirect('Pago rechazado', $e->getMessage());
+            $this->throwErrorRedirect($errorTitle, $e->getMessage());
         }
     }
 }
