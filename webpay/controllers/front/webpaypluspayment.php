@@ -16,9 +16,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             $cart = $this->getCartFromContext();
             $orderId = $cart->id;
             $amount = $this->getOrderTotalRound($cart);
-            //patch for error with parallels carts
-            $recoverQueryParams = ['token_cart' => md5(_COOKIE_KEY_.'recover_cart_'.$orderId), 'recover_cart' => $orderId];
-            $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', $recoverQueryParams, true);
+            $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', [], true);
             $tbkWebpayplus = TbkFactory::createTbkWebpayplusService($this->getCurrentStoreId());
             $response = $tbkWebpayplus->createTransaction($orderId, $amount, $returnUrl);
             $this->setRedirectionTemplate($response->token, $response->url, $amount);

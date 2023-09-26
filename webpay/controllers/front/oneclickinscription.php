@@ -16,8 +16,7 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
             $orderId = $cart->id;
             $customer = $this->getCustomerFromContext();
             $tbkOneclick = TbkFactory::createTbkOneclickService($this->getCurrentStoreId());
-            $recoverQueryParams = [];
-            $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', $recoverQueryParams, true);
+            $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', [], true);
             $response = $tbkOneclick->startInscription($orderId, $customer->id, $customer->email, $returnUrl, 'checkout');
             $this->setRedirectionTemplate($response->token, $response->urlWebpay, $this->getOrderTotalRound($cart));
         } catch (StartTbkOneclickException $e) {
