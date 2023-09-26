@@ -18,28 +18,29 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
     public function initContent()
     {
         parent::initContent();
+        $errorTitle = 'Error al confirmar la inscripción';
         $this->logger = TbkFactory::createLogger();
         try {
             $tbkOneclick = TbkFactory::createTbkOneclickService($this->getCurrentStoreId());
             $tbkOneclick->processTbkReturnAndFinishInscription($_SERVER, $_GET, $_POST);
             $this->redirectToOrderConfirmationByCartId($this->context->cart->id);
         } catch (WithoutTokenInscriptionOneclickException $e) {
-            $this->setPaymentErrorPage('Error', $e->getMessage());
+            $this->setPaymentErrorPage($errorTitle, $e->getMessage());
         } catch (TimeoutInscriptionOneclickException $e) {
-            $this->setPaymentErrorPage('Error', $e->getMessage());
+            $this->setPaymentErrorPage($errorTitle, $e->getMessage());
         } catch (UserCancelInscriptionOneclickException $e) {
             $this->setPaymentErrorPage('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ');
         } catch (InvalidStatusInscriptionOneclickException $e) {
-            $this->setPaymentErrorPage('Error', $e->getMessage());
+            $this->setPaymentErrorPage($errorTitle, $e->getMessage());
         } catch (RejectedInscriptionOneclickException $e) {
-            $this->setPaymentErrorPage('Error', $e->getMessage());
+            $this->setPaymentErrorPage($errorTitle, $e->getMessage());
         } catch (GetInscriptionDbException $e) {
-            $this->setPaymentErrorPage('Error', $e->getMessage());
+            $this->setPaymentErrorPage($errorTitle, $e->getMessage());
         } catch (FinishTbkOneclickException $e) {
-            $this->setPaymentErrorPage('Error', $e->getMessage());
+            $this->setPaymentErrorPage($errorTitle, $e->getMessage());
         } catch (Exception $e) {
-            $this->setPaymentErrorPage('Error', $e->getMessage());
-        } 
+            $this->setPaymentErrorPage($errorTitle, $e->getMessage());
+        }
     }
     private function redirectToOrderConfirmationByCartId($cartId)
     {
