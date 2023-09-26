@@ -50,26 +50,31 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             }
             return $this->redirectToPaidSuccessPaymentPage($cart);
         } catch (TimeoutWebpayException $e) {
-            $msg = 'Al parecer pasaron más de 15 minutos en el formulario de pago, por lo que la transacción se ha cancelado automáticamente';
+            $msg = "Al parecer pasaron más de 15 minutos en el formulario de pago, 
+                por lo que la transacción se ha cancelado automáticamente";
             $this->setPaymentErrorPage($msg);
         } catch (UserCancelWebpayException $e) {
-            $msg = 'Transacción abortada desde el formulario de pago. Puedes reintentar el pago. ';
+            $msg = "Transacción abortada desde el formulario de pago. Puedes reintentar el pago. ";
             $this->setPaymentErrorPage($msg);
         } catch (DoubleTokenWebpayException $e) {
-            $msg = 'Al parecer ocurrió un error durante el proceso de pago. Puedes volver a intentar. ';
+            $msg = "Al parecer ocurrió un error durante el proceso de pago. 
+                Puedes volver a intentar. ";
             $this->setPaymentErrorPage($msg);
         } catch (InvalidStatusWebpayException $e) {
-            $msg = 'Esta compra se encuentra en estado rechazado o cancelado y no se puede aceptar el pago';
+            $msg = "Esta compra se encuentra en estado rechazado o 
+                cancelado y no se puede aceptar el pago";
             $this->setPaymentErrorPage($msg);
         } catch (OrderAlreadyPaidException $e) {
-            $msg = 'Otra transacción de este carro de compras ya fue aprobada. Se rechazo este pago para no generar un cobro duplicado';
+            $msg = "Otra transacción de este carro de compras ya fue aprobada. 
+                Se rechazo este pago para no generar un cobro duplicado";
             $this->setPaymentErrorPage($msg);
         } catch (AlreadyApprovedWebpayException $e) {
             return $this->redirectToPaidSuccessPaymentPage($cart);
         } catch (RejectedCommitWebpayException $e) {
             $this->responseData['PAYMENT_OK'] = 'FAIL';
             $error = 'La transacción ha sido rechazada. Por favor, reintente el pago. ';
-            $detail = 'Código de respuesta: '.$e->getCommitResponse()->getResponseCode().'. Estado: '.$e->getCommitResponse()->getStatus();
+            $detail = 'Código de respuesta: '.$e->getCommitResponse()->getResponseCode().
+                '. Estado: '.$e->getCommitResponse()->getStatus();
             $this->setPaymentErrorPage($error, $detail);
         } catch (CommitTbkWebpayException $e) {
             $this->responseData['PAYMENT_OK'] = 'FAIL';
@@ -78,7 +83,8 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->setPaymentErrorPage($error, $detail);
         } catch (\Exception $e) {
             $msg = 'Al parecer ocurrió un error durante el proceso de pago. Puedes volver a intentar. ';
-            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, $e->getMessage(), $msg);
+            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, 
+                $e->getMessage(), $msg);
             $this->setPaymentErrorPage($e->getMessage(), $msg);
         }
 
@@ -88,47 +94,58 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     {
         if (!$this->module->active) {
             $error = 'El módulo no esta activo';
-            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, null, $error);
+            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, 
+                null, $error);
             $this->throwErrorRedirect($error);
         } 
 
         if ($cart->id == null) {
             $error = 'Cart id was null. Redirecto to confirmation page of the last order';
-            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, null, $error);
+            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, 
+                null, $error);
 
             $id_usuario = Context::getContext()->customer->id;
-            $sql = 'SELECT id_cart FROM '._DB_PREFIX_."cart p WHERE p.id_customer = $id_usuario ORDER BY p.id_cart DESC";
+            $sql = 'SELECT id_cart FROM '._DB_PREFIX_."cart p WHERE p.id_customer = 
+                $id_usuario ORDER BY p.id_cart DESC";
             $cart->id = Db::getInstance()->getValue($sql);
             $customer = $this->getCustomer($cart->id_customer);
-            Tools::redirect('index.php?controller=order-confirmation&id_cart='.(int) $cart->id.'&id_module='.(int) $this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
+            Tools::redirect('index.php?controller=order-confirmation&id_cart='.
+                (int) $cart->id.'&id_module='.(int) $this->module->id.'&id_order='.
+                $this->module->currentOrder.'&key='.$customer->secure_key);
         }
 
         if ($cart->id_customer == 0) {
             $error = 'id_customer es cero';
-            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, null, $error);
+            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, 
+                null, $error);
             $this->throwErrorRedirect($error);
         } 
         else if ($cart->id_address_delivery == 0) {
             $error = 'id_address_delivery es cero';
-            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, null, $error);
+            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, 
+                null, $error);
             $this->throwErrorRedirect($error);
         }
         else if ($cart->id_address_invoice == 0) {
             $error = 'id_address_invoice es cero';
-            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, null, $error);
+            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, 
+                null, $error);
             $this->throwErrorRedirect($error);
         }
 
         $customer = $this->getCustomer($cart->id_customer);
         if (!Validate::isLoadedObject($customer)) {
             $error = 'Customer not load';
-            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, null, $error);
+            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, 
+                null, $error);
             $this->throwErrorRedirect($error);
         }
 
         if ($transaction->amount != $this->getOrderTotalRound($cart)) {
-            $error = 'El monto del carro ha cambiado, la transacción no fue completada, ningún cargo será realizado en su tarjeta. Por favor, reintente el pago.';
-            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, null,'Carro ha sido manipulado durante el proceso de pago');
+            $error = "El monto del carro ha cambiado, la transacción no fue completada, 
+                ningún cargo será realizado en su tarjeta. Por favor, reintente el pago.";
+            $tbkWebpayplus->saveTransactiondFailed($transaction, TbkConstans::WEBPAYPLUS_COMMIT, 
+                null,'Carro ha sido manipulado durante el proceso de pago');
             $this->setPaymentErrorPage($error);
         }
     }

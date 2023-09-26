@@ -15,7 +15,9 @@ trait InteractsWithTabs
             return;
         }
         TabsHelper::removeTab('WebPay');
-        TabsHelper::addTab(ConfigureController::TAB_CLASS_NAME, $this->getNamesToManualInstall('Configuración Webpay', 'Modules.WebpayPlus.Config'), 'WebPay', 'AdminParentPayment');
+        TabsHelper::addTab(ConfigureController::TAB_CLASS_NAME, 
+            $this->getNamesToManualInstall('Configuración Webpay', 'Modules.WebpayPlus.Config'), 
+            'WebPay', 'AdminParentPayment');
     }
     
     protected function uninstallTab()

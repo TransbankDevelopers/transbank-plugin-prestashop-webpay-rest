@@ -29,12 +29,14 @@ class PaymentModuleFrontController extends BaseModuleFrontController
     protected function redirectToPaidSuccessPaymentPage(Cart $cart)
     {
         $customer = $this->getCustomer($cart->id_customer);
-        $dataUrl = 'id_cart='.(int) $cart->id.'&id_module='.(int) $this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key;
+        $dataUrl = 'id_cart='.(int) $cart->id.'&id_module='.(int) $this->module->id.
+            '&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key;
         return Tools::redirect('index.php?controller=order-confirmation&'.$dataUrl);
     }
 
     protected function validate($cart, $customer){
-        if ($cart->id_customer == 0 || $cart->id_address_delivery == 0 || $cart->id_address_invoice == 0 || !$this->module->active) {
+        if ($cart->id_customer == 0 || $cart->id_address_delivery == 0 
+            || $cart->id_address_invoice == 0 || !$this->module->active) {
             Tools::redirect('index.php?controller=order&step=1');
         }
 
@@ -47,7 +49,8 @@ class PaymentModuleFrontController extends BaseModuleFrontController
             }
         }
         if (!$authorized) {
-            exit($this->module->getTranslator()->trans('This payment method is not available.', [], 'Modules.Webpay'));
+            exit($this->module->getTranslator()->trans('This payment method is not available.', 
+                [], 'Modules.Webpay'));
         }
         if (!Validate::isLoadedObject($customer)) {
             Tools::redirect('index.php?controller=order&step=1');

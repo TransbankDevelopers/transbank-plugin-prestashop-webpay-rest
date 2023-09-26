@@ -16,7 +16,8 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             $cart = $this->getCartFromContext();
             $orderId = $cart->id;
             $amount = $this->getOrderTotalRound($cart);
-            $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', [], true);
+            $returnUrl = Context::getContext()->link->getModuleLink('webpay', 
+                'webpaypluspaymentvalidate', [], true);
             $tbkWebpayplus = TbkFactory::createTbkWebpayplusService($this->getCurrentStoreId());
             $response = $tbkWebpayplus->createTransaction($orderId, $amount, $returnUrl);
             $this->setRedirectionTemplate($response->token, $response->url, $amount);

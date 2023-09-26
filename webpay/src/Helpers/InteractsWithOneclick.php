@@ -28,16 +28,19 @@ trait InteractsWithOneclick
     protected function getOneclickPaymentOption($base, $context, $tbkOneclick)
     {
         $result = [];
-        $paymentController = $context->link->getModuleLink($base->name, 'oneclickpaymentvalidate', array(), true);
+        $paymentController = $context->link->getModuleLink($base->name, 'oneclickpaymentvalidate', 
+            array(), true);
         $cards = $tbkOneclick->getListInscriptionByUserId($this->getUserId($context));
         foreach($cards as $card){
             $po = new PaymentOption();
             $cardNumber = $card['card_number'];
             $environment = $card['environment']=='TEST' ? '[TEST] ' : '';
             array_push($result,
-                $po->setCallToActionText($environment.$card['card_type'].' terminada en '.substr($cardNumber,- 4, 4))
+                $po->setCallToActionText(
+                        $environment.$card['card_type'].' terminada en '.substr($cardNumber,- 4, 4))
                     ->setAction($paymentController)
-                    ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_small.png'))
+                    ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . 
+                        $this->name . '/views/img/oneclick_small.png'))
                     ->setInputs([
                         'token' => [
                             'name' =>'username',
@@ -48,13 +51,16 @@ trait InteractsWithOneclick
                 );
         }
 
-        array_push($result, $this->getOneclickInscriptionOption($base, $context, 'Usar un nuevo método de pago'));
+        array_push($result, $this->getOneclickInscriptionOption($base, $context, 
+            'Usar un nuevo método de pago'));
         return $result;
     }
 
     protected function getNewOneclickPaymentOption($base, $context)
     {
-        return $this->getOneclickInscriptionOption($base, $context, 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick');
+        return $this->getOneclickInscriptionOption($base, $context,
+            "Inscribe tu tarjeta de crédito, débito o prepago y 
+                luego paga con un solo click a través de Webpay Oneclick");
     }
 
     protected function getOneclickInscriptionOption($base, $context, $description)
