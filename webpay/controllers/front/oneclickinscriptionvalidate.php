@@ -39,9 +39,7 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
             $this->setPaymentErrorPage('Error', $e->getMessage());
         } catch (Exception $e) {
             $this->setPaymentErrorPage('Error', $e->getMessage());
-        } catch (\Exception $e) {
-            $this->setPaymentErrorPage('Error', $e->getMessage());
-        }
+        } 
     }
     private function redirectToOrderConfirmationByCartId($cartId)
     {
