@@ -10,21 +10,25 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
     public function initContent()
     {
         parent::initContent();
+        $errorTitle = 'Error al crear la inscripción';
         $this->logger = TbkFactory::createLogger();
         try {
             $cart = $this->getCartFromContext();
             $orderId = $cart->id;
             $customer = $this->getCustomerFromContext();
             $tbkOneclick = TbkFactory::createTbkOneclickService($this->getCurrentStoreId());
-            $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', [], true);
-            $response = $tbkOneclick->startInscription($orderId, $customer->id, $customer->email, $returnUrl, 'checkout');
-            $this->setRedirectionTemplate($response->token, $response->urlWebpay, $this->getOrderTotalRound($cart));
+            $returnUrl = Context::getContext()->link->getModuleLink('webpay',
+                'oneclickinscriptionvalidate', [], true);
+            $response = $tbkOneclick->startInscription($orderId, $customer->id,
+                $customer->email, $returnUrl, 'checkout');
+            $this->setRedirectionTemplate($response->token, $response->urlWebpay,
+                $this->getOrderTotalRound($cart));
         } catch (StartTbkOneclickException $e) {
-            $this->setPaymentErrorPage('Error al crear la inscripción', $e->getMessage());
+            $this->setPaymentErrorPage($errorTitle, $e->getMessage());
         } catch (CreateInscriptionDbException $e) {
-            $this->setPaymentErrorPage('Error al crear la inscripción', $e->getMessage());
+            $this->setPaymentErrorPage($errorTitle, $e->getMessage());
         } catch (\Exception $e) {
-            $this->setPaymentErrorPage('Error al crear la inscripción', $e->getMessage());
+            $this->setPaymentErrorPage($errorTitle, $e->getMessage());
         }
     }
 
