@@ -8,8 +8,6 @@ use Cart;
 use Context;
 use Tools;
 use Configuration;
-use PrestaShop\Module\WebpayPlus\Utils\Utils;
-use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 
 class BaseModuleFrontController extends ModuleFrontController
 {
@@ -17,6 +15,7 @@ class BaseModuleFrontController extends ModuleFrontController
     public $display_footer = false;
     public $display_column_left = false;
     public $ssl = true;
+    protected $logger;
 
     protected function getCustomer($customerId){
         return new Customer($customerId);
@@ -41,30 +40,11 @@ class BaseModuleFrontController extends ModuleFrontController
     }
 
     protected function logError($msg){
-        (new LogHandler())->logError($msg);
+        $this->logger->logError($msg);
     }
 
     protected function logInfo($msg){
-        (new LogHandler())->logInfo($msg);
-    }
-
-    protected function cartToLog($cart){
-        $this->logInfo('-----------------------------------------------------');
-        $this->logInfo('------------CART-------------------------------------');
-        $this->logInfo(json_encode($cart));
-        $prods = $cart->getProducts();
-        foreach ($prods as $prod){
-            $this->logInfo('------------PRODUCT---------------------------------');
-            $this->logInfo(json_encode($prod));
-        }
-        $this->logInfo('-----------------------------------------------------');
-    }
-
-    protected function customerToLog($customer){
-        $this->logInfo('-----------------------------------------------------');
-        $this->logInfo('------------CUSTOMER-------------------------------------');
-        $this->logInfo(json_encode($customer));
-        $this->logInfo('-----------------------------------------------------');
+        $this->logger->logInfo($msg);
     }
 
     protected function getCartFromContext(){
@@ -76,7 +56,7 @@ class BaseModuleFrontController extends ModuleFrontController
     }
 
     protected function getOrderTotalRound($cart){
-        return round($this->getOrderTotal($cart)); 
+        return round($this->getOrderTotal($cart));
     }
 
     protected function getOrderTotal($cart){
@@ -85,32 +65,23 @@ class BaseModuleFrontController extends ModuleFrontController
         return $cart->getOrderTotal(true, Cart::BOTH);// for CLP it should alway be a int
     }
 
-    protected function getDebugActive(){
-        return Configuration::get('DEBUG_ACTIVE');
-    }
-
-
     /**
      * @param array $result
      */
     protected function setPaymentErrorPage($error, $detailError = null)
     {
-        $date_tx_hora = date('H:i:s');
-        $date_tx_fecha = date('d-m-Y');
         $msg = $error.(isset($detailError) ? ' ('.$detailError.')' : '');
         $this->logError($msg);
         Context::getContext()->smarty->assign([
-            'WEBPAY_RESULT_CODE'          => 500,
-            'WEBPAY_RESULT_DESC'          => $msg,
-            'WEBPAY_VOUCHER_ORDENCOMPRA'  => 0,
-            'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
-            'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
+            "data" => [
+                ["label" => "Respuesta de la Transacción", "value" => $msg],
+                ["label" => "Código de la Transacción", "value" => 500],
+                ["label" => "Orden de Compra", "value" => 0],
+                ["label" => "Fecha de Transaccion", "value" => date('d-m-Y')],
+                ["label" => "Hora de Transaccion", "value" => date('H:i:s')]
+            ]
         ]);
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('payment_error_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-        }
+        $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
     }
 
     protected function throwErrorRedirect($message, $redirectTo = 'index.php?controller=order&step=3')
@@ -131,6 +102,10 @@ class BaseModuleFrontController extends ModuleFrontController
 
     protected function getUserEmailFromCookie(){
         return $this->context->cookie->webpay_email;
+    }
+
+    protected function getCurrentStoreId(){
+        return Context::getContext()->shop->id;
     }
 }
 
