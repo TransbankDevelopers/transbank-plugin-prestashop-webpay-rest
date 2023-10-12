@@ -5,10 +5,10 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
-use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
+use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -56,7 +56,7 @@ class WebPay extends PaymentModule
         $this->ps_versions_compliancy = array('min' => '1.7.6.0', 'max' => _PS_VERSION_);
         $this->pluginValidation();
         try {
-            $this->log = new LogHandler();
+            $this->log = TbkFactory::createLogger();
         } catch (Exception $e) {
             print_r($e);
         }

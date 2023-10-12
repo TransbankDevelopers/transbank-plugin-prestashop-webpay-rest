@@ -6,6 +6,7 @@ use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
+use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
 /**
  * Class WebPayOneclickPaymentValidateModuleFrontController.
@@ -22,6 +23,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
      */
     public function postProcess()
     {
+        $this->logger = TbkFactory::createLogger();
         $this->logOneclickPaymentIniciando();
         
         $cart = $this->context->cart;

@@ -1,11 +1,11 @@
 <?php
 
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
-use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Utils\Utils;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
+use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
 class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleFrontController
 {
@@ -14,6 +14,7 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
     public function initContent()
     {
         parent::initContent();
+        $this->logger = TbkFactory::createLogger();
         $method = $_SERVER['REQUEST_METHOD'];
         $data = $method === 'GET' ? $_GET : $_POST;
         $token = isset($data["TBK_TOKEN"]) ? $data['TBK_TOKEN'] : null;
@@ -88,7 +89,7 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         $error = isset($result['error']) ? $result['error'] : '';
         $detail = isset($result['detail']) ? $result['detail'] : '';
 
-        (new LogHandler())->logError($error.' ('.$detail.')');
+        $this->logError($error.' ('.$detail.')');
 
         Context::getContext()->smarty->assign([
             'WEBPAY_RESULT_CODE'          => 500,

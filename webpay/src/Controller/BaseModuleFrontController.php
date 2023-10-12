@@ -9,7 +9,6 @@ use Context;
 use Tools;
 use Configuration;
 use PrestaShop\Module\WebpayPlus\Utils\Utils;
-use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 
 class BaseModuleFrontController extends ModuleFrontController
 {
@@ -17,6 +16,7 @@ class BaseModuleFrontController extends ModuleFrontController
     public $display_footer = false;
     public $display_column_left = false;
     public $ssl = true;
+    protected $logger = null;
 
     protected function getCustomer($customerId){
         return new Customer($customerId);
@@ -41,11 +41,11 @@ class BaseModuleFrontController extends ModuleFrontController
     }
 
     protected function logError($msg){
-        (new LogHandler())->logError($msg);
+        $this->logger->logError($msg);
     }
 
     protected function logInfo($msg){
-        (new LogHandler())->logInfo($msg);
+        $this->logger->logInfo($msg);
     }
 
     protected function cartToLog($cart){

@@ -8,6 +8,7 @@ use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
+use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
 /**
  * Class WebPayWebpayplusPaymentValidateModuleFrontController.
@@ -23,7 +24,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     public function initContent()
     {
         parent::initContent();
-
+        $this->logger = TbkFactory::createLogger();
         //Flujos:
         //1. Flujo normal (OK): solo llega token_ws
         //2. Timeout (más de 10 minutos en el formulario de Transbank): llegan TBK_ID_SESION y TBK_ORDEN_COMPRA
