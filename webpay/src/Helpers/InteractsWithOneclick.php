@@ -25,7 +25,7 @@ trait InteractsWithOneclick
         if ($this->getOneclickActive()!=1){
             return [];
         }
-        if ($this->getCountCardsByUserId($this->getUserId($context)) > 0){
+        if ($this->getCountCardsByUserId($this->getUserIdForOneclick($context)) > 0){
             return $this->getOneclickPaymentOption($base, $context);
         }
         return [
@@ -37,7 +37,7 @@ trait InteractsWithOneclick
     {
         $result = [];
         $paymentController = $context->link->getModuleLink($base->name, 'oneclickpaymentvalidate', array(), true);
-        $cards = $this->getCardsByUserId($this->getUserId($context));
+        $cards = $this->getCardsByUserId($this->getUserIdForOneclick($context));
         foreach($cards as $card){
             $po = new PaymentOption();
             $cardNumber = $card['card_number'];
@@ -95,7 +95,7 @@ trait InteractsWithOneclick
         return SqlHelper::getValue('SELECT count(1) FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
     }
 
-    protected function getUserId($context){
+    protected function getUserIdForOneclick($context){
         if ($context->customer->isLogged()) {
             return $context->customer->id;
         }

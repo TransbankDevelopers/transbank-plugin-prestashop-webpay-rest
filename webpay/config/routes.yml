@@ -63,19 +63,4 @@ ps_controller_webpay_configure_diagnosis_form_save:
   methods: [POST]
   defaults:
     _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::saveDiagnosisForm'
-#grid
-ps_controller_webpay_orders:
-    path: /webpay/orders
-    methods: [GET]
-    defaults:
-        _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\OrdersController::indexAction'
-        _legacy_controller: 'WebpayPlusOrders'
-        _legacy_link: 'WebpayPlusOrders'
 
-ps_controller_webpay_orders_search:
-    path: /webpay/orders
-    methods: [POST]
-    defaults:
-        _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\OrdersController::searchAction'
-        _legacy_controller: 'WebpayPlusOrders'
-        _legacy_link: 'WebpayPlusOrders:search'
