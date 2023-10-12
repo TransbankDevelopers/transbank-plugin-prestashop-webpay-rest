@@ -10,10 +10,6 @@ use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
-
 require_once __DIR__.'/vendor/autoload.php';
 
 class WebPay extends PaymentModule
