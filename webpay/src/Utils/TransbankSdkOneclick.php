@@ -127,10 +127,11 @@ class TransbankSdkOneclick
     }
 
     /**
+     * @param $username
+     * @param $tbkUser
+     * @param $parentBuyOrder
+     * @param $childBuyOrder
      * @param $amount
-     * @param $sessionId
-     * @param $buyOrder
-     * @param $returnUrl
      *
      * @throws Exception
      *
