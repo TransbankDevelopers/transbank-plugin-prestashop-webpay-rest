@@ -7,7 +7,6 @@ use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\Oneclick\MallInscription;
 use Transbank\Webpay\Oneclick\MallTransaction;
-use Transbank\Webpay\Oneclick;
 
 /**
  * Class TransbankSdkOneclick.
