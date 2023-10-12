@@ -108,7 +108,6 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
 
     protected function redirectToOrderConfirmationByCartId($cartId)
     {
-        //Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cartId.'&id_module='.(int) $this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$this->context->customer->secure_key);
         Tools::redirect('index.php?controller=order');
     }
 
