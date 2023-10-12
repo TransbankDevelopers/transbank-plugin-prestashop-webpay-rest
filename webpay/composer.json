@@ -13,7 +13,8 @@
     },
     "autoload": {
         "psr-4": {
-            "PrestaShop\\Module\\WebpayPlus\\": "src/"
+            "PrestaShop\\Module\\WebpayPlus\\": "src/",
+            "Transbank\\Plugin\\": "shared/"
         },
         "config": {
             "prepend-autoloader": false
