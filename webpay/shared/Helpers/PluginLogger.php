@@ -18,8 +18,6 @@ final class PluginLogger implements ILogger {
      * Toma como valores por defecto lo siguiente:
      * date format : "Y-m-d H:i:s" "Y n j, g:i a"
      * output format : "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
-     * 
-     *
      * @param Throwable $e
      */
     public function __construct(LogConfig $config) {
