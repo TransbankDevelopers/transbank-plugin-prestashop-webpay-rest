@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
-use PrestaShop\Module\WebpayPlus\Utils\MetricsUtil;
 use PrestaShop\Module\WebpayPlus\Utils\InfoUtil;
 use Configuration;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
@@ -110,7 +109,6 @@ class ConfigureController extends FrameworkBundleAdminController
             else if ($form->getClickedButton() === $form->get('webpay_plus_form_save_button')){
                 $errors = $formDataHandler->save($form->getData());
                 if (empty($errors)) {
-                    $this->sendMetrics('webpay', $this->getWebpayEnvironment());
                     $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
                 } else {
                     $this->flashErrors($errors);
@@ -141,7 +139,6 @@ class ConfigureController extends FrameworkBundleAdminController
             else if ($form->getClickedButton() === $form->get('oneclick_form_save_button')){
                 $errors = $formDataHandler->save($form->getData());
                 if (empty($errors)) {
-                    $this->sendMetrics('oneclick', $this->getOneclickEnvironment());
                     $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
                 } else {
                     $this->flashErrors($errors);
@@ -169,26 +166,6 @@ class ConfigureController extends FrameworkBundleAdminController
         }
 
         return $this->redirectToRoute('ps_controller_webpay_configure_diagnosis');
-    }
-
-    private function sendMetrics($product, $enviroment) {
-        if ($enviroment === Options::ENVIRONMENT_INTEGRATION)
-        {
-            return;
-        }
-        $info = InfoUtil::getFullResume();
-        //$shops = Shop::getShops();
-        return MetricsUtil::sendMetrics(
-            $info['php']['version'],//$phpVersion, 
-            'prestashop',//$plugin, 
-            $info['commerce_info']['current_plugin_version'],//$pluginVersion
-            $info['commerce_info']['current_ecommerce_version'],//$ecommerceVersion
-            1,//$ecommerceId, 
-            $product, 
-            $enviroment, 
-            $this->getWebpayCommerceCode(),//$commerceCode
-            $this->getMeta()
-        );
     }
 
     private function getMeta(){
