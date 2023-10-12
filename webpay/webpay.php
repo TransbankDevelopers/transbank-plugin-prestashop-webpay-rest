@@ -80,8 +80,10 @@ class WebPay extends PaymentModule
         $this->loadDefaultConfigurationOneclick();
 
         /* Se instalan las tablas, si falla se sigue con la instalación */
-        $this->installWebpayTable();
-        $this->installOneclickTable();
+        $resultInstallWebpayTable = $this->installWebpayTable();
+        $this->logError("installWebpayTable => {$resultInstallWebpayTable}");
+        $resultInstallOneclickTable = $this->installOneclickTable();
+        $this->logError("installOneclickTable => {$resultInstallOneclickTable}");
         $this->installTab();
 
         /* Si algo falla aqui se muestran los errores */
