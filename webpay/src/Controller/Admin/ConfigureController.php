@@ -8,12 +8,12 @@ use Exception;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Utils\MetricsUtil;
 use PrestaShop\Module\WebpayPlus\Utils\InfoUtil;
 use Configuration;
+use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Webpay\Options;
 
 class ConfigureController extends FrameworkBundleAdminController
@@ -62,14 +62,14 @@ class ConfigureController extends FrameworkBundleAdminController
 
     public function logs(Request $request)
     {
-        $log = new LogHandler();
-        $res = $log->getResumeBase();
-        $lastLog = $log->setLastLog();
+        $logger = TbkFactory::createLogger();
+        $resume = $logger->getInfo();
+        $lastLog = $logger->getLogDetail(basename($resume['last']));
         
         return $this->render('@Modules/webpay/views/templates/admin/logs_configure.html.twig', [
             'enableSidebar' => true,
             'layoutTitle' => $this->trans('Configuración Webpay', 'Modules.WebpayPlus.Admin'),
-            'resume' => $res,
+            'resume' => $resume,
             'lastLog' => $lastLog
         ]);
     }
