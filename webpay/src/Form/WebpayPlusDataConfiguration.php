@@ -6,8 +6,6 @@ namespace PrestaShop\Module\WebpayPlus\Form;
 
 use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
 use PrestaShop\PrestaShop\Core\ConfigurationInterface;
-use Transbank\Webpay\Options;
-use Transbank\Webpay\WebpayPlus;
 
 final class WebpayPlusDataConfiguration implements DataConfigurationInterface
 {
