@@ -3,7 +3,6 @@
 namespace PrestaShop\Module\WebpayPlus\Controller;
 
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
-use Configuration;
 use Cart;
 use Module;
 use Validate;
