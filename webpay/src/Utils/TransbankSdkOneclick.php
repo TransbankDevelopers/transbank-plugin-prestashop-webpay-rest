@@ -3,11 +3,11 @@
 namespace PrestaShop\Module\WebpayPlus\Utils;
 
 use Exception;
+use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\Oneclick\MallInscription;
 use Transbank\Webpay\Oneclick\MallTransaction;
 use Transbank\Webpay\Oneclick;
-use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 
 /**
  * Class TransbankSdkOneclick.
@@ -18,9 +18,6 @@ class TransbankSdkOneclick
      * @var Options
      */
     public $options;
-    /**
-     * @var LogHandler
-     */
     protected $log;
 
     protected $inscription = null;
@@ -34,7 +31,7 @@ class TransbankSdkOneclick
      */
     public function __construct($config)
     {
-        $this->log = new LogHandler();
+        $this->log = TbkFactory::createLogger();
         $this->options = MallInscription::getDefaultOptions();
         if (isset($config) && isset($config['ENVIRONMENT']) && $config['ENVIRONMENT'] == Options::ENVIRONMENT_PRODUCTION){
             $this->options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY_SECRET']);

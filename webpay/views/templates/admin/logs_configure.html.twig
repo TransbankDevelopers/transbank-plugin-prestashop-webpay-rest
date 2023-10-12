@@ -13,14 +13,14 @@
                     </tr>
                 </thead>
                 <tr>
-                    <td style="width: 300px;">{{ 'Directorio de logs:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{resume.log_dir}}</td>
+                    <td style="width: 300px;">{{ 'Directorio de logs:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{resume.dir}}</td>
                 </tr>
                 <tr>
-                    <td>{{ 'Cantidad de logs en directorio:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{resume.logs_count.log_count}}</td>
+                    <td>{{ 'Cantidad de logs en directorio:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{resume.length}}</td>
                 </tr>
                 <tr>
                     <td>{{ 'Listado de logs disponibles:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>
-                        {% for log in resume.logs_list %}
+                        {% for log in resume.logs %}
                             <li>{{ log }}</li>
                         {% endfor %}
                     </td>
@@ -34,13 +34,13 @@
                     </tr>
                 </thead>
                 <tr>
-                    <td style="width: 300px;">{{ 'Último Documento:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{lastLog.log_file}}</td>
+                    <td style="width: 300px;">{{ 'Último Documento:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{lastLog.filename}}</td>
                 </tr>
                 <tr>
-                    <td>{{ 'Peso del Documento:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{lastLog.log_weight}}</td>
+                    <td>{{ 'Peso del Documento:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{lastLog.size}}</td>
                 </tr>
                 <tr>
-                    <td>{{ 'Cantidad de Líneas:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{lastLog.log_regs_lines}}</td>
+                    <td>{{ 'Cantidad de Líneas:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{lastLog.lines}}</td>
                 </tr>
             </table>
 
@@ -49,7 +49,7 @@
         <div class="card-block row">
             <div class="col">
 <pre>
-{{lastLog.log_content}}
+{{lastLog.content}}
 </pre>
             </div>
         </div>

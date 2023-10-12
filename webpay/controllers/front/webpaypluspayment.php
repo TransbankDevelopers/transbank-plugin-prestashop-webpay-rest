@@ -6,6 +6,7 @@ use PrestaShop\Module\WebpayPlus\Utils\Utils;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
 use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
+use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
 /**
  * Class WebPayWebpayplusPaymentModuleFrontController.
@@ -17,6 +18,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
     public function initContent()
     {
         parent::initContent();
+        $this->logger = TbkFactory::createLogger();
         $this->logWebpayPlusIniciando();
 
         $randomNumber = uniqid();

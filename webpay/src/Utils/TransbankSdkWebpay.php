@@ -3,11 +3,11 @@
 namespace PrestaShop\Module\WebpayPlus\Utils;
 
 use Exception;
+use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
 use Transbank\Webpay\WebpayPlus;
-use PrestaShop\Module\WebpayPlus\Utils\LogHandler;
 
 /**
  * Class TransbankSdkWebpayRest.
@@ -18,9 +18,6 @@ class TransbankSdkWebpay
      * @var Options
      */
     public $options;
-    /**
-     * @var LogHandler
-     */
     protected $log;
 
     protected $transaction = null;
@@ -32,7 +29,7 @@ class TransbankSdkWebpay
      */
     public function __construct($config)
     {
-        $this->log = new LogHandler();
+        $this->log = TbkFactory::createLogger();
         $this->options = Transaction::getDefaultOptions();
         if (isset($config) && isset($config['ENVIRONMENT']) && $config['ENVIRONMENT'] == Options::ENVIRONMENT_PRODUCTION){
             $this->options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY_SECRET']);
