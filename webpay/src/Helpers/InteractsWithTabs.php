@@ -31,7 +31,7 @@ trait InteractsWithTabs
         }
 
         $base->tabs = [
-            [   
+            [
                 'route_name' => 'ps_controller_webpay_configure',
                 'class_name' => ConfigureController::TAB_CLASS_NAME,
                 'visible' => true,
