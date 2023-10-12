@@ -10,9 +10,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
-use PrestaShop\Module\WebpayPlus\Utils\InfoUtil;
 use Configuration;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
+use Transbank\Plugin\Helpers\InfoUtil;
+use Transbank\Plugin\Helpers\PrestashopInfoUtil;
 use Transbank\Webpay\Options;
 
 class ConfigureController extends FrameworkBundleAdminController
@@ -49,13 +50,14 @@ class ConfigureController extends FrameworkBundleAdminController
     {
         $diagnosisFormDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
         $diagnosisForm = $diagnosisFormDataHandler->getForm();
-        $data = InfoUtil::getFullResume();
-
+        $summary = InfoUtil::getSummary();
+        $eSummary = PrestashopInfoUtil::getSummary();
         return $this->render('@Modules/webpay/views/templates/admin/diagnosis_configure.html.twig', [
             'diagnosisForm' => $diagnosisForm->createView(),
             'enableSidebar' => true,
             'layoutTitle' => $this->trans('Configuración Webpay', 'Modules.WebpayPlus.Admin'),
-            'data' => $data
+            'summary' => $summary,
+            'eSummary' => $eSummary
         ]);
     }
 
@@ -75,15 +77,10 @@ class ConfigureController extends FrameworkBundleAdminController
 
     public function info(Request $request)
     {
-
-        ob_start();
-        phpinfo();
-        $phpinfo = ob_get_contents();
-        ob_end_clean();
-        $phpinfo = preg_replace('~<style(.*?)</style>~Usi', "", $phpinfo); 
+        $phpInfo = InfoUtil::getPhpInfo();
         return $this->render('@Modules/webpay/views/templates/admin/info_configure.html.twig', [
             'enableSidebar' => true,
-            'phpinfo' => $phpinfo,
+            'content' => $phpInfo['content'],
             'layoutTitle' => $this->trans('Configuración Webpay', 'Modules.WebpayPlus.Admin'),
             
         ]);
