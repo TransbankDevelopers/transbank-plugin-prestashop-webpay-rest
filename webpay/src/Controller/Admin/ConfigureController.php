@@ -165,38 +165,4 @@ class ConfigureController extends FrameworkBundleAdminController
         return $this->redirectToRoute('ps_controller_webpay_configure_diagnosis');
     }
 
-    private function getMeta(){
-        return [
-            'PS_SHOP_NAME' => Configuration::get('PS_SHOP_NAME'),
-            'PS_SHOP_EMAIL' => Configuration::get('PS_SHOP_EMAIL'),
-            'PS_SHOP_PHONE' => Configuration::get('PS_SHOP_PHONE'),
-            'systemInformationSummary' => $this->getSystemInformationSummary()
-        ];
-    }    
-
-    /**
-     * @return \PrestaShop\PrestaShop\Adapter\System\SystemInformation
-     */
-    private function getSystemInformationSummary()
-    {
-        /* Ejemplo de data entregada por el objeto */
-        /*{
-            "notHostMode":true,
-            "server":{"version":"Apache\/2.4.52 (Debian)","php":{"version":"7.4.28","memoryLimit":"256M","maxExecutionTime":"30","maxFileSizeUpload":"20M"}},
-            "instaWebInstalled":false,"uname":"Linux #1 SMP Fri Apr 2 22:23:49 UTC 2021 x86_64",
-            "database":{"version":"10.8.3-MariaDB-1:10.8.3+maria~jammy","server":"webpay_mariadb_1.7.8.5-7.4:3306","name":"prestashop","user":"root","prefix":"ps_","engine":"InnoDB","driver":"DbPDO"},
-            "overrides":[],
-            "shop":{"version":"1.7.8.5","url":"http:\/\/localhost:8080\/","path":"\/var\/www\/html","theme":"classic"},
-            "isNativePHPmail":true,
-            "smtp":{"server":"smtp.","user":"","password":"","encryption":"off","port":"25"}
-          }
-        */
-        try {
-            return $this->get('prestashop.adapter.system_information')->getSummary();
-        } catch (Exception $ex) {
-            return 'No compatible';
-        }
-        
-    }
-
 }
