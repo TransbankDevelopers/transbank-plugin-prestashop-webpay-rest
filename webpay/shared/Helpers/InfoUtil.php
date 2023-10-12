@@ -100,7 +100,7 @@ class InfoUtil
         phpinfo();
         $info = ob_get_contents();
         ob_end_clean();
-        $info = preg_replace('~<style(.*?)</style>~Usi', "", $info); 
+        $info = preg_replace('~<style(.*?)</style>~Usi', "", $info);
         return ['content' => $info];
     }
 
