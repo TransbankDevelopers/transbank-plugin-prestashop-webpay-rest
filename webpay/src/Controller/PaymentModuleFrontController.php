@@ -8,6 +8,7 @@ use Cart;
 use Module;
 use Validate;
 use Tools;
+use Exception;
 
 class PaymentModuleFrontController extends BaseModuleFrontController
 {
@@ -47,7 +48,8 @@ class PaymentModuleFrontController extends BaseModuleFrontController
             }
         }
         if (!$authorized) {
-            exit($this->module->getTranslator()->trans('This payment method is not available.', [], 'Modules.Webpay'));
+            $errorMessage = $this->module->getTranslator()->trans('This payment method is not available.', [], 'Modules.Webpay');
+            throw new Exception($errorMessage);
         }
         if (!Validate::isLoadedObject($customer)) {
             Tools::redirect('index.php?controller=order&step=1');
