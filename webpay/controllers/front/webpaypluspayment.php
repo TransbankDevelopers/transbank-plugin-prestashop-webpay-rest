@@ -30,9 +30,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $buyOrder = 'ps:'.$randomNumber;
         $sessionId = 'ps:sessionId:'.$randomNumber;
 
-        //patch for error with parallels carts
-        $recoverQueryParams = ['token_cart' => md5(_COOKIE_KEY_.'recover_cart_'.$cartId), 'recover_cart' => $cartId];
-        $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', $recoverQueryParams, true);
+        $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', [], true);
         $this->logWebpayPlusAntesCrearTx($amount, $sessionId, $buyOrder, $returnUrl);
         $result = $webpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
         
