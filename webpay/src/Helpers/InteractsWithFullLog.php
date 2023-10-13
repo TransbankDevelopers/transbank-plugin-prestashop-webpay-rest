@@ -2,8 +2,6 @@
 
 namespace PrestaShop\Module\WebpayPlus\Helpers;
 
-use Configuration;
-use Tools;
 
 /**
  * Trait InteractsWithFullLog.

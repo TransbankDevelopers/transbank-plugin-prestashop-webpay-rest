@@ -76,7 +76,7 @@ class BaseModuleFrontController extends ModuleFrontController
     }
 
     protected function getOrderTotalRound($cart){
-        return round($this->getOrderTotal($cart)); 
+        return round($this->getOrderTotal($cart));
     }
 
     protected function getOrderTotal($cart){
@@ -117,7 +117,6 @@ class BaseModuleFrontController extends ModuleFrontController
     {
         $this->logError($message);
         Tools::redirect($redirectTo);
-        exit;
     }
 
     protected function loadCartFromCookie(){

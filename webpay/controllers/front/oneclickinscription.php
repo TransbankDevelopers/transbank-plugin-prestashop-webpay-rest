@@ -26,14 +26,12 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
             $this->customerToLog($customer);
         }
 
-        $recoverQueryParams = [];
-        //$recoverQueryParams = ['token_cart' => md5(_COOKIE_KEY_.'recover_cart_'.$cartId), 'recover_cart' => $cartId];
         $webpay = OneclickFactory::create();
 
         $userId = $customer->id;
         $userName = $this->generateUsername($userId, $webpay->getCommerceCode());
         $userEmail = $customer->email;
-        $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', $recoverQueryParams, true);
+        $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', [], true);
 
 
         $resp = $webpay->startInscription($userName, $userEmail, $returnUrl);

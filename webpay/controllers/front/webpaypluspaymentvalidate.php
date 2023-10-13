@@ -186,7 +186,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_APPROVED;
             $webpayTransaction->save();
             $this->logWebpayPlusTodoOk($token, $webpayTransaction);
-            return $this->redirectToPaidSuccessPaymentPage($cart);
+            $this->redirectToPaidSuccessPaymentPage($cart);
         } else {
             $this->logWebpayPlusCommitFallidoError($token, $result);
             $webpayTransaction->response_code = isset($result->responseCode) ? $result->responseCode : null;
@@ -234,7 +234,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
         if ($webpayTransaction->status == TransbankWebpayRestTransaction::STATUS_APPROVED) {
             $cart = $this->getCart($webpayTransaction->cart_id);
-            return $this->redirectToPaidSuccessPaymentPage($cart);
+            $this->redirectToPaidSuccessPaymentPage($cart);
         }
         $this->updateTransactionStatus($webpayTransaction, TransbankWebpayRestTransaction::STATUS_FAILED, json_encode(['error' => $errorMessage]));
         $this->setPaymentErrorPage($errorMessage);
@@ -243,7 +243,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     private function updateTransactionStatus($tx, $status, $tbkResponse){
         $tx->status = $status;
         $tx->transbank_response = $tbkResponse;
-        return $tx->save();
+        $tx->save();
     }
 
 }

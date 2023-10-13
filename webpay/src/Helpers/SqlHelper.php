@@ -26,7 +26,7 @@ class SqlHelper
 
     public static function getValue($sql){
         try {
-            return Db::getInstance()->getValue($sql, $use_cache = true);
+            return Db::getInstance()->getValue($sql);
         }
         catch(Exception $e) {
             return null;

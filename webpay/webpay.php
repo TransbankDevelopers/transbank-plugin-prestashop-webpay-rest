@@ -10,10 +10,6 @@ use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
-
 require_once __DIR__.'/vendor/autoload.php';
 
 class WebPay extends PaymentModule
@@ -80,8 +76,10 @@ class WebPay extends PaymentModule
         $this->loadDefaultConfigurationOneclick();
 
         /* Se instalan las tablas, si falla se sigue con la instalación */
-        $this->installWebpayTable();
-        $this->installOneclickTable();
+        $resultInstallWebpayTable = $this->installWebpayTable();
+        $this->logError("installWebpayTable => {$resultInstallWebpayTable}");
+        $resultInstallOneclickTable = $this->installOneclickTable();
+        $this->logError("installOneclickTable => {$resultInstallOneclickTable}");
         $this->installTab();
 
         /* Si algo falla aqui se muestran los errores */

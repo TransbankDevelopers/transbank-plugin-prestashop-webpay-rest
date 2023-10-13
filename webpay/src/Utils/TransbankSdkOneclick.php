@@ -4,10 +4,10 @@ namespace PrestaShop\Module\WebpayPlus\Utils;
 
 use Exception;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\Oneclick\MallInscription;
 use Transbank\Webpay\Oneclick\MallTransaction;
-use Transbank\Webpay\Oneclick;
 
 /**
  * Class TransbankSdkOneclick.
@@ -80,7 +80,8 @@ class TransbankSdkOneclick
                     'token' => $resp->token,
                 ];
             } else {
-                throw new Exception('No se ha iniciado la inscripción para => userName: ' . $userName . ', email: ' . $email);
+                throw new EcommerceException(
+                    'No se ha iniciado la inscripción para => userName: ' . $userName . ', email: ' . $email);
             }
         } catch (Exception $e) {
             $result = [
@@ -127,10 +128,11 @@ class TransbankSdkOneclick
     }
 
     /**
+     * @param $username
+     * @param $tbkUser
+     * @param $parentBuyOrder
+     * @param $childBuyOrder
      * @param $amount
-     * @param $sessionId
-     * @param $buyOrder
-     * @param $returnUrl
      *
      * @throws Exception
      *

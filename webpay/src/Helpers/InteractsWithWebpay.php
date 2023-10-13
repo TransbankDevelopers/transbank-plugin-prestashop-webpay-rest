@@ -112,23 +112,23 @@ trait InteractsWithWebpay
     }
 
     protected function setWebpayApiKey($value){
-        return Configuration::updateValue('WEBPAY_API_KEY_SECRET', $value);
+        Configuration::updateValue('WEBPAY_API_KEY_SECRET', $value);
     }
 
     protected function setWebpayCommerceCode($value){
-        return Configuration::updateValue('WEBPAY_STOREID', $value);
+        Configuration::updateValue('WEBPAY_STOREID', $value);
     }
 
     protected function setWebpayEnvironment($value){
-        return Configuration::updateValue('WEBPAY_ENVIRONMENT', $value);
+        Configuration::updateValue('WEBPAY_ENVIRONMENT', $value);
     }
 
     protected function setWebpayOrderAfterPayment($value){
-        return Configuration::updateValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', $value);
+        Configuration::updateValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT', $value);
     }
 
     protected function setWebpayActive($value){
-        return Configuration::updateValue('WEBPAY_ACTIVE', $value);
+        Configuration::updateValue('WEBPAY_ACTIVE', $value);
     }
 
     protected function getDefaultWebpayCommerceCode(){

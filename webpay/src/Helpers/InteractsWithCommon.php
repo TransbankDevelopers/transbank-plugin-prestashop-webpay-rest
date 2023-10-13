@@ -15,7 +15,7 @@ trait InteractsWithCommon
     }
 
     protected function setDebugActive($value){
-        return Configuration::updateValue('DEBUG_ACTIVE', $value);
+        Configuration::updateValue('DEBUG_ACTIVE', $value);
     }
 
     protected function getFormDebugActive(){

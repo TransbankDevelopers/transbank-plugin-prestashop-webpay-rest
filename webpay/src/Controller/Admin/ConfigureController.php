@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\WebpayPlus\Controller\Admin;
 
-use Exception;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
-use Configuration;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Helpers\InfoUtil;
 use Transbank\Plugin\Helpers\PrestashopInfoUtil;
-use Transbank\Webpay\Options;
+
 
 class ConfigureController extends FrameworkBundleAdminController
 {
@@ -22,7 +19,7 @@ class ConfigureController extends FrameworkBundleAdminController
     use InteractsWithOneclick;
     const TAB_CLASS_NAME = 'WebpayPlusConfigure';
 
-    public function webpayplus(Request $request)
+    public function webpayplus()
     {
         $webpayPlusFormDataHandler = $this->get('webpay.form.webpay_plus_form_data_handler');
         $webpayPlusForm = $webpayPlusFormDataHandler->getForm();
@@ -34,7 +31,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function oneclick(Request $request)
+    public function oneclick()
     {
         $oneclickFormDataHandler = $this->get('webpay.form.oneclick_form_data_handler');
         $oneclickForm = $oneclickFormDataHandler->getForm();
@@ -46,7 +43,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function diagnosis(Request $request)
+    public function diagnosis()
     {
         $diagnosisFormDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
         $diagnosisForm = $diagnosisFormDataHandler->getForm();
@@ -61,7 +58,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function logs(Request $request)
+    public function logs()
     {
         $logger = TbkFactory::createLogger();
         $resume = $logger->getInfo();
@@ -75,7 +72,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function info(Request $request)
+    public function info()
     {
         $phpInfo = InfoUtil::getPhpInfo();
         return $this->render('@Modules/webpay/views/templates/admin/info_configure.html.twig', [
@@ -86,7 +83,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function saveWebpayPlusForm(Request $request): Response
+    public function saveWebpayPlusForm(): Response
     {
         $formDataHandler = $this->get('webpay.form.webpay_plus_form_data_handler');
         $form = $formDataHandler->getForm();
@@ -116,7 +113,7 @@ class ConfigureController extends FrameworkBundleAdminController
         return $this->redirectToRoute('ps_controller_webpay_configure_webpayplus');
     }
 
-    public function saveOneclickForm(Request $request): Response
+    public function saveOneclickForm(): Response
     {
         $formDataHandler = $this->get('webpay.form.oneclick_form_data_handler');
         $form = $formDataHandler->getForm();
@@ -146,7 +143,7 @@ class ConfigureController extends FrameworkBundleAdminController
         return $this->redirectToRoute('ps_controller_webpay_configure_oneclick');
     }
 
-    public function saveDiagnosisForm(Request $request): Response
+    public function saveDiagnosisForm(): Response
     {
         $formDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
         $form = $formDataHandler->getForm();

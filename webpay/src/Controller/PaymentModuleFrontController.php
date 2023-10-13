@@ -3,11 +3,12 @@
 namespace PrestaShop\Module\WebpayPlus\Controller;
 
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
-use Configuration;
 use Cart;
 use Module;
 use Validate;
 use Tools;
+use Exception;
+use Transbank\Plugin\Exceptions\EcommerceException;
 
 class PaymentModuleFrontController extends BaseModuleFrontController
 {
@@ -47,7 +48,9 @@ class PaymentModuleFrontController extends BaseModuleFrontController
             }
         }
         if (!$authorized) {
-            exit($this->module->getTranslator()->trans('This payment method is not available.', [], 'Modules.Webpay'));
+            $errorMessage = $this->module->getTranslator()->trans(
+                'This payment method is not available.', [], 'Modules.Webpay');
+            throw new EcommerceException($errorMessage);
         }
         if (!Validate::isLoadedObject($customer)) {
             Tools::redirect('index.php?controller=order&step=1');
