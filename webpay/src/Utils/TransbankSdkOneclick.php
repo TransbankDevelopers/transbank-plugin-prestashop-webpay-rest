@@ -80,7 +80,8 @@ class TransbankSdkOneclick
                     'token' => $resp->token,
                 ];
             } else {
-                throw new EcommerceException('No se ha iniciado la inscripción para => userName: ' . $userName . ', email: ' . $email);
+                throw new EcommerceException(
+                    'No se ha iniciado la inscripción para => userName: ' . $userName . ', email: ' . $email);
             }
         } catch (Exception $e) {
             $result = [
