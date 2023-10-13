@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\WebpayPlus\Controller\Admin;
 
-use Exception;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
-use Configuration;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Helpers\InfoUtil;
 use Transbank\Plugin\Helpers\PrestashopInfoUtil;
-use Transbank\Webpay\Options;
+
 
 class ConfigureController extends FrameworkBundleAdminController
 {
