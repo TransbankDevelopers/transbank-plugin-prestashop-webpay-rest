@@ -48,7 +48,8 @@ class PaymentModuleFrontController extends BaseModuleFrontController
             }
         }
         if (!$authorized) {
-            $errorMessage = $this->module->getTranslator()->trans('This payment method is not available.', [], 'Modules.Webpay');
+            $errorMessage = $this->module->getTranslator()->trans(
+                'This payment method is not available.', [], 'Modules.Webpay');
             throw new EcommerceException($errorMessage);
         }
         if (!Validate::isLoadedObject($customer)) {
