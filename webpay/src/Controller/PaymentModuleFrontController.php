@@ -8,6 +8,7 @@ use Module;
 use Validate;
 use Tools;
 use Exception;
+use Transbank\Plugin\Exceptions\EcommerceException;
 
 class PaymentModuleFrontController extends BaseModuleFrontController
 {
@@ -48,7 +49,7 @@ class PaymentModuleFrontController extends BaseModuleFrontController
         }
         if (!$authorized) {
             $errorMessage = $this->module->getTranslator()->trans('This payment method is not available.', [], 'Modules.Webpay');
-            throw new Exception($errorMessage);
+            throw new EcommerceException($errorMessage);
         }
         if (!Validate::isLoadedObject($customer)) {
             Tools::redirect('index.php?controller=order&step=1');

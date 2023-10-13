@@ -4,6 +4,7 @@ namespace PrestaShop\Module\WebpayPlus\Utils;
 
 use Exception;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
@@ -103,7 +104,7 @@ class TransbankSdkWebpay
         try {
             $this->log->logInfo('commitTransaction : tokenWs: ' . $tokenWs);
             if ($tokenWs == null) {
-                throw new Exception('El token webpay es requerido');
+                throw new EcommerceException('El token webpay es requerido');
             }
 
             return $this->transaction->commit($tokenWs);
