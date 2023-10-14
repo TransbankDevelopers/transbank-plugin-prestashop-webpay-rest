@@ -26,8 +26,8 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $this->logPrintCart($cart);
         $cartId = $cart->id;
         $webpay = WebpayPlusFactory::create();
-        $amount = $this->getOrderTotalRound($cart); 
-        $buyOrder = 'ps:'.$randomNumber;
+        $amount = (int) $this->getOrderTotalRound($cart); 
+        $buyOrder = $cart->id;
         $sessionId = 'ps:sessionId:'.$randomNumber;
 
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', [], true);
