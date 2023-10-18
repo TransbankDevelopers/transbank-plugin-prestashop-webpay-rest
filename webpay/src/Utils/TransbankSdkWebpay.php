@@ -77,7 +77,7 @@ class TransbankSdkWebpay
                 throw new EcommerceException($errorMessage);
             }
         } catch (Exception $e) {
-            $errorMessage = "Error creando la transacción para => 
+            $errorMessage = "Error creando la transacción para =>
                 buyOrder: {$buyOrder}, amount: {$amount}, error: {$e->getMessage()}";
             throw new EcommerceException($errorMessage, 0, $e);
         }

@@ -154,7 +154,7 @@ trait InteractsWithWebpayLog
         $this->logError(json_encode($result));
     }
 
-    public function logWebpayPlusAntesValidateOrderPrestashop($token, $amount, $cartId, $okStatus, 
+    public function logWebpayPlusAntesValidateOrderPrestashop($token, $amount, $cartId, $okStatus,
         $currencyId, $customerSecureKey){
         if($this->getDebugActive()==1){
             $this->logInfo('C.6. Procesando pago - antes de validateOrder');
