@@ -2,7 +2,6 @@
 
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
-use PrestaShop\Module\WebpayPlus\Utils\Utils;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
@@ -99,11 +98,7 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
             'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
         ]);
 
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('payment_error_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-        }
+        $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
     }
 
     protected function redirectToOrderConfirmationByCartId($cartId)

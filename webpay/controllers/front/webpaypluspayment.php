@@ -2,7 +2,6 @@
 
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
-use PrestaShop\Module\WebpayPlus\Utils\Utils;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayLog;
 use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
@@ -56,12 +55,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             'token_ws' => $result['token_ws'],
             'amount'   => $amount,
         ]);
-
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('payment_execution_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
-        }
+        $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
     }
 
     /**
@@ -84,12 +78,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
             'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
         ]);
-
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('payment_error_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-        }
+        $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
     }
 
     private function createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $currencyId, $token, $buyOrder, $amount){

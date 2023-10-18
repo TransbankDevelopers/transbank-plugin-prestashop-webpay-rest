@@ -8,7 +8,6 @@ use Cart;
 use Context;
 use Tools;
 use Configuration;
-use PrestaShop\Module\WebpayPlus\Utils\Utils;
 
 class BaseModuleFrontController extends ModuleFrontController
 {
@@ -106,11 +105,7 @@ class BaseModuleFrontController extends ModuleFrontController
             'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
             'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
         ]);
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('payment_error_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-        }
+        $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
     }
 
     protected function throwErrorRedirect($message, $redirectTo = 'index.php?controller=order&step=3')

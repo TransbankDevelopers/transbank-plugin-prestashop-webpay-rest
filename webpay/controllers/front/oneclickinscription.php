@@ -3,7 +3,6 @@
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
-use PrestaShop\Module\WebpayPlus\Utils\Utils;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 
 class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontController
@@ -70,12 +69,7 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
             'token_ws' => $result['token'],
             'amount'   => round($amount)
         ]);
-
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('oneclick_inscription_execution_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/oneclick_inscription_execution.tpl');
-        }
+        $this->setTemplate('module:webpay/views/templates/front/oneclick_inscription_execution.tpl');
     }
 
     
@@ -105,11 +99,6 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
             'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
             'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
         ]);
-
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('payment_error_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-        }
+        $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
     }
 }
