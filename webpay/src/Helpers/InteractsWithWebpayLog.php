@@ -124,8 +124,7 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusCommitTxCarroManipuladoError($token, $tx){
-        $this->logError('C.3. El carro de compras ya fue pagado con otra Transacción => token: '.$token);
-        $this->logError(json_encode($tx));
+        $this->logWebpayPlusCommitTxCarroManipuladoError($token, $tx);
     }
     
     public function logWebpayPlusDespuesCommitTx($token, $result){
