@@ -63,7 +63,7 @@ class TransbankSdkWebpay
         try {
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
-            $this->log->logInfo('createTransaction : amount: ' . $amount . ', sessionId: ' . 
+            $this->log->logInfo('createTransaction : amount: ' . $amount . ', sessionId: ' .
                 $sessionId .', buyOrder: ' . $buyOrder . ', txDate: ' . $txDate . ', txTime: ' . $txTime);
             $initResult = $this->transaction->create($buyOrder, $sessionId, $amount, $returnUrl);
             $this->log->logInfo('createTransaction.result: ' . json_encode($initResult));

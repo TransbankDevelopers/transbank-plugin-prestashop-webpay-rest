@@ -6,7 +6,8 @@ trait InteractsWithWebpayLog
 {
     public function logWebpayPlusInstallConfigLoad($webpayCommerceCode, $webpayDefaultOrderStateIdAfterPayment){
         $this->logInfo('Configuración de WEBPAY PLUS se cargo de forma correcta');
-        $this->logInfo('webpayCommerceCode: '.$webpayCommerceCode.', webpayDefaultOrderStateIdAfterPayment: '.$webpayDefaultOrderStateIdAfterPayment);
+        $this->logInfo('webpayCommerceCode: '.$webpayCommerceCode.', webpayDefaultOrderStateIdAfterPayment: '
+            .$webpayDefaultOrderStateIdAfterPayment);
     }
 
     public function logWebpayPlusInstallConfigLoadDefault(){
@@ -14,7 +15,8 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusInstallConfigLoadDefaultPorIncompleta(){
-        $this->logInfo('Configuración por defecto de WEBPAY PLUS se cargo de forma correcta porque los valores de producción estan incompletos');
+        $this->logInfo('Configuración por defecto de WEBPAY PLUS se cargo de forma
+            correcta porque los valores de producción estan incompletos');
     }
 
     public function logWebpayPlusConfigError(){
@@ -30,7 +32,8 @@ trait InteractsWithWebpayLog
     public function logWebpayPlusAntesCrearTx($amount, $sessionId, $buyOrder, $returnUrl){
         if($this->getDebugActive()==1){
             $this->logInfo('B.2. Preparando datos antes de crear la transacción en Transbank');
-            $this->logInfo('amount: '.$amount.', sessionId: '.$sessionId.', buyOrder: '.$buyOrder.', returnUrl: '.$returnUrl);
+            $this->logInfo('amount: '.$amount.', sessionId: '.$sessionId.', buyOrder: '.$buyOrder.
+                ', returnUrl: '.$returnUrl);
         }
     }
 
@@ -80,7 +83,8 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusRetornandoDesdeTbkFujo2Error($tbkIdSesion){
-        $this->logError('C.2. Error tipo Flujo 2: El pago fue anulado por tiempo de espera => tbkIdSesion: '.$tbkIdSesion);
+        $this->logError('C.2. Error tipo Flujo 2: El pago fue anulado por tiempo de espera => tbkIdSesion: '
+            .$tbkIdSesion);
     }
 
     public function logWebpayPlusRetornandoDesdeTbkFujo3Error($tbktoken){
@@ -92,7 +96,8 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusRetornandoDesdeTbkFujo4Error($tokenWs, $tbktoken){
-        $this->logError('C.2. Error tipo Flujo 4: El pago es inválido  => tokenWs: '.$tokenWs.', tbktoken: '.$tbktoken);
+        $this->logError('C.2. Error tipo Flujo 4: El pago es inválido  => tokenWs: '.$tokenWs.', tbktoken: '
+            .$tbktoken);
     }
 
     public function logWebpayPlusAntesCommitTx($token, $tx, $cart){
@@ -149,10 +154,12 @@ trait InteractsWithWebpayLog
         $this->logError(json_encode($result));
     }
 
-    public function logWebpayPlusAntesValidateOrderPrestashop($token, $amount, $cartId, $OkStatus, $currencyId, $customerSecureKey){
+    public function logWebpayPlusAntesValidateOrderPrestashop($token, $amount, $cartId, $okStatus, 
+        $currencyId, $customerSecureKey){
         if($this->getDebugActive()==1){
             $this->logInfo('C.6. Procesando pago - antes de validateOrder');
-            $this->logInfo('token : '.$token.', amount : '.$amount.', cartId: '.$cartId.', OKStatus: '.$OkStatus.', currencyId: '.$currencyId.', customer_secure_key: '.$customerSecureKey);
+            $this->logInfo('token : '.$token.', amount : '.$amount.', cartId: '.$cartId.', okStatus: '.$okStatus.
+                ', currencyId: '.$currencyId.', customer_secure_key: '.$customerSecureKey);
         }
     }
 

@@ -84,7 +84,7 @@ class TransbankSdkOneclick
                 throw new EcommerceException($errorMessage);
             }
         } catch (Exception $e) {
-            $errorMessage = "Error al iniciar la inscripción para => 
+            $errorMessage = "Error al iniciar la inscripción para =>
                 userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
             throw new EcommerceException($errorMessage, 0, $e);
@@ -113,7 +113,7 @@ class TransbankSdkOneclick
             $this->log->logInfo('finish - resp: ' . json_encode($resp));
             return $resp;
         } catch (Exception $e) {
-            $errorMessage = "Error al confirmar la inscripción para => 
+            $errorMessage = "Error al confirmar la inscripción para =>
                 userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
             throw new EcommerceException($errorMessage, 0, $e);
@@ -153,7 +153,7 @@ class TransbankSdkOneclick
             $this->log->logInfo('authorize - resp: ' . json_encode($resp));
             return $resp;
         } catch (Exception $e) {
-            $errorMessage = "Error al autorizar el pago para => userName: 
+            $errorMessage = "Error al autorizar el pago para => userName:
                 {$username}, buyOrder: {$parentBuyOrder}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
             throw new EcommerceException($errorMessage, 0, $e);
