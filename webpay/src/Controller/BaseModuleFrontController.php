@@ -89,18 +89,14 @@ class BaseModuleFrontController extends ModuleFrontController
     }
 
 
-    /**
-     * @param array $result
-     */
-    protected function setPaymentErrorPage($error, $detailError = null)
+    protected function setPaymentErrorPage($errorMessage)
     {
         $date_tx_hora = date('H:i:s');
         $date_tx_fecha = date('d-m-Y');
-        $msg = $error.(isset($detailError) ? ' ('.$detailError.')' : '');
-        $this->logError($msg);
+        $this->logError($errorMessage);
         Context::getContext()->smarty->assign([
             'WEBPAY_RESULT_CODE'          => 500,
-            'WEBPAY_RESULT_DESC'          => $msg,
+            'WEBPAY_RESULT_DESC'          => $errorMessage,
             'WEBPAY_VOUCHER_ORDENCOMPRA'  => 0,
             'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
             'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,

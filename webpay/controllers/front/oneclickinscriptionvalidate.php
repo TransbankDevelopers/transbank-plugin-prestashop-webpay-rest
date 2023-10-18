@@ -21,7 +21,7 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         $tbkOrdenCompra = isset($data["TBK_ORDEN_COMPRA"]) ? $data['TBK_ORDEN_COMPRA'] : null;
 
         if ($tbkOrdenCompra && $tbkSessionId && !$token){
-            $this->setErrorTemplate(['error' => 'Timeout Error.']);
+            $this->setPaymentErrorPage('Timeout Error.');
         }
 
         //validar si se registro la tarjeta correctamente correctamente
@@ -34,15 +34,16 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         if (isset($tbkOrdenCompra)) {//se abandono la inscripcion al haber presionado la opción 'Abandonar y volver al comercio'
             $ins->status = TransbankInscriptions::STATUS_FAILED;
             $ins->save();
-            $this->setErrorTemplate(['error' => 'Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ']);//.', token: '.$token.', tbkSessionId: '.$tbkSessionId.', tbkOrdenCompra: '.$tbkOrdenCompra
+            $this->setPaymentErrorPage('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ');
         }
 
         //registro correcto
         //flujo correcto
-        $this->finishInscription($ins, $token);
-
-        //return $this->setErrorTemplate(['error' => 'Todo biennnnn']);
-        //$cart = new Cart($webpayTransaction->cart_id);
+        try {
+            $this->finishInscription($ins, $token);
+        } catch (\Exception $e) {
+            $this->setPaymentErrorPage($e->getMessage());
+        }
         $this->redirectToOrderConfirmationByCartId($this->context->cart->id);
 
     }
@@ -60,8 +61,6 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         $ins->save();
     }
 
-
-
     /**
      * @return TransbankInscriptions
      */
@@ -73,32 +72,6 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
             $this->throwErrorRedirect('Oneclick Token '.$token.' was not found on database');
         }
         return new TransbankInscriptions($result['id']);
-    }
-
-
-
-    /**
-     * @param array $result
-     */
-    protected function setErrorTemplate(array $result)
-    {
-        $date_tx_hora = date('H:i:s');
-        $date_tx_fecha = date('d-m-Y');
-
-        $error = isset($result['error']) ? $result['error'] : '';
-        $detail = isset($result['detail']) ? $result['detail'] : '';
-
-        $this->logError($error.' ('.$detail.')');
-
-        Context::getContext()->smarty->assign([
-            'WEBPAY_RESULT_CODE'          => 500,
-            'WEBPAY_RESULT_DESC'          => $error.' ('.$detail.')',
-            'WEBPAY_VOUCHER_ORDENCOMPRA'  => 0,
-            'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
-            'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
-        ]);
-
-        $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
     }
 
     protected function redirectToOrderConfirmationByCartId($cartId)

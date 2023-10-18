@@ -33,7 +33,11 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', [], true);
 
 
-        $resp = $webpay->startInscription($userName, $userEmail, $returnUrl);
+        try {
+            $resp = $webpay->startInscription($userName, $userEmail, $returnUrl);
+        } catch (\Exception $e) {
+            $this->setPaymentErrorPage($e->getMessage());
+        }
 
         if (isset($resp['token'])) {
             $ins = new TransbankInscriptions();
@@ -50,7 +54,7 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
             $saved = $ins->save();
             if (!$saved) {
                 $this->logError('Could not create record on transbank_inscriptions database');
-                $this->setErrorTemplate(['error' => 'No se pudo crear la transacción en la tabla transbank_inscriptions']);
+                $this->setPaymentErrorPage('No se pudo crear la transacción en la tabla transbank_inscriptions');
             }
             $this->setRedirectionTemplate($resp, $this->getOrderTotalRound($cart));
         } else {
@@ -72,33 +76,8 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         $this->setTemplate('module:webpay/views/templates/front/oneclick_inscription_execution.tpl');
     }
 
-    
-
     private function generateUsername($userId, $commerceCode){
         return 'PS:'.$commerceCode.':'.$userId.':'.uniqid();
     }
 
-
-    /**
-     * @param array $result
-     */
-    protected function setErrorTemplate(array $result)
-    {
-        $date_tx_hora = date('H:i:s');
-        $date_tx_fecha = date('d-m-Y');
-
-        $error = isset($result['error']) ? $result['error'] : '';
-        $detail = isset($result['detail']) ? $result['detail'] : '';
-
-        $this->logError($error.' ('.$detail.')');
-
-        Context::getContext()->smarty->assign([
-            'WEBPAY_RESULT_CODE'          => 500,
-            'WEBPAY_RESULT_DESC'          => $error.' ('.$detail.')',
-            'WEBPAY_VOUCHER_ORDENCOMPRA'  => 0,
-            'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
-            'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
-        ]);
-        $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-    }
 }

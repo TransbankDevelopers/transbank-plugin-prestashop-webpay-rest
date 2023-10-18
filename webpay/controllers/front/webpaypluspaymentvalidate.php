@@ -202,10 +202,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
                 $detail = isset($result['detail']) ? $result['detail'] : 'Indefinido';
             }
             else if ($result instanceof TransactionCommitResponse) {
-                $error = 'La transacción ha sido rechazada. Por favor, reintente el pago. ';
-                $detail = 'Código de respuesta: '.$result->getResponseCode().'. Estado: '.$result->getStatus();
+                $error = 'La transacción ha sido rechazada. Por favor, reintente el pago. '.
+                    'Código de respuesta: '.$result->getResponseCode().'. Estado: '.$result->getStatus();
             }
-            $this->setPaymentErrorPage($error, $detail);
+            $this->setPaymentErrorPage($error);
         }
     }
 

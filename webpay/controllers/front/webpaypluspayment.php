@@ -30,7 +30,12 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
 
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', [], true);
         $this->logWebpayPlusAntesCrearTx($amount, $sessionId, $buyOrder, $returnUrl);
-        $result = $webpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
+        try {
+            $result = $webpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
+        } catch (\Exception $e) {
+            $this->logWebpayPlusDespuesCrearTxError($result);
+            $this->setPaymentErrorPage($e->getMessage());
+        }
         
         if (isset($result['token_ws'])) {
             $this->logWebpayPlusDespuesCrearTx($result);
@@ -57,29 +62,6 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
     }
 
-    /**
-     * @param $cart
-     * @param $amount
-     * @param array $result
-     */
-    protected function setErrorTemplate(array $result)
-    {
-        $date_tx_hora = date('H:i:s');
-        $date_tx_fecha = date('d-m-Y');
-
-        $error = isset($result['error']) ? $result['error'] : '';
-        $detail = isset($result['detail']) ? $result['detail'] : '';
-
-        Context::getContext()->smarty->assign([
-            'WEBPAY_RESULT_CODE'          => 500,
-            'WEBPAY_RESULT_DESC'          => $error.' ('.$detail.')',
-            'WEBPAY_VOUCHER_ORDENCOMPRA'  => 0,
-            'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
-            'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
-        ]);
-        $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-    }
-
     private function createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $currencyId, $token, $buyOrder, $amount){
         $transaction = new TransbankWebpayRestTransaction();
         $transaction->amount = $amount;
@@ -100,7 +82,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $saved = $transaction->save();
         if (!$saved) {
             $this->logWebpayPlusDespuesCrearTxEnTablaError($transaction);
-            $this->setErrorTemplate(['error' => 'No se pudo crear la transacción en la tabla webpay_transactions']);
+            $this->setErrorTemplate('No se pudo crear la transacción en la tabla webpay_transactions');
         }
         return $transaction;
     }
