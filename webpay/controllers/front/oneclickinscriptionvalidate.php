@@ -39,18 +39,18 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
 
         //registro correcto
         //flujo correcto
-        try {
-            $this->finishInscription($ins, $token);
-        } catch (\Exception $e) {
-            $this->setPaymentErrorPage($e->getMessage());
-        }
+        $this->finishInscription($ins, $token);
         $this->redirectToOrderConfirmationByCartId($this->context->cart->id);
 
     }
 
     private function finishInscription($ins, $token){
         $webpay = OneclickFactory::create();
-        $resp = $webpay->finishInscription($token, $ins->username, $ins->email);
+        try {
+            $resp = $webpay->finish($token, $ins->username, $ins->email);
+        } catch (\Exception $e) {
+            $this->setPaymentErrorPage($e->getMessage());
+        }
         $ins->finished = true;
         $ins->authorization_code = $resp->getAuthorizationCode();
         $ins->tbk_token = $resp->getTbkUser();

@@ -108,7 +108,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $this->logOneclickPaymentAntesAutorizarTx($ins->username, $ins->tbk_token, $parentBuyOrder, $childBuyOrder, $amount);
         /* 2. Autorizamos la transacción */
         try {
-            $resp = $webpay->authorizeTransaction($ins->username, $ins->tbk_token, $parentBuyOrder, $childBuyOrder, $amount);
+            $resp = $webpay->authorize($ins->username, $ins->tbk_token, $parentBuyOrder, $childBuyOrder, $amount);
         } catch (\Exception $e) {
             $this->throwErrorRedirect($e->getMessage());
         }

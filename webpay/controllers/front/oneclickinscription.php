@@ -32,34 +32,28 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         $userEmail = $customer->email;
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', [], true);
 
-
         try {
             $resp = $webpay->startInscription($userName, $userEmail, $returnUrl);
         } catch (\Exception $e) {
             $this->setPaymentErrorPage($e->getMessage());
         }
-
-        if (isset($resp['token'])) {
-            $ins = new TransbankInscriptions();
-            $ins->token = $resp['token'];
-            $ins->username = $userName;
-            $ins->email = $userEmail;
-            $ins->user_id = $userId;
-            $ins->pay_after_inscription = false;
-            $ins->from = 'checkout';
-            $ins->status = TransbankInscriptions::STATUS_INITIALIZED;
-            $ins->environment = $webpay->getEnviroment();
-            $ins->commerce_code = $webpay->getCommerceCode();
-            $ins->order_id = $this->module->currentOrder;//importante para recuperar la orden en curso y el carro en curso
-            $saved = $ins->save();
-            if (!$saved) {
-                $this->logError('Could not create record on transbank_inscriptions database');
-                $this->setPaymentErrorPage('No se pudo crear la transacción en la tabla transbank_inscriptions');
-            }
-            $this->setRedirectionTemplate($resp, $this->getOrderTotalRound($cart));
-        } else {
-            $this->setErrorTemplate($resp);
+        $ins = new TransbankInscriptions();
+        $ins->token = $resp['token'];
+        $ins->username = $userName;
+        $ins->email = $userEmail;
+        $ins->user_id = $userId;
+        $ins->pay_after_inscription = false;
+        $ins->from = 'checkout';
+        $ins->status = TransbankInscriptions::STATUS_INITIALIZED;
+        $ins->environment = $webpay->getEnviroment();
+        $ins->commerce_code = $webpay->getCommerceCode();
+        $ins->order_id = $this->module->currentOrder;//importante para recuperar la orden en curso y el carro en curso
+        $saved = $ins->save();
+        if (!$saved) {
+            $this->logError('Could not create record on transbank_inscriptions database');
+            $this->setPaymentErrorPage('No se pudo crear la transacción en la tabla transbank_inscriptions');
         }
+        $this->setRedirectionTemplate($resp, $this->getOrderTotalRound($cart));
     }
 
     /**

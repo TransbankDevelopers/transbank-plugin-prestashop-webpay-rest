@@ -72,7 +72,6 @@ class TransbankSdkOneclick
                 ', txDate: ' . $txDate . ', txTime: ' . $txTime);
 
             $resp = $this->inscription->start($userName, $email, $returnUrl);
-
             $this->log->logInfo('startInscription - resp: ' . json_encode($resp));
             if (isset($resp) && isset($resp->urlWebpay) && isset($resp->token)) {
                 $result = [
@@ -80,15 +79,13 @@ class TransbankSdkOneclick
                     'token' => $resp->token,
                 ];
             } else {
-                throw new EcommerceException(
-                    'No se ha iniciado la inscripción para => userName: ' . $userName . ', email: ' . $email);
+                $errorMessage = "Error al iniciar la inscripción para => userName: {$userName}, email: {$email}";
+                throw new EcommerceException($errorMessage);
             }
         } catch (Exception $e) {
-            $result = [
-                'error'  => 'Error al iniciar la inscripción',
-                'detail' => $e->getMessage().$returnUrl,
-            ];
-            $this->log->logError(json_encode($result));
+            $errorMessage = "Error al iniciar la inscripción para => userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
+            $this->log->logError($errorMessage);
+            throw new EcommerceException($errorMessage, 0, $e);
         }
         return $result;
     }
@@ -102,28 +99,22 @@ class TransbankSdkOneclick
      *
      * @return array|Transbank\Webpay\Oneclick\Responses\InscriptionFinishResponse
      */
-    public function finishInscription($token, $userName, $email)
+    public function finish($token, $userName, $email)
     {
         $result = [];
-
         try {
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
-            $this->log->logInfo('finishInscription => token: ' . $token . ' userName: ' . $userName . ', email: ' . $email .
+            $this->log->logInfo('finish => token: ' . $token . ' userName: ' . $userName . ', email: ' . $email .
                 ', txDate: ' . $txDate . ', txTime: ' . $txTime);
-
             $resp = $this->inscription->finish($token);
-
-            $this->log->logInfo('finishInscription - resp: ' . json_encode($resp));
+            $this->log->logInfo('finish - resp: ' . json_encode($resp));
             return $resp;
         } catch (Exception $e) {
-            $result = [
-                'error'  => 'Error al confirmar la inscripción',
-                'detail' => $e->getMessage(),
-            ];
-            $this->log->logError(json_encode($result));
+            $errorMessage = "Error al confirmar la inscripción para => userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
+            $this->log->logError($errorMessage);
+            throw new EcommerceException($errorMessage, 0, $e);
         }
-
         return $result;
     }
 
@@ -138,15 +129,14 @@ class TransbankSdkOneclick
      *
      * @return array|Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse
      */
-    public function authorizeTransaction($username, $tbkUser, $parentBuyOrder, $childBuyOrder, $amount)
+    public function authorize($username, $tbkUser, $parentBuyOrder, $childBuyOrder, $amount)
     {
         $result = [];
         try {
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
-            $this->log->logInfo('authorizeTransaction => username: ' . $username . ' parentBuyOrder: ' . $parentBuyOrder. ' childBuyOrder: ' . $childBuyOrder . ', amount: ' . $amount .
+            $this->log->logInfo('authorize => username: ' . $username . ' parentBuyOrder: ' . $parentBuyOrder. ' childBuyOrder: ' . $childBuyOrder . ', amount: ' . $amount .
                 ', txDate: ' . $txDate . ', txTime: ' . $txTime);
-
             $details = [
                 [
                     'commerce_code'       => $this->getChildCommerceCode(),
@@ -155,20 +145,15 @@ class TransbankSdkOneclick
                     'installments_number' => 1,
                 ],
             ];
-
             $resp = $this->transaction->authorize($username, $tbkUser, $parentBuyOrder, $details);
-            $this->log->logInfo('authorizeTransaction - resp: ' . json_encode($resp));
+            $this->log->logInfo('authorize - resp: ' . json_encode($resp));
             return $resp;
         } catch (Exception $e) {
-            $result = [
-                'error'  => 'Error al autorizar el pago',
-                'detail' => $e->getMessage(),
-            ];
-            $this->log->logError(json_encode($result));
+            $errorMessage = "Error al autorizar el pago para => userName: {$username}, buyOrder: {$parentBuyOrder}, error: {$e->getMessage()}";
+            $this->log->logError($errorMessage);
+            throw new EcommerceException($errorMessage, 0, $e);
         }
-
         return $result;
     }
-
 
 }
