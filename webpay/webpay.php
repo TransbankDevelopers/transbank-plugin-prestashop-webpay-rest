@@ -49,7 +49,7 @@ class WebPay extends PaymentModule
         try {
             $this->log = TbkFactory::createLogger();
         } catch (Exception $e) {
-            throw new EcommerceException($e->getMessage(), 0, $e);
+            throw new EcommerceException($e->getMessage(), $e);
         }
     }
 

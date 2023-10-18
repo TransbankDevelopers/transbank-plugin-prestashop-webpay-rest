@@ -87,7 +87,7 @@ class TransbankSdkOneclick
             $errorMessage = "Error al iniciar la inscripción para =>
                 userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
-            throw new EcommerceException($errorMessage, 0, $e);
+            throw new EcommerceException($errorMessage, $e);
         }
         return $result;
     }
@@ -116,7 +116,7 @@ class TransbankSdkOneclick
             $errorMessage = "Error al confirmar la inscripción para =>
                 userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
-            throw new EcommerceException($errorMessage, 0, $e);
+            throw new EcommerceException($errorMessage, $e);
         }
         return $result;
     }
@@ -156,7 +156,7 @@ class TransbankSdkOneclick
             $errorMessage = "Error al autorizar el pago para => userName:
                 {$username}, buyOrder: {$parentBuyOrder}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
-            throw new EcommerceException($errorMessage, 0, $e);
+            throw new EcommerceException($errorMessage, $e);
         }
         return $result;
     }

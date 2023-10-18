@@ -79,7 +79,7 @@ class TransbankSdkWebpay
         } catch (Exception $e) {
             $errorMessage = "Error creando la transacción para =>
                 buyOrder: {$buyOrder}, amount: {$amount}, error: {$e->getMessage()}";
-            throw new EcommerceException($errorMessage, 0, $e);
+            throw new EcommerceException($errorMessage, $e);
         }
 
         return $result;
@@ -106,7 +106,7 @@ class TransbankSdkWebpay
             return $this->transaction->commit($tokenWs);
         } catch (TransactionCommitException $e) {
             $errorMessage = "Error confirmando la transacción para => tokenWs: {$tokenWs}, error: {$e->getMessage()}";
-            throw new EcommerceException($errorMessage, 0, $e);
+            throw new EcommerceException($errorMessage, $e);
         }
 
         return $result;
