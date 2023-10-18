@@ -33,7 +33,8 @@ class TransbankSdkOneclick
     {
         $this->log = TbkFactory::createLogger();
         $this->options = MallInscription::getDefaultOptions();
-        if (isset($config) && isset($config['ENVIRONMENT']) && $config['ENVIRONMENT'] == Options::ENVIRONMENT_PRODUCTION){
+        $environment = isset($config['ENVIRONMENT']) ? $config['ENVIRONMENT'] : null;
+        if (isset($config) && $environment == Options::ENVIRONMENT_PRODUCTION){
             $this->options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY_SECRET']);
         }
         $this->inscription = new MallInscription($this->options);
@@ -83,7 +84,8 @@ class TransbankSdkOneclick
                 throw new EcommerceException($errorMessage);
             }
         } catch (Exception $e) {
-            $errorMessage = "Error al iniciar la inscripción para => userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
+            $errorMessage = "Error al iniciar la inscripción para => 
+                userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
             throw new EcommerceException($errorMessage, 0, $e);
         }
@@ -111,7 +113,8 @@ class TransbankSdkOneclick
             $this->log->logInfo('finish - resp: ' . json_encode($resp));
             return $resp;
         } catch (Exception $e) {
-            $errorMessage = "Error al confirmar la inscripción para => userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
+            $errorMessage = "Error al confirmar la inscripción para => 
+                userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
             throw new EcommerceException($errorMessage, 0, $e);
         }
@@ -135,7 +138,8 @@ class TransbankSdkOneclick
         try {
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
-            $this->log->logInfo('authorize => username: ' . $username . ' parentBuyOrder: ' . $parentBuyOrder. ' childBuyOrder: ' . $childBuyOrder . ', amount: ' . $amount .
+            $this->log->logInfo('authorize => username: ' . $username . ' parentBuyOrder: '
+                . $parentBuyOrder. ' childBuyOrder: ' . $childBuyOrder . ', amount: ' . $amount .
                 ', txDate: ' . $txDate . ', txTime: ' . $txTime);
             $details = [
                 [
@@ -149,7 +153,8 @@ class TransbankSdkOneclick
             $this->log->logInfo('authorize - resp: ' . json_encode($resp));
             return $resp;
         } catch (Exception $e) {
-            $errorMessage = "Error al autorizar el pago para => userName: {$username}, buyOrder: {$parentBuyOrder}, error: {$e->getMessage()}";
+            $errorMessage = "Error al autorizar el pago para => userName: 
+                {$username}, buyOrder: {$parentBuyOrder}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
             throw new EcommerceException($errorMessage, 0, $e);
         }

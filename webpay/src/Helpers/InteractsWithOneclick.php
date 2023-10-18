@@ -62,7 +62,9 @@ trait InteractsWithOneclick
 
     protected function getNewOneclickPaymentOption($base, $context)
     {
-        return $this->getOneclickInscriptionOption($base, $context, 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick');
+        $message = "Inscribe tu tarjeta de crédito,
+            débito o prepago y luego paga con un solo click a través de Webpay Oneclick";
+        return $this->getOneclickInscriptionOption($base, $context, $message);
     }
 
     protected function getOneclickInscriptionOption($base, $context, $description)
@@ -83,7 +85,9 @@ trait InteractsWithOneclick
 
     protected function getCardsByUserId($userId)
     {
-        $r = SqlHelper::executeSql('SELECT * FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
+        $r = SqlHelper::executeSql('SELECT * FROM '.
+            _DB_PREFIX_.TransbankInscriptions::TABLE_NAME.
+            ' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
         if (!isset($r)){
             return [];
         }
@@ -92,7 +96,9 @@ trait InteractsWithOneclick
 
     protected function getCountCardsByUserId($userId)
     {
-        return SqlHelper::getValue('SELECT count(1) FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
+        return SqlHelper::getValue('SELECT count(1) FROM '
+            ._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'
+            .TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
     }
 
     protected function getUserIdForOneclick($context){
@@ -125,7 +131,8 @@ trait InteractsWithOneclick
                 $this->setOneclickChildCommerceCode($oneclickChildCommerceCode);
                 $this->setOneclickApiKey($oneclickApikey);
                 $this->setOneclickOrderAfterPayment($oneclickDefaultOrderStateIdAfterPayment);
-                $this->logOneclickInstallConfigLoad($oneclickMallCommerceCode, $oneclickChildCommerceCode, $oneclickDefaultOrderStateIdAfterPayment);
+                $this->logOneclickInstallConfigLoad($oneclickMallCommerceCode, 
+                    $oneclickChildCommerceCode, $oneclickDefaultOrderStateIdAfterPayment);
             }
             else{
                 $this->loadDefaultOneclick();

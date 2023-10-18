@@ -31,7 +31,8 @@ class TransbankSdkWebpay
     {
         $this->log = TbkFactory::createLogger();
         $this->options = Transaction::getDefaultOptions();
-        if (isset($config) && isset($config['ENVIRONMENT']) && $config['ENVIRONMENT'] == Options::ENVIRONMENT_PRODUCTION){
+        $environment = isset($config['ENVIRONMENT']) ? $config['ENVIRONMENT'] : null;
+        if (isset($config) && $environment == Options::ENVIRONMENT_PRODUCTION){
             $this->options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY_SECRET']);
         }
         $this->transaction = new Transaction($this->options);
@@ -62,7 +63,8 @@ class TransbankSdkWebpay
         try {
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
-            $this->log->logInfo('createTransaction : amount: ' . $amount . ', sessionId: ' . $sessionId .', buyOrder: ' . $buyOrder . ', txDate: ' . $txDate . ', txTime: ' . $txTime);
+            $this->log->logInfo('createTransaction : amount: ' . $amount . ', sessionId: ' . 
+                $sessionId .', buyOrder: ' . $buyOrder . ', txDate: ' . $txDate . ', txTime: ' . $txTime);
             $initResult = $this->transaction->create($buyOrder, $sessionId, $amount, $returnUrl);
             $this->log->logInfo('createTransaction.result: ' . json_encode($initResult));
             if (isset($initResult) && isset($initResult->url) && isset($initResult->token)) {
@@ -75,7 +77,8 @@ class TransbankSdkWebpay
                 throw new EcommerceException($errorMessage);
             }
         } catch (Exception $e) {
-            $errorMessage = "Error creando la transacción para => buyOrder: {$buyOrder}, amount: {$amount}, error: {$e->getMessage()}";
+            $errorMessage = "Error creando la transacción para => 
+                buyOrder: {$buyOrder}, amount: {$amount}, error: {$e->getMessage()}";
             throw new EcommerceException($errorMessage, 0, $e);
         }
 
