@@ -71,18 +71,12 @@ class TransbankSdkWebpay
                     'token_ws' => $initResult->token,
                 ];
             } else {
-                $result = [
-                    'error'  => 'Error al crear la transacción',
-                    'detail' => 'No se ha creado la transacción para, amount: ' . $amount . ', sessionId: ' . $sessionId . ', buyOrder: ' . $buyOrder,
-                ];
-                $this->log->logError('createTransaction.error: '.json_encode($result));
+                $errorMessage = "Error creando la transacción para => buyOrder: {$buyOrder}, amount: {$amount}";
+                throw new EcommerceException($errorMessage);
             }
         } catch (Exception $e) {
-            $result = [
-                'error'  => 'Error al crear la transacción',
-                'detail' => $e->getMessage(),
-            ];
-            $this->log->logError('createTransaction.error: '.json_encode($result));
+            $errorMessage = "Error creando la transacción para => buyOrder: {$buyOrder}, amount: {$amount}, error: {$e->getMessage()}";
+            throw new EcommerceException($errorMessage, 0, $e);
         }
 
         return $result;
@@ -108,11 +102,8 @@ class TransbankSdkWebpay
 
             return $this->transaction->commit($tokenWs);
         } catch (TransactionCommitException $e) {
-            $result = [
-                'error'  => 'Error al confirmar la transacción',
-                'detail' => $e->getMessage(),
-            ];
-            $this->log->logError(json_encode($result));
+            $errorMessage = "Error confirmando la transacción para => tokenWs: {$tokenWs}, error: {$e->getMessage()}";
+            throw new EcommerceException($errorMessage, 0, $e);
         }
 
         return $result;

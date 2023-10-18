@@ -144,7 +144,12 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
 
         $transbankSdkWebpay = WebpayPlusFactory::create();
-        $result = $transbankSdkWebpay->commitTransaction($webpayTransaction->token);
+        try {
+            $result = $transbankSdkWebpay->commitTransaction($webpayTransaction->token);
+        } catch (\Exception $e) {
+            $this->setPaymentErrorPage($e->getMessage());
+        }
+
         $this->logWebpayPlusDespuesCommitTx($token, $result);
 
         $webpayTransaction->transbank_response = json_encode($result);
@@ -196,10 +201,8 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->responseData['PAYMENT_OK'] = 'FAIL';
 
             $error = 'Error en el pago';
-            $detail = 'Indefinido';
             if (is_array($result) && isset($result['error'])) {
                 $error = $result['error'];
-                $detail = isset($result['detail']) ? $result['detail'] : 'Indefinido';
             }
             else if ($result instanceof TransactionCommitResponse) {
                 $error = 'La transacción ha sido rechazada. Por favor, reintente el pago. '.
