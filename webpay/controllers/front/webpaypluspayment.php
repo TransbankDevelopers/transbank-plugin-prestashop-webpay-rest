@@ -36,16 +36,10 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             $this->logWebpayPlusDespuesCrearTxError($result);
             $this->setPaymentErrorPage($e->getMessage());
         }
-        
-        if (isset($result['token_ws'])) {
-            $this->logWebpayPlusDespuesCrearTx($result);
-            $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
-            $this->logWebpayPlusDespuesCrearTxEnTabla($transaction);
-            $this->setRedirectionTemplate($result, $amount);
-        } else {
-            $this->logWebpayPlusDespuesCrearTxError($result);
-            $this->setErrorTemplate($result);
-        }
+        $this->logWebpayPlusDespuesCrearTx($result);
+        $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
+        $this->logWebpayPlusDespuesCrearTxEnTabla($transaction);
+        $this->setRedirectionTemplate($result, $amount);
     }
 
     /**
