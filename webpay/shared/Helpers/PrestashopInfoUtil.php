@@ -2,12 +2,14 @@
 
 namespace Transbank\Plugin\Helpers;
 
+use Transbank\Plugin\Exceptions\EcommerceException;
+
 class PrestashopInfoUtil
 {
     public static function getVersion()
     {
         if (!defined('_PS_VERSION_')) {
-            exit;
+            throw new EcommerceException('No existe instalación Prestashop');
         }
         return _PS_VERSION_;
     }
@@ -15,7 +17,7 @@ class PrestashopInfoUtil
     public static function getPluginVersion()
     {
         if (!file_exists(_PS_ROOT_DIR_.'/modules/webpay/config.xml')) {
-            exit;
+            throw new EcommerceException('No existe instalación Prestashop');
         }
         $xml = simplexml_load_file(_PS_ROOT_DIR_.'/modules/webpay/config.xml',
             null, LIBXML_NOCDATA);
