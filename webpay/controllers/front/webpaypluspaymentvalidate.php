@@ -33,7 +33,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $params = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
         $tokenWs = isset($params['token_ws']) && $params['token_ws']!==null ? $params['token_ws'] : null;
         $tbktoken = isset($params['TBK_TOKEN']) && $params['TBK_TOKEN']!==null ? $params['TBK_TOKEN'] : null;
-        $tbkOrdenCompra = isset($params['TBK_ORDEN_COMPRA']) && $params['TBK_ORDEN_COMPRA']!==null ? $params['TBK_ORDEN_COMPRA'] : null;
         $tbkIdSesion = isset($params['TBK_ID_SESION'])&& $params['TBK_ID_SESION']!==null ? $params['TBK_ID_SESION'] : null;
         $this->logWebpayPlusRetornandoDesdeTbk($_SERVER['REQUEST_METHOD'], $params);
 
