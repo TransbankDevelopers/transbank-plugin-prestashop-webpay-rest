@@ -4,7 +4,7 @@ use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclickLog;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
@@ -13,7 +13,7 @@ use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
  */
 class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFrontController
 {
-    use InteractsWithFullLog;
+    use InteractsWithOneclickLog;
     use InteractsWithOneclick;
     
     protected $responseData = [];

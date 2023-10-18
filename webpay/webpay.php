@@ -7,14 +7,16 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclickLog;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayLog;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
 require_once __DIR__.'/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
-    use InteractsWithFullLog;
+    use InteractsWithWebpayLog;
+    use InteractsWithOneclickLog;
     use InteractsWithWebpay;
     use InteractsWithOneclick;
     use InteractsWithCommon;
