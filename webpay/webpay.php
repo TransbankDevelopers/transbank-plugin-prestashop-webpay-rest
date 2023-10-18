@@ -385,11 +385,6 @@ class WebPay extends PaymentModule
         return $displayOrder;
     }
 
-    private function adminValidation()
-    {
-        $this->_errors = array();
-    }
-
     protected function logError($msg){
         if (isset($this->log))
             $this->log->logError($msg);
