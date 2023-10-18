@@ -386,13 +386,11 @@ class WebPay extends PaymentModule
     }
 
     protected function logError($msg){
-        if (isset($this->log))
-            $this->log->logError($msg);
+        $this->log->logError($msg);
     }
 
     protected function logInfo($msg){
-        if (isset($this->log))
-            $this->log->logInfo($msg);
+        $this->log->logInfo($msg);
     }
 
     public function updateSettings(){
