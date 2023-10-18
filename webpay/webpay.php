@@ -10,6 +10,7 @@ use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclickLog;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayLog;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
+use Transbank\Plugin\Helpers\TbkConstans;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -28,15 +29,6 @@ class WebPay extends PaymentModule
     protected $_errors = array();
     public $log;
     public $title = 'Pago con tarjetas de crédito o Redcompra';
-
-    private $paymentTypeCodearray = [
-        "VD" => "Venta débito",
-        "VN" => "Venta normal",
-        "VC" => "Venta en cuotas",
-        "SI" => "3 cuotas sin interés",
-        "S2" => "2 cuotas sin interés",
-        "NC" => "N cuotas sin interés",
-    ];
 
     public function __construct()
     {
@@ -234,7 +226,7 @@ class WebPay extends PaymentModule
             $paymentType = "Crédito";
         }
         if (in_array($paymentTypeCode, ["SI", "S2", "NC", "VC"])) {
-            $installmentType = $this->paymentTypeCodearray[$paymentTypeCode];
+            $installmentType = TbkConstans::PAYMENT_TYPE_CODE[$paymentTypeCode];
         } else {
             $installmentType = "Sin cuotas";
         }
