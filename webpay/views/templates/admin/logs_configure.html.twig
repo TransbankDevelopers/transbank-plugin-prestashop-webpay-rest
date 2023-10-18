@@ -21,7 +21,7 @@
                 <tr>
                     <td>{{ 'Listado de logs disponibles:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>
                         {% for log in resume.logs %}
-                            <li>{{ log }}</li>
+                            <li>{{ log.filename }}</li>
                         {% endfor %}
                     </td>
                 </tr>
