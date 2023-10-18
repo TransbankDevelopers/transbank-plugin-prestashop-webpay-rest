@@ -38,7 +38,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $webpayTransaction = $this->authorizeTransaction($inscriptionId, $cart, $total);
         $OKStatus = $this->getOneclickOkStatus();
 
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo('C.4. Procesando pago - antes de validateOrder');
             $this->logInfo('amount : '.$total.', cartId: '.$cart->id.', OKStatus: '.$OKStatus.', currencyId: '.$currency->id.', customer_secure_key: '.$customer->secure_key);
         }

@@ -28,4 +28,8 @@ trait InteractsWithCommon
         }
     }
 
+    protected function isDebugActive(){
+        return Configuration::get('DEBUG_ACTIVE') === '1';
+    }
+
 }

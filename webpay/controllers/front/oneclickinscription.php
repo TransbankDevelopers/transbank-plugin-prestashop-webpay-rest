@@ -11,17 +11,17 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
     {
         parent::initContent();
         $this->logger = TbkFactory::createLogger();
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo('B.1. Iniciando medio de pago Oneclick');
         }
 
         $cart = $this->getCartFromContext();
         $customer = $this->getCustomerFromContext();
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->cartToLog($cart);
         }
 
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->customerToLog($customer);
         }
 

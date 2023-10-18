@@ -24,13 +24,13 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusIniciando(){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.1. Iniciando medio de pago Webpay Plus");
         }
     }
 
     public function logWebpayPlusAntesCrearTx($amount, $sessionId, $buyOrder, $returnUrl){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.2. Preparando datos antes de crear la transacción en Transbank");
             $this->logInfo("amount: {$amount}, sessionId: {$sessionId}, buyOrder: {$buyOrder}
                 , returnUrl: {$returnUrl}");
@@ -38,7 +38,7 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusDespuesCrearTx($result){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.3. Transacción creada en Transbank");
             $this->logInfo(json_encode($result));
         }
@@ -50,14 +50,14 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusAntesCrearTxEnTabla($transaction){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.4. Preparando datos antes de crear la transacción en la tabla webpay_transactions");
             $this->logInfo(json_encode($transaction));
         }
     }
 
     public function logWebpayPlusDespuesCrearTxEnTabla($transaction){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.5. Transacción creada en la tabla webpay_transactions");
             $this->logInfo(json_encode($transaction));
         }
@@ -69,14 +69,14 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusRetornandoDesdeTbk($method, $params){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("C.1. Iniciando validación luego de redirección desde tbk => method: {$method}");
             $this->logInfo(json_encode($params));
         }
     }
     
     public function logWebpayPlusDespuesObtenerTx($token, $tx){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("C.2. Tx obtenido desde la tabla webpay_transactions => token: {$token}");
             $this->logInfo(json_encode($tx));
         }
@@ -100,7 +100,7 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusAntesCommitTx($token, $tx, $cart){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("C.3. Transaccion antes del commit  => token: {$token}");
             $this->logInfo(json_encode($tx));
             $this->logPrintCart($cart);
@@ -137,7 +137,7 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusGuardandoCommitExitoso($token){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("C.5. Transacción con commit exitoso en Transbank y guardado => token: {$token}");
         }
     }
@@ -154,7 +154,7 @@ trait InteractsWithWebpayLog
 
     public function logWebpayPlusAntesValidateOrderPrestashop($token, $amount, $cartId, $okStatus,
         $currencyId, $customerSecureKey){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("C.6. Procesando pago - antes de validateOrder");
             $this->logInfo("token : {$token}, amount : {$amount}, cartId: {$cartId}, okStatus: {$okStatus}
                 , currencyId: {$currencyId}, customer_secure_key: {$customerSecureKey}");
@@ -162,7 +162,7 @@ trait InteractsWithWebpayLog
     }
 
     public function logWebpayPlusDespuesValidateOrderPrestashop($token){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("C.7. Procesando pago despues de validateOrder => token: {$token}");
         }
     }

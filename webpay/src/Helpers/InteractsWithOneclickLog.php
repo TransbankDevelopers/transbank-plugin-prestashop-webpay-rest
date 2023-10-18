@@ -27,27 +27,27 @@ trait InteractsWithOneclickLog
     }
 
     public function logOneclickPaymentIniciando(){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.1. Iniciando medio de pago Oneclick");
         }
     }
 
     public function logOneclickPaymentAntesObtenerInscripcion($inscriptionId, $cartId, $amount){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.2. Antes de obtener inscripción de la BD => inscriptionId:
                 {$inscriptionId}, cartId: {$cartId}, amount: {$amount}");
         }
     }
 
     public function logOneclickPaymentDespuesObtenerInscripcion($inscriptionId, $ins){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.2. Despues de obtener inscripción de la BD => inscriptionId: {$inscriptionId}");
             $this->logInfo(json_encode($ins));
         }
     }
 
     public function logOneclickPaymentAntesCrearTxBd($inscriptionId, $transaction){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.3. Preparando datos antes de crear la transacción en BD => inscriptionId:
                 {$inscriptionId}");
             $this->logInfo(json_encode($transaction));
@@ -60,7 +60,7 @@ trait InteractsWithOneclickLog
     }
 
     public function logOneclickPaymentAntesAutorizarTx($username, $tbkToken, $parentBuyOrder, $childBuyOrder, $amount){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.4. Preparando datos antes de autorizar la transacción en Transbank");
             $this->logInfo("username: {$username}, tbkToken: {$tbkToken}, parentBuyOrder:
                 {$parentBuyOrder}, childBuyOrder: {$childBuyOrder}, amount: {$amount}");
@@ -93,7 +93,7 @@ trait InteractsWithOneclickLog
     }
 
     public function logOneclickPaymentDespuesValidateOrderPrestashop($inscriptionId, $webpayTransaction){
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo("B.7. Procesando pago despues de validateOrder => inscriptionId: {$inscriptionId}");
             $this->logInfo(json_encode($webpayTransaction));
         }
