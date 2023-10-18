@@ -28,7 +28,6 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         
         $cart = $this->context->cart;
         $customer = new Customer($cart->id_customer);
-        $moduleId = $this->module->id;
         $this->validate($cart, $customer);
 
         $currency = $this->context->currency;
