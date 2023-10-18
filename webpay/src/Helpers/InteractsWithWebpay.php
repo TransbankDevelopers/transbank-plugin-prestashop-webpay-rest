@@ -52,7 +52,7 @@ trait InteractsWithWebpay
             }
             else{
                 $this->loadDefaultWebpay();
-                $this->logWebpayPlusInstallConfigLoadDefaultPorIncompleta();               
+                $this->logWebpayPlusInstallConfigLoadDefaultPorIncompleta();
             }
         }
         else{
@@ -63,32 +63,17 @@ trait InteractsWithWebpay
 
     protected function webpayUpdateSettings(){
         $theEnvironmentChanged = false;
+        $environment = Tools::getValue('form_webpay_environment');
         if (Tools::getIsset('btn_webpay_update')) {
-            if ($this->getFormWebpayEnvironment() !=  $this->getWebpayEnvironment()) {
+            if ($environment !=  $this->getWebpayEnvironment()) {
                 $theEnvironmentChanged = true;
             }
-            $this->setWebpayCommerceCode($this->getFormWebpayCommerceCode());
-            $this->setWebpayApiKey($this->getFormWebpayApiKey());
-            $this->setWebpayEnvironment($this->getFormWebpayEnvironment());
-            $this->setWebpayOrderAfterPayment($this->getFormWebpayOrderAfterPayment());
+            $this->setWebpayCommerceCode(trim(Tools::getValue('form_webpay_commerce_code')));
+            $this->setWebpayApiKey(trim(Tools::getValue('form_webpay_api_key')));
+            $this->setWebpayEnvironment($environment);
+            $this->setWebpayOrderAfterPayment((int)Tools::getValue('form_webpay_order_after_payment'));
         } 
         return $theEnvironmentChanged;
-    }
-
-    protected function getFormWebpayCommerceCode(){
-        return trim(Tools::getValue('form_webpay_commerce_code'));//storeID
-    }
-
-    protected function getFormWebpayApiKey(){
-        return trim(Tools::getValue('form_webpay_api_key'));//apiKeySecret
-    }
-
-    protected function getFormWebpayEnvironment(){
-        return Tools::getValue('form_webpay_environment');
-    }
-
-    protected function getFormWebpayOrderAfterPayment(){
-        return (int)Tools::getValue('form_webpay_order_after_payment');
     }
 
     protected function getWebpayCommerceCode(){

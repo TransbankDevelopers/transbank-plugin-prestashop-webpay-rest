@@ -140,37 +140,18 @@ trait InteractsWithOneclick
 
     protected function oneclickUpdateSettings(){
         $theEnvironmentChanged = false;
+        $environment = Tools::getValue('form_oneclick_environment');
         if (Tools::getIsset('btn_oneclick_update')) {
-            if ($this->getFormOneclickEnvironment() !=  $this->getOneclickEnvironment()) {
+            if ($environment !=  $this->getOneclickEnvironment()) {
                 $theEnvironmentChanged = true;
             }
-            $this->setOneclickMallCommerceCode($this->getFormOneclickMallCommerceCode());
-            $this->setOneclickChildCommerceCode($this->getFormOneclickChildCommerceCode());
-            $this->setOneclickApiKey($this->getFormOneclickApiKey());
-            $this->setOneclickEnvironment($this->getFormOneclickEnvironment());
-            $this->setOneclickOrderAfterPayment($this->getDefaultWebpayOrderAfterPayment());
+            $this->setOneclickMallCommerceCode(trim(Tools::getValue('form_oneclick_mall_commerce_code')));
+            $this->setOneclickChildCommerceCode(trim(Tools::getValue('form_oneclick_child_commerce_code')));
+            $this->setOneclickApiKey(trim(Tools::getValue('form_oneclick_api_key')));
+            $this->setOneclickEnvironment($environment);
+            $this->setOneclickOrderAfterPayment((int)Tools::getValue('form_oneclick_order_after_payment'));
         } 
         return $theEnvironmentChanged;
-    }
-
-    protected function getFormOneclickMallCommerceCode(){
-        return trim(Tools::getValue('form_oneclick_mall_commerce_code'));
-    }
-
-    protected function getFormOneclickChildCommerceCode(){
-        return trim(Tools::getValue('form_oneclick_child_commerce_code'));
-    }
-
-    protected function getFormOneclickApiKey(){
-        return trim(Tools::getValue('form_oneclick_api_key'));
-    }
-
-    protected function getFormOneclickEnvironment(){
-        return Tools::getValue('form_oneclick_environment');
-    }
-
-    protected function getFormOneclickOrderAfterPayment(){
-        return (int)Tools::getValue('form_oneclick_order_after_payment');
     }
 
     protected function getOneclickMallCommerceCode(){
