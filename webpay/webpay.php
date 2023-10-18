@@ -10,6 +10,7 @@ use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclickLog;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayLog;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Plugin\Helpers\TbkConstans;
 
 require_once __DIR__.'/vendor/autoload.php';
@@ -48,7 +49,7 @@ class WebPay extends PaymentModule
         try {
             $this->log = TbkFactory::createLogger();
         } catch (Exception $e) {
-            print_r($e);
+            throw new EcommerceException($e->getMessage(), 0, $e);
         }
     }
 
