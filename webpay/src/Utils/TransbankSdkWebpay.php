@@ -8,7 +8,6 @@ use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
-use Transbank\Webpay\WebpayPlus;
 
 /**
  * Class TransbankSdkWebpayRest.
@@ -95,7 +94,7 @@ class TransbankSdkWebpay
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws Exception
      *
-     * @return array|WebpayPlus\TransactionCommitResponse
+     * @return array|Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse
      */
     public function commitTransaction($tokenWs)
     {

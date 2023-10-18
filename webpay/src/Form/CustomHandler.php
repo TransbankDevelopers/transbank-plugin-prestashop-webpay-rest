@@ -29,10 +29,8 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\WebpayPlus\Form;
 
-use Exception;
 use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 use PrestaShop\PrestaShop\Core\Form\FormHandlerInterface;
 use PrestaShop\PrestaShop\Core\Form\FormDataProviderInterface;
 /**
@@ -121,7 +119,7 @@ class CustomHandler implements FormHandlerInterface
      * {@inheritdoc}
      *
      * @throws Exception
-     * @throws UndefinedOptionsException
+     * @throws Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException
      */
     public function save(array $data)
     {
