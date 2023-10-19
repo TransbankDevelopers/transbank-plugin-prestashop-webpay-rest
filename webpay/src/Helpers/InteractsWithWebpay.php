@@ -49,16 +49,19 @@ trait InteractsWithWebpay
                 $this->setWebpayCommerceCode($webpayCommerceCode);
                 $this->setWebpayApiKey($webpayApikey);
                 $this->setWebpayOrderAfterPayment($webpayDefaultOrderStateIdAfterPayment);
-                $this->logWebpayPlusInstallConfigLoad($webpayCommerceCode, $webpayDefaultOrderStateIdAfterPayment);
+                $this->logInfo("Configuración de WEBPAY PLUS se cargo de forma correcta =>
+                    webpayCommerceCode: {$webpayCommerceCode}, webpayDefaultOrderStateIdAfterPayment:
+                    {$webpayDefaultOrderStateIdAfterPayment}");
             }
             else{
                 $this->loadDefaultWebpay();
-                $this->logWebpayPlusInstallConfigLoadDefaultPorIncompleta();
+                $this->logInfo("Configuración por defecto de WEBPAY PLUS se cargo de forma
+                    correcta porque los valores de producción estan incompletos");
             }
         }
         else{
             $this->loadDefaultWebpay();
-            $this->logWebpayPlusInstallConfigLoadDefault();
+            $this->logInfo("Configuración por defecto de WEBPAY PLUS se cargo de forma correcta");
         }
     }
 

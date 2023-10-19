@@ -131,17 +131,20 @@ trait InteractsWithOneclick
                 $this->setOneclickChildCommerceCode($oneclickChildCommerceCode);
                 $this->setOneclickApiKey($oneclickApikey);
                 $this->setOneclickOrderAfterPayment($oneclickDefaultOrderStateIdAfterPayment);
-                $this->logOneclickInstallConfigLoad($oneclickMallCommerceCode,
-                    $oneclickChildCommerceCode, $oneclickDefaultOrderStateIdAfterPayment);
+                $this->logInfo("Configuración de ONECLICK se cargo de forma correcta =>
+                    oneclickMallCommerceCode: {$oneclickMallCommerceCode}
+                    , oneclickChildCommerceCode: {$oneclickChildCommerceCode},
+                    , oneclickDefaultOrderStateIdAfterPayment: {$oneclickDefaultOrderStateIdAfterPayment}");
             }
             else{
                 $this->loadDefaultOneclick();
-                $this->logOneclickInstallConfigLoadDefaultPorIncompleta();
+                $this->logInfo("Configuración por defecto de ONECLICK se cargo de
+                    forma correcta porque los valores de producción estan incompletos");
             }
         }
         else{
             $this->loadDefaultOneclick();
-            $this->logOneclickInstallConfigLoadDefault();
+            $this->logInfo("Configuración por defecto de ONECLICK se cargo de forma correcta");
         }
     }
 

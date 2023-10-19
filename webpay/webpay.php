@@ -7,8 +7,6 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclickLog;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayLog;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Plugin\Helpers\TbkConstans;
@@ -17,8 +15,6 @@ require_once __DIR__.'/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
-    use InteractsWithWebpayLog;
-    use InteractsWithOneclickLog;
     use InteractsWithWebpay;
     use InteractsWithOneclick;
     use InteractsWithCommon;
@@ -330,7 +326,7 @@ class WebPay extends PaymentModule
             array_push($payment_options, ...$this->getWebpayPaymentOption($this, $this->context));
         }
         else{
-            $this->logWebpayPlusConfigError();
+            $this->logError("Configuración de WEBPAY PLUS incorrecta, revise los valores");
         }
 
         if ($this->configOneclickIsOk()){
@@ -338,7 +334,7 @@ class WebPay extends PaymentModule
             array_push($payment_options, ...$this->getGroupOneclickPaymentOption($this, $this->context));
         }
         else{
-            $this->logOneclickConfigError();
+            $this->logError("Configuración de ONECLICK incorrecta, revise los valores");
         }
         
         
