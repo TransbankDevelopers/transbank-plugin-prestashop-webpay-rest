@@ -42,7 +42,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
 
         if($this->isDebugActive()){
             $this->logInfo('C.4. Procesando pago - antes de validateOrder');
-            $this->logInfo("amount : {$total}, cartId: {$cart->id}, OKStatus: {$OKStatus}, 
+            $this->logInfo("amount : {$total}, cartId: {$cart->id}, OKStatus: {$OKStatus},
                 currencyId: {$currency->id}, customer_secure_key: {$customer->secure_key}");
         }
 
