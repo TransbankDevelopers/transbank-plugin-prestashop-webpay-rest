@@ -65,7 +65,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             if ($this->getTransactionApprovedByCartId($webpayTransaction->cart_id) && !isset($_GET['final'])) {
                 $this->logError("C.3. El carro de compras ya fue pagado con otra Transacción => token: {$tokenWs}");
                 $this->logError(json_encode($webpayTransaction));
-                $msg = "Otra transacción de este carro de compras ya fue aprobada. 
+                $msg = "Otra transacción de este carro de compras ya fue aprobada.
                     Se rechazo este pago para no generar un cobro duplicado";
                 $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
                 $webpayTransaction->save();
