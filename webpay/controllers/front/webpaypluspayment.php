@@ -92,7 +92,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         if (!$saved) {
             $this->logError("B.5. Transacción no se pudo crear en la tabla webpay_transactions => ");
             $this->logError(json_encode($transaction));
-            $this->setErrorTemplate('No se pudo crear la transacción en la tabla webpay_transactions');
+            $this->setPaymentErrorPage('No se pudo crear la transacción en la tabla webpay_transactions');
         }
         return $transaction;
     }
