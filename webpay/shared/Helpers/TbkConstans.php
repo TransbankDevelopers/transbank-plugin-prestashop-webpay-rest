@@ -2,7 +2,7 @@
 
 namespace Transbank\Plugin\Helpers;
 
-class TbkConstans
+class TbkConstants
 {
     const PAYMENT_TYPE_CODE = [
         "VD" => "Venta Débito",

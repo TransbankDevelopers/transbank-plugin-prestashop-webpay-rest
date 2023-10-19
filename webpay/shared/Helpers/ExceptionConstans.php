@@ -2,7 +2,7 @@
 
 namespace Transbank\Plugin\Helpers;
 
-class ExceptionConstans
+class ExceptionConstants
 {
     const DEFAULT_CODE = 0;
 }

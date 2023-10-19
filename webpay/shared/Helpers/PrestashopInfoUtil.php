@@ -34,13 +34,13 @@ class PrestashopInfoUtil
     public static function getSummary()
     {
         $result = [];
-        $result['ecommerce'] = TbkConstans::ECOMMERCE_PRESTASHOP;
+        $result['ecommerce'] = TbkConstants::ECOMMERCE_PRESTASHOP;
         $result['currentEcommerceVersion'] = PrestashopInfoUtil::getVersion();
         $result['lastEcommerceVersion'] = GitHubUtil::getLastGitHubReleaseVersion(
-            TbkConstans::REPO_OFFICIAL_PRESTASHOP);
+            TbkConstants::REPO_OFFICIAL_PRESTASHOP);
         $result['currentPluginVersion'] = PrestashopInfoUtil::getPluginVersion();
         $result['lastPluginVersion'] = GitHubUtil::getLastGitHubReleaseVersion(
-            TbkConstans::REPO_PRESTASHOP);
+            TbkConstants::REPO_PRESTASHOP);
         return $result;
     }
 }

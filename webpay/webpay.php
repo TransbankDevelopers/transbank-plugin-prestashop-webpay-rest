@@ -9,7 +9,7 @@ use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
-use Transbank\Plugin\Helpers\TbkConstans;
+use Transbank\Plugin\Helpers\TbkConstants;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -223,7 +223,7 @@ class WebPay extends PaymentModule
             $paymentType = "Crédito";
         }
         if (in_array($paymentTypeCode, ["SI", "S2", "NC", "VC"])) {
-            $installmentType = TbkConstans::PAYMENT_TYPE_CODE[$paymentTypeCode];
+            $installmentType = TbkConstants::PAYMENT_TYPE_CODE[$paymentTypeCode];
         } else {
             $installmentType = "Sin cuotas";
         }
