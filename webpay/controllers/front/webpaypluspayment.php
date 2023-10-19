@@ -21,13 +21,13 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             $this->logInfo("B.1. Iniciando medio de pago Webpay Plus");
         }
 
-        $randomNumber = uniqid();
+        $randomNumber = $this->generateRandomId();
         $cart = $this->getCartFromContext();
-        $cartId = $cart->id;
+        $orderId = $cart->id;
         $webpay = WebpayPlusFactory::create();
         $amount = $this->getOrderTotalRound($cart);
-        $buyOrder = 'ps:'.$randomNumber;
-        $sessionId = 'ps:sessionId:'.$randomNumber;
+        $buyOrder = "ps:{$randomNumber}:{$orderId}";
+        $sessionId = "ps:sessionId:{$randomNumber}:{$orderId}";
 
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', [], true);
         if($this->isDebugActive()){
@@ -46,7 +46,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             $this->logInfo("B.3. Transacción creada en Transbank");
             $this->logInfo(json_encode($result));
         }
-        $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
+        $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $orderId, $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
         if($this->isDebugActive()){
             $this->logInfo("B.5. Transacción creada en la tabla webpay_transactions");
             $this->logInfo(json_encode($transaction));
