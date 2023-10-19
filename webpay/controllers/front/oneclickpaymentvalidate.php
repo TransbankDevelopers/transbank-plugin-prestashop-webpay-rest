@@ -80,9 +80,10 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
 
     private function authorizeTransaction($inscriptionId, $cart, $amount){
         /* 1. Creamos la transaccion antes de intentar autorizarla con tbk */
-        $randomNumber = uniqid();
-        $parentBuyOrder = 'ps:parent:'.$randomNumber;
-        $childBuyOrder = 'ps:child:'.$randomNumber;
+        $orderId = $cart->id;
+        $randomNumber = $this->generateRandomId();
+        $parentBuyOrder = "ps:{$randomNumber}:{$orderId}";
+        $childBuyOrder = "cb:{$randomNumber}:{$orderId}";
         if($this->isDebugActive()){
             $this->logInfo("B.2. Antes de obtener inscripción de la BD => inscriptionId:
                 {$inscriptionId}, cartId: {$cart->id}, amount: {$amount}");
