@@ -21,7 +21,7 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         $webpay = OneclickFactory::create();
 
         $userId = $customer->id;
-        $userName = $this->generateUsername($userId, $webpay->getCommerceCode());
+        $userName = $this->generateUsername($userId);
         $userEmail = $customer->email;
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', [], true);
 
@@ -63,8 +63,8 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         $this->setTemplate('module:webpay/views/templates/front/oneclick_inscription_execution.tpl');
     }
 
-    private function generateUsername($userId, $commerceCode){
-        return 'PS:'.$commerceCode.':'.$userId.':'.uniqid();
+    private function generateUsername($userId){
+        return 'ps:'.$this->generateRandomId().':'.$userId;
     }
 
 }
