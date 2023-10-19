@@ -46,7 +46,8 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             $this->logInfo("B.3. Transacción creada en Transbank");
             $this->logInfo(json_encode($result));
         }
-        $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $orderId, $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
+        $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $orderId,
+            $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
         if($this->isDebugActive()){
             $this->logInfo("B.5. Transacción creada en la tabla webpay_transactions");
             $this->logInfo(json_encode($transaction));
@@ -68,7 +69,9 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
     }
 
-    private function createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $currencyId, $token, $buyOrder, $amount){
+    private function createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $currencyId,
+        $token, $buyOrder, $amount){
+
         $transaction = new TransbankWebpayRestTransaction();
         $transaction->amount = $amount;
         $transaction->cart_id = (int) $cartId;
