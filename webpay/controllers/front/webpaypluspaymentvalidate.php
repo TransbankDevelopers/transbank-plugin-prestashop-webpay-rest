@@ -223,7 +223,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_APPROVED;
             $webpayTransaction->save();
             $this->logInfo("***** TODO OK *****");
-            $this->logInfo("TRANSACCION VALIDADA POR PRESTASHOP Y POR TBK EN ESTADO STATUS_APPROVED => 
+            $this->logInfo("TRANSACCION VALIDADA POR PRESTASHOP Y POR TBK EN ESTADO STATUS_APPROVED =>
                 TOKEN: {$token}");
             $this->logInfo(json_encode($webpayTransaction));
             $this->redirectToPaidSuccessPaymentPage($cart);
@@ -253,7 +253,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $error = 'El monto del carro ha cambiado, la transacción no fue completada, ningún
         cargo será realizado en su tarjeta. Por favor, reintente el pago.';
         $message = 'Carro ha sido manipulado durante el proceso de pago';
-        $this->updateTransactionStatus($webpayTransaction, 
+        $this->updateTransactionStatus($webpayTransaction,
             TransbankWebpayRestTransaction::STATUS_FAILED, json_encode(['error' => $message]));
         $this->setPaymentErrorPage($error);
     }
@@ -267,7 +267,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     private function stopIfComingFromAnTimeoutErrorOnWebpay($sessionId)
     {
         $webpayTransaction = $this->getTransbankWebpayRestTransactionBySessionId($sessionId);
-        $errorMessage = "Al parecer pasaron más de 15 minutos en el formulario de pago, 
+        $errorMessage = "Al parecer pasaron más de 15 minutos en el formulario de pago,
             por lo que la transacción se ha cancelado automáticamente";
         if (!isset($webpayTransaction)) {
             $this->setPaymentErrorPage($errorMessage);
@@ -277,7 +277,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $cart = $this->getCart($webpayTransaction->cart_id);
             $this->redirectToPaidSuccessPaymentPage($cart);
         }
-        $this->updateTransactionStatus($webpayTransaction, 
+        $this->updateTransactionStatus($webpayTransaction,
             TransbankWebpayRestTransaction::STATUS_FAILED, json_encode(['error' => $errorMessage]));
         $this->setPaymentErrorPage($errorMessage);
     }
