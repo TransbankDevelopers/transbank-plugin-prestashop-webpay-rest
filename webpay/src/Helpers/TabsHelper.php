@@ -2,7 +2,6 @@
 namespace PrestaShop\Module\WebpayPlus\Helpers;
 
 use Tab;
-use Language;
 
 class TabsHelper
 {

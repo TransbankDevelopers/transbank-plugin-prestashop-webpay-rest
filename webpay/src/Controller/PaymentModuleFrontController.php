@@ -7,7 +7,6 @@ use Cart;
 use Module;
 use Validate;
 use Tools;
-use Exception;
 use Transbank\Plugin\Exceptions\EcommerceException;
 
 class PaymentModuleFrontController extends BaseModuleFrontController

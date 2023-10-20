@@ -8,7 +8,6 @@ use Cart;
 use Context;
 use Tools;
 use Configuration;
-use PrestaShop\Module\WebpayPlus\Utils\Utils;
 
 class BaseModuleFrontController extends ModuleFrontController
 {
@@ -90,27 +89,19 @@ class BaseModuleFrontController extends ModuleFrontController
     }
 
 
-    /**
-     * @param array $result
-     */
-    protected function setPaymentErrorPage($error, $detailError = null)
+    protected function setPaymentErrorPage($errorMessage)
     {
         $date_tx_hora = date('H:i:s');
         $date_tx_fecha = date('d-m-Y');
-        $msg = $error.(isset($detailError) ? ' ('.$detailError.')' : '');
-        $this->logError($msg);
+        $this->logError($errorMessage);
         Context::getContext()->smarty->assign([
             'WEBPAY_RESULT_CODE'          => 500,
-            'WEBPAY_RESULT_DESC'          => $msg,
+            'WEBPAY_RESULT_DESC'          => $errorMessage,
             'WEBPAY_VOUCHER_ORDENCOMPRA'  => 0,
             'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
             'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
         ]);
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('payment_error_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-        }
+        $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
     }
 
     protected function throwErrorRedirect($message, $redirectTo = 'index.php?controller=order&step=3')
@@ -130,6 +121,15 @@ class BaseModuleFrontController extends ModuleFrontController
 
     protected function getUserEmailFromCookie(){
         return $this->context->cookie->webpay_email;
+    }
+
+    protected function generateRandomId($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[random_int(0, strlen($characters) - 1)];
+        }
+        return $randomString;
     }
 }
 

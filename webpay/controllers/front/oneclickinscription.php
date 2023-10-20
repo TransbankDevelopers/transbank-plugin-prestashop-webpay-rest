@@ -1,62 +1,52 @@
 <?php
 
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithCommon;
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
-use PrestaShop\Module\WebpayPlus\Utils\Utils;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 
 class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontController
 {
+    use InteractsWithCommon;
     public function initContent()
     {
         parent::initContent();
         $this->logger = TbkFactory::createLogger();
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo('B.1. Iniciando medio de pago Oneclick');
         }
-
         $cart = $this->getCartFromContext();
         $customer = $this->getCustomerFromContext();
-        if($this->getDebugActive()==1){
-            $this->cartToLog($cart);
-        }
-
-        if($this->getDebugActive()==1){
-            $this->customerToLog($customer);
-        }
-
         $webpay = OneclickFactory::create();
 
         $userId = $customer->id;
-        $userName = $this->generateUsername($userId, $webpay->getCommerceCode());
+        $userName = $this->generateUsername($userId);
         $userEmail = $customer->email;
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', [], true);
 
-
-        $resp = $webpay->startInscription($userName, $userEmail, $returnUrl);
-
-        if (isset($resp['token'])) {
-            $ins = new TransbankInscriptions();
-            $ins->token = $resp['token'];
-            $ins->username = $userName;
-            $ins->email = $userEmail;
-            $ins->user_id = $userId;
-            $ins->pay_after_inscription = false;
-            $ins->from = 'checkout';
-            $ins->status = TransbankInscriptions::STATUS_INITIALIZED;
-            $ins->environment = $webpay->getEnviroment();
-            $ins->commerce_code = $webpay->getCommerceCode();
-            $ins->order_id = $this->module->currentOrder;//importante para recuperar la orden en curso y el carro en curso
-            $saved = $ins->save();
-            if (!$saved) {
-                $this->logError('Could not create record on transbank_inscriptions database');
-                $this->setErrorTemplate(['error' => 'No se pudo crear la transacción en la tabla transbank_inscriptions']);
-            }
-            $this->setRedirectionTemplate($resp, $this->getOrderTotalRound($cart));
-        } else {
-            $this->setErrorTemplate($resp);
+        try {
+            $resp = $webpay->startInscription($userName, $userEmail, $returnUrl);
+        } catch (\Exception $e) {
+            $this->setPaymentErrorPage($e->getMessage());
         }
+        $ins = new TransbankInscriptions();
+        $ins->token = $resp['token'];
+        $ins->username = $userName;
+        $ins->email = $userEmail;
+        $ins->user_id = $userId;
+        $ins->pay_after_inscription = false;
+        $ins->from = 'checkout';
+        $ins->status = TransbankInscriptions::STATUS_INITIALIZED;
+        $ins->environment = $webpay->getEnviroment();
+        $ins->commerce_code = $webpay->getCommerceCode();
+        $ins->order_id = $this->module->currentOrder;//importante para recuperar la orden en curso y el carro en curso
+        $saved = $ins->save();
+        if (!$saved) {
+            $this->logError('Could not create record on transbank_inscriptions database');
+            $this->setPaymentErrorPage('No se pudo crear la transacción en la tabla transbank_inscriptions');
+        }
+        $this->setRedirectionTemplate($resp, $this->getOrderTotalRound($cart));
     }
 
     /**
@@ -70,46 +60,11 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
             'token_ws' => $result['token'],
             'amount'   => round($amount)
         ]);
-
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('oneclick_inscription_execution_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/oneclick_inscription_execution.tpl');
-        }
+        $this->setTemplate('module:webpay/views/templates/front/oneclick_inscription_execution.tpl');
     }
 
-    
-
-    private function generateUsername($userId, $commerceCode){
-        return 'PS:'.$commerceCode.':'.$userId.':'.uniqid();
+    private function generateUsername($userId){
+        return 'ps:'.$this->generateRandomId().':'.$userId;
     }
 
-
-    /**
-     * @param array $result
-     */
-    protected function setErrorTemplate(array $result)
-    {
-        $date_tx_hora = date('H:i:s');
-        $date_tx_fecha = date('d-m-Y');
-
-        $error = isset($result['error']) ? $result['error'] : '';
-        $detail = isset($result['detail']) ? $result['detail'] : '';
-
-        $this->logError($error.' ('.$detail.')');
-
-        Context::getContext()->smarty->assign([
-            'WEBPAY_RESULT_CODE'          => 500,
-            'WEBPAY_RESULT_DESC'          => $error.' ('.$detail.')',
-            'WEBPAY_VOUCHER_ORDENCOMPRA'  => 0,
-            'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
-            'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
-        ]);
-
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('payment_error_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-        }
-    }
 }

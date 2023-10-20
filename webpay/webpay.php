@@ -7,14 +7,14 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
+use Transbank\Plugin\Exceptions\EcommerceException;
+use Transbank\Plugin\Helpers\TbkConstants;
 
 require_once __DIR__.'/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
-    use InteractsWithFullLog;
     use InteractsWithWebpay;
     use InteractsWithOneclick;
     use InteractsWithCommon;
@@ -26,15 +26,6 @@ class WebPay extends PaymentModule
     protected $_errors = array();
     public $log;
     public $title = 'Pago con tarjetas de crédito o Redcompra';
-
-    private $paymentTypeCodearray = [
-        "VD" => "Venta débito",
-        "VN" => "Venta normal",
-        "VC" => "Venta en cuotas",
-        "SI" => "3 cuotas sin interés",
-        "S2" => "2 cuotas sin interés",
-        "NC" => "N cuotas sin interés",
-    ];
 
     public function __construct()
     {
@@ -54,7 +45,7 @@ class WebPay extends PaymentModule
         try {
             $this->log = TbkFactory::createLogger();
         } catch (Exception $e) {
-            print_r($e);
+            throw new EcommerceException($e->getMessage(), $e);
         }
     }
 
@@ -191,7 +182,7 @@ class WebPay extends PaymentModule
             $this->logError('Showing confirmation page, but there is no webpayTransaction object, so we cant find an approved transaction for this order.');
         }
         
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo('D.3. TransbankWebpayRestTransaction obtenida');
             $this->logInfo(isset($webpayTransaction) ? $webpayTransaction->transbank_response : 'No se encontro el registro');
         }
@@ -232,7 +223,7 @@ class WebPay extends PaymentModule
             $paymentType = "Crédito";
         }
         if (in_array($paymentTypeCode, ["SI", "S2", "NC", "VC"])) {
-            $installmentType = $this->paymentTypeCodearray[$paymentTypeCode];
+            $installmentType = TbkConstants::PAYMENT_TYPE_CODE[$paymentTypeCode];
         } else {
             $installmentType = "Sin cuotas";
         }
@@ -257,7 +248,7 @@ class WebPay extends PaymentModule
 
     public function hookPaymentReturn($params)
     {
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo('D.1. Retornando (hookPaymentReturn)');
         }
         if (!$this->active) {
@@ -267,7 +258,7 @@ class WebPay extends PaymentModule
         $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
         $orderId = $params[$nameOrderRef]->id;
         
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo('D.2. Obteniendo TransbankWebpayRestTransaction desde la BD');
             $this->logInfo('nameOrderRef: '.$nameOrderRef.', orderId: '.$orderId);
         }
@@ -316,7 +307,7 @@ class WebPay extends PaymentModule
     */
     public function hookPaymentOptions($params)
     {
-        if($this->getDebugActive()==1){
+        if($this->isDebugActive()){
             $this->logInfo('*****************************************************');
             $this->logInfo('A.1. Mostrando medios de pago Webpay Plus');
             $this->logInfo(json_encode($params['cart']));
@@ -335,7 +326,7 @@ class WebPay extends PaymentModule
             array_push($payment_options, ...$this->getWebpayPaymentOption($this, $this->context));
         }
         else{
-            $this->logWebpayPlusConfigError();
+            $this->logError("Configuración de WEBPAY PLUS incorrecta, revise los valores");
         }
 
         if ($this->configOneclickIsOk()){
@@ -343,7 +334,7 @@ class WebPay extends PaymentModule
             array_push($payment_options, ...$this->getGroupOneclickPaymentOption($this, $this->context));
         }
         else{
-            $this->logOneclickConfigError();
+            $this->logError("Configuración de ONECLICK incorrecta, revise los valores");
         }
         
         
@@ -390,19 +381,12 @@ class WebPay extends PaymentModule
         return $displayOrder;
     }
 
-    private function adminValidation()
-    {
-        $this->_errors = array();
-    }
-
     protected function logError($msg){
-        if (isset($this->log))
-            $this->log->logError($msg);
+        $this->log->logError($msg);
     }
 
     protected function logInfo($msg){
-        if (isset($this->log))
-            $this->log->logInfo($msg);
+        $this->log->logInfo($msg);
     }
 
     public function updateSettings(){

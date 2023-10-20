@@ -17,7 +17,8 @@ trait InteractsWithTabs
             return;
         }
         TabsHelper::removeTab('WebPay');
-        TabsHelper::AddTab(ConfigureController::TAB_CLASS_NAME, $this->getNamesToManualInstall('Configuración Webpay', 'Modules.WebpayPlus.Config'), 'WebPay', 'AdminParentPayment');
+        TabsHelper::AddTab(ConfigureController::TAB_CLASS_NAME,
+            $this->getNamesToManualInstall('Configuración Webpay'), 'WebPay', 'AdminParentPayment');
     }
     
     protected function uninstallTab()
@@ -49,7 +50,7 @@ trait InteractsWithTabs
         return $tabNames;
     }
 
-    protected function getNamesToManualInstall($tabName, $property){
+    protected function getNamesToManualInstall($tabName){
         $tabNames = [];
         foreach (Language::getLanguages(true) as $lang) {
             $tabNames[$lang['id_lang']] = $tabName;

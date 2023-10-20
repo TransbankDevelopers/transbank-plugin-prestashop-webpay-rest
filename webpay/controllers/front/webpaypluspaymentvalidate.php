@@ -2,10 +2,10 @@
 
 use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithCommon;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use Transbank\Webpay\WebpayPlus\TransactionCommitResponse;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
@@ -15,7 +15,7 @@ use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
  */
 class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModuleFrontController
 {
-    use InteractsWithFullLog;
+    use InteractsWithCommon;
     use InteractsWithWebpay;
     use InteractsWithWebpayDb;
 
@@ -33,30 +33,40 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $params = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
         $tokenWs = isset($params['token_ws']) && $params['token_ws']!==null ? $params['token_ws'] : null;
         $tbktoken = isset($params['TBK_TOKEN']) && $params['TBK_TOKEN']!==null ? $params['TBK_TOKEN'] : null;
-        $tbkOrdenCompra = isset($params['TBK_ORDEN_COMPRA']) && $params['TBK_ORDEN_COMPRA']!==null ? $params['TBK_ORDEN_COMPRA'] : null;
         $tbkIdSesion = isset($params['TBK_ID_SESION'])&& $params['TBK_ID_SESION']!==null ? $params['TBK_ID_SESION'] : null;
-        $this->logWebpayPlusRetornandoDesdeTbk($_SERVER['REQUEST_METHOD'], $params);
+        if($this->isDebugActive()){
+            $this->logInfo("C.1. Iniciando validación luego de redirección desde tbk =>
+                method: {$_SERVER['REQUEST_METHOD']}");
+            $this->logInfo(json_encode($params));
+        }
 
         if (isset($tokenWs) && !isset($tbktoken)) {//Flujo 1 => Confirmar Transacción
 
             $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($tokenWs);
-            $this->logWebpayPlusDespuesObtenerTx($tokenWs, $webpayTransaction);
+            if($this->isDebugActive()){
+                $this->logInfo("C.2. Tx obtenido desde la tabla webpay_transactions => token: {$tokenWs}");
+                $this->logInfo(json_encode($webpayTransaction));
+            }
             $cart = $this->getCart($webpayTransaction->cart_id);
             $this->validateData($cart);
 
             if ($webpayTransaction->status == TransbankWebpayRestTransaction::STATUS_APPROVED) {
-                $this->logWebpayPlusCommitTxYaAprobadoError($tokenWs, $webpayTransaction);
+                $this->logError("C.3. Transacción ya estaba aprobada => token: {$tokenWs}");
+                $this->logError(json_encode($webpayTransaction));
                 return $this->redirectToPaidSuccessPaymentPage($cart);
             } 
             else if ($webpayTransaction->status != TransbankWebpayRestTransaction::STATUS_INITIALIZED) {
-                $this->logWebpayPlusCommitTxNoInicializadoError($tokenWs, $webpayTransaction);
+                $this->logError("C.3. Transacción se encuentra en estado rechazado o cancelado => token: {$tokenWs}");
+                $this->logError(json_encode($webpayTransaction));
                 $msg = 'Esta compra se encuentra en estado rechazado o cancelado y no se puede aceptar el pago';
                 $this->setPaymentErrorPage($msg);
             }
 
             if ($this->getTransactionApprovedByCartId($webpayTransaction->cart_id) && !isset($_GET['final'])) {
-                $this->logWebpayPlusCommitTxCarroAprobadoError($tokenWs, $webpayTransaction);
-                $msg = 'Otra transacción de este carro de compras ya fue aprobada. Se rechazo este pago para no generar un cobro duplicado';
+                $this->logError("C.3. El carro de compras ya fue pagado con otra Transacción => token: {$tokenWs}");
+                $this->logError(json_encode($webpayTransaction));
+                $msg = "Otra transacción de este carro de compras ya fue aprobada.
+                    Se rechazo este pago para no generar un cobro duplicado";
                 $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
                 $webpayTransaction->save();
                 $this->setPaymentErrorPage($msg);
@@ -65,20 +75,23 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->processPayment($tokenWs, $webpayTransaction, $cart);
         }
         else if (!isset($tokenWs) && !isset($tbktoken)) {//Flujo 2 => El pago fue anulado por tiempo de espera.
-            $this->logWebpayPlusRetornandoDesdeTbkFujo2Error($tbkIdSesion);
+            $this->logError("C.2. Error tipo Flujo 2: El pago fue anulado por tiempo de espera => tbkIdSesion:
+                {$tbkIdSesion}");
             $this->stopIfComingFromAnTimeoutErrorOnWebpay($tbkIdSesion);
         }
         else if (!isset($tokenWs) && isset($tbktoken)) {//Flujo 3 => El pago fue anulado por el usuario.
-            $this->logWebpayPlusRetornandoDesdeTbkFujo3Error($tbktoken);
+            $this->logError("C.2. Error tipo Flujo 3: El pago fue anulado por el usuario => tbktoken: {$tbktoken}");
             $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($tbktoken);
             $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER;
-            $this->logWebpayPlusRetornandoDesdeTbkFujo3TxError($tbktoken, $webpayTransaction);
+            $this->logError("C.2. Error tipo Flujo 3 => tbktoken: {$tbktoken}");
+            $this->logError(json_encode($webpayTransaction));
             $webpayTransaction->save();
             $msg = 'Transacción abortada desde el formulario de pago. Puedes reintentar el pago. ';
             $this->setPaymentErrorPage($msg);
         }
         else if (isset($tokenWs) && isset($tbktoken)) {//Flujo 4 => El pago es inválido.
-            $this->logWebpayPlusRetornandoDesdeTbkFujo4Error($tokenWs, $tbktoken);
+            $this->logError("C.2. Error tipo Flujo 4: El pago es inválido  => tokenWs:
+                {$tokenWs}, tbktoken: {$tbktoken}");
             $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($tokenWs);
             $msg = 'Al parecer ocurrió un error durante el proceso de pago. Puedes volver a intentar. ';
             $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
@@ -103,7 +116,8 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $sql = 'SELECT id_cart FROM '._DB_PREFIX_."cart p WHERE p.id_customer = $id_usuario ORDER BY p.id_cart DESC";
             $cart->id = SqlHelper::getValue($sql);
             $customer = $this->getCustomer($cart->id_customer);
-            Tools::redirect('index.php?controller=order-confirmation&id_cart='.(int) $cart->id.'&id_module='.(int) $this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
+            Tools::redirect('index.php?controller=order-confirmation&id_cart='.(int) $cart->id.'&id_module='
+                .(int) $this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
         }
 
         if ($cart->id_customer == 0) {
@@ -136,16 +150,30 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      */
     private function processPayment($token, $webpayTransaction, $cart)
     {
-        $this->logWebpayPlusAntesCommitTx($token, $webpayTransaction, $cart);
+        if($this->isDebugActive()){
+            $this->logInfo("C.3. Transaccion antes del commit  => token: {$token}");
+            $this->logInfo(json_encode($webpayTransaction));
+        }
         $amount = $this->getOrderTotal($cart);
         if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
-            $this->logWebpayPlusCommitTxCarroManipuladoError($token, $webpayTransaction);
+            $this->logError("C.3. El carro de compras ha sido manipulado => token: {$token}");
+            $this->logError(json_encode($webpayTransaction));
             $this->handleCartManipulated($token, $webpayTransaction);
         }
 
         $transbankSdkWebpay = WebpayPlusFactory::create();
-        $result = $transbankSdkWebpay->commitTransaction($webpayTransaction->token);
-        $this->logWebpayPlusDespuesCommitTx($token, $result);
+        try {
+            $result = $transbankSdkWebpay->commitTransaction($webpayTransaction->token);
+        } catch (\Exception $e) {
+            $this->setPaymentErrorPage($e->getMessage());
+        }
+        $this->logInfo("C.4. Transacción con commit en Transbank => token: {$token}");
+        $this->logInfo(json_encode($result));
+        if (!is_array($result) && isset($result->buyOrder) && $result->responseCode === 0){
+            $this->logInfo("***** COMMIT TBK OK *****");
+            $this->logInfo("TRANSACCION VALIDADA POR TBK => TOKEN: {$token}");
+            $this->logInfo("SI NO SE ENCUENTRA VALIDACION POR PRESTASHOP DEBE ANULARSE");
+        }
 
         $webpayTransaction->transbank_response = json_encode($result);
         $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
@@ -153,20 +181,27 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $saved = $webpayTransaction->save(); // Guardar como fallida por si algo falla más adelante
 
         if (!$saved) {
-            $this->logWebpayPlusGuardandoCommitError($token, $webpayTransaction);
+            $this->logError("C.5. No se pudo guardar en base de datos el resultado del commit => token: {$token}");
+            $this->logError(json_encode($webpayTransaction));
             $error = 'No se pudo guardar en base de datos el resultado de la transacción';
             $this->throwErrorRedirect($error);
         }
         else if (!is_array($result) && isset($result->buyOrder) && $result->responseCode === 0) {
-            $this->logWebpayPlusGuardandoCommitExitoso($token);
+            if($this->isDebugActive()){
+                $this->logInfo("C.5. Transacción con commit exitoso en Transbank y guardado => token: {$token}");
+            }
             $customer = $this->getCustomer($cart->id_customer);
             $currency = Context::getContext()->currency;
-            $OKStatus = $this->getWebpayOkStatus();
+            $okStatus = $this->getWebpayOkStatus();
 
-            $this->logWebpayPlusAntesValidateOrderPrestashop($token, $amount, $cart->id, $OKStatus, $currency->id, $customer->secure_key);
+            if($this->isDebugActive()){
+                $this->logInfo("C.6. Procesando pago - antes de validateOrder");
+                $this->logInfo("token : {$token}, amount : {$amount}, cartId: {$cart->id}, okStatus: {$okStatus}
+                    , currencyId: {$currency->id}, customer_secure_key: {$customer->secure_key}");
+            }
             $this->module->validateOrder(
                 (int) $cart->id,
-                $OKStatus,
+                $okStatus,
                 $amount,
                 $this->module->displayName,
                 'Pago exitoso',
@@ -175,7 +210,9 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
                 false,
                 $customer->secure_key
             );
-            $this->logWebpayPlusDespuesValidateOrderPrestashop($token);
+            if($this->isDebugActive()){
+                $this->logInfo("C.7. Procesando pago despues de validateOrder => token: {$token}");
+            }
 
             $order = new Order($this->module->currentOrder);
             $this->saveOrderPayment($order, $cart, $webpayTransaction->card_number);
@@ -185,10 +222,14 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $webpayTransaction->vci = $result->vci;
             $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_APPROVED;
             $webpayTransaction->save();
-            $this->logWebpayPlusTodoOk($token, $webpayTransaction);
+            $this->logInfo("***** TODO OK *****");
+            $this->logInfo("TRANSACCION VALIDADA POR PRESTASHOP Y POR TBK EN ESTADO STATUS_APPROVED =>
+                TOKEN: {$token}");
+            $this->logInfo(json_encode($webpayTransaction));
             $this->redirectToPaidSuccessPaymentPage($cart);
         } else {
-            $this->logWebpayPlusCommitFallidoError($token, $result);
+            $this->logError("C.5. Respuesta de tbk commit fallido => token: {$token}");
+            $this->logError(json_encode($result));
             $webpayTransaction->response_code = isset($result->responseCode) ? $result->responseCode : null;
             $webpayTransaction->transbank_response = json_encode($result);
             $webpayTransaction->save();
@@ -196,16 +237,14 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->responseData['PAYMENT_OK'] = 'FAIL';
 
             $error = 'Error en el pago';
-            $detail = 'Indefinido';
             if (is_array($result) && isset($result['error'])) {
                 $error = $result['error'];
-                $detail = isset($result['detail']) ? $result['detail'] : 'Indefinido';
             }
             else if ($result instanceof TransactionCommitResponse) {
-                $error = 'La transacción ha sido rechazada. Por favor, reintente el pago. ';
-                $detail = 'Código de respuesta: '.$result->getResponseCode().'. Estado: '.$result->getStatus();
+                $error = 'La transacción ha sido rechazada. Por favor, reintente el pago. '.
+                    'Código de respuesta: '.$result->getResponseCode().'. Estado: '.$result->getStatus();
             }
-            $this->setPaymentErrorPage($error, $detail);
+            $this->setPaymentErrorPage($error);
         }
     }
 
@@ -214,7 +253,8 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $error = 'El monto del carro ha cambiado, la transacción no fue completada, ningún
         cargo será realizado en su tarjeta. Por favor, reintente el pago.';
         $message = 'Carro ha sido manipulado durante el proceso de pago';
-        $this->updateTransactionStatus($webpayTransaction, TransbankWebpayRestTransaction::STATUS_FAILED, json_encode(['error' => $message]));
+        $this->updateTransactionStatus($webpayTransaction,
+            TransbankWebpayRestTransaction::STATUS_FAILED, json_encode(['error' => $message]));
         $this->setPaymentErrorPage($error);
     }
 
@@ -227,7 +267,8 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     private function stopIfComingFromAnTimeoutErrorOnWebpay($sessionId)
     {
         $webpayTransaction = $this->getTransbankWebpayRestTransactionBySessionId($sessionId);
-        $errorMessage = 'Al parecer pasaron más de 15 minutos en el formulario de pago, por lo que la transacción se ha cancelado automáticamente';
+        $errorMessage = "Al parecer pasaron más de 15 minutos en el formulario de pago,
+            por lo que la transacción se ha cancelado automáticamente";
         if (!isset($webpayTransaction)) {
             $this->setPaymentErrorPage($errorMessage);
         }
@@ -236,7 +277,8 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $cart = $this->getCart($webpayTransaction->cart_id);
             $this->redirectToPaidSuccessPaymentPage($cart);
         }
-        $this->updateTransactionStatus($webpayTransaction, TransbankWebpayRestTransaction::STATUS_FAILED, json_encode(['error' => $errorMessage]));
+        $this->updateTransactionStatus($webpayTransaction,
+            TransbankWebpayRestTransaction::STATUS_FAILED, json_encode(['error' => $errorMessage]));
         $this->setPaymentErrorPage($errorMessage);
     }
 

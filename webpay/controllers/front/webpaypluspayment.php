@@ -1,11 +1,9 @@
 <?php
 
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
+use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithCommon;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
-use PrestaShop\Module\WebpayPlus\Utils\Utils;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithFullLog;
-use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
 /**
@@ -13,36 +11,48 @@ use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
  */
 class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontController
 {
-    use InteractsWithFullLog;
+    use InteractsWithCommon;
 
     public function initContent()
     {
         parent::initContent();
         $this->logger = TbkFactory::createLogger();
-        $this->logWebpayPlusIniciando();
+        if($this->isDebugActive()){
+            $this->logInfo("B.1. Iniciando medio de pago Webpay Plus");
+        }
 
-        $randomNumber = uniqid();
+        $randomNumber = $this->generateRandomId();
         $cart = $this->getCartFromContext();
-        $this->logPrintCart($cart);
-        $cartId = $cart->id;
+        $orderId = $cart->id;
         $webpay = WebpayPlusFactory::create();
-        $amount = $this->getOrderTotalRound($cart); 
-        $buyOrder = 'ps:'.$randomNumber;
-        $sessionId = 'ps:sessionId:'.$randomNumber;
+        $amount = $this->getOrderTotalRound($cart);
+        $buyOrder = "ps:{$randomNumber}:{$orderId}";
+        $sessionId = "ps:sessionId:{$randomNumber}:{$orderId}";
 
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', [], true);
-        $this->logWebpayPlusAntesCrearTx($amount, $sessionId, $buyOrder, $returnUrl);
-        $result = $webpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
-        
-        if (isset($result['token_ws'])) {
-            $this->logWebpayPlusDespuesCrearTx($result);
-            $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
-            $this->logWebpayPlusDespuesCrearTxEnTabla($transaction);
-            $this->setRedirectionTemplate($result, $amount);
-        } else {
-            $this->logWebpayPlusDespuesCrearTxError($result);
-            $this->setErrorTemplate($result);
+        if($this->isDebugActive()){
+            $this->logInfo("B.2. Preparando datos antes de crear la transacción en Transbank");
+            $this->logInfo("amount: {$amount}, sessionId: {$sessionId}, buyOrder: {$buyOrder}
+                , returnUrl: {$returnUrl}");
         }
+        try {
+            $result = $webpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
+        } catch (\Exception $e) {
+            $this->logError("B.3. Transacción creada con error en Transbank");
+            $this->logError(json_encode($result));
+            $this->setPaymentErrorPage($e->getMessage());
+        }
+        if($this->isDebugActive()){
+            $this->logInfo("B.3. Transacción creada en Transbank");
+            $this->logInfo(json_encode($result));
+        }
+        $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $orderId,
+            $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
+        if($this->isDebugActive()){
+            $this->logInfo("B.5. Transacción creada en la tabla webpay_transactions");
+            $this->logInfo(json_encode($transaction));
+        }
+        $this->setRedirectionTemplate($result, $amount);
     }
 
     /**
@@ -56,43 +66,12 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             'token_ws' => $result['token_ws'],
             'amount'   => $amount,
         ]);
-
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('payment_execution_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
-        }
+        $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
     }
 
-    /**
-     * @param $cart
-     * @param $amount
-     * @param array $result
-     */
-    protected function setErrorTemplate(array $result)
-    {
-        $date_tx_hora = date('H:i:s');
-        $date_tx_fecha = date('d-m-Y');
+    private function createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $currencyId,
+        $token, $buyOrder, $amount){
 
-        $error = isset($result['error']) ? $result['error'] : '';
-        $detail = isset($result['detail']) ? $result['detail'] : '';
-
-        Context::getContext()->smarty->assign([
-            'WEBPAY_RESULT_CODE'          => 500,
-            'WEBPAY_RESULT_DESC'          => $error.' ('.$detail.')',
-            'WEBPAY_VOUCHER_ORDENCOMPRA'  => 0,
-            'WEBPAY_VOUCHER_TXDATE_HORA'  => $date_tx_hora,
-            'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
-        ]);
-
-        if (Utils::isPrestashop_1_6()) {
-            $this->setTemplate('payment_error_1.6.tpl');
-        } else {
-            $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
-        }
-    }
-
-    private function createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $currencyId, $token, $buyOrder, $amount){
         $transaction = new TransbankWebpayRestTransaction();
         $transaction->amount = $amount;
         $transaction->cart_id = (int) $cartId;
@@ -108,11 +87,15 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $transaction->environment = $webpay->getEnviroment();
         $transaction->product = TransbankWebpayRestTransaction::PRODUCT_WEBPAY_PLUS;
 
-        $this->logWebpayPlusAntesCrearTxEnTabla($transaction);
+        if($this->isDebugActive()){
+            $this->logInfo("B.4. Preparando datos antes de crear la transacción en la tabla webpay_transactions");
+            $this->logInfo(json_encode($transaction));
+        }
         $saved = $transaction->save();
         if (!$saved) {
-            $this->logWebpayPlusDespuesCrearTxEnTablaError($transaction);
-            $this->setErrorTemplate(['error' => 'No se pudo crear la transacción en la tabla webpay_transactions']);
+            $this->logError("B.5. Transacción no se pudo crear en la tabla webpay_transactions => ");
+            $this->logError(json_encode($transaction));
+            $this->setPaymentErrorPage('No se pudo crear la transacción en la tabla webpay_transactions');
         }
         return $transaction;
     }

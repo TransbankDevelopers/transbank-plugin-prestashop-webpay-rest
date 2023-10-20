@@ -2,11 +2,9 @@
 
 namespace Transbank\Plugin\Helpers;
 
-use Exception;
 use Monolog\Logger;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
-use Throwable;
 use Transbank\Plugin\Model\LogConfig;
 
 final class PluginLogger implements ILogger {

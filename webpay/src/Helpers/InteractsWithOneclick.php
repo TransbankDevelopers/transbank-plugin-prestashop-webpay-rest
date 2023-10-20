@@ -62,7 +62,9 @@ trait InteractsWithOneclick
 
     protected function getNewOneclickPaymentOption($base, $context)
     {
-        return $this->getOneclickInscriptionOption($base, $context, 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick');
+        $message = "Inscribe tu tarjeta de crédito,
+            débito o prepago y luego paga con un solo click a través de Webpay Oneclick";
+        return $this->getOneclickInscriptionOption($base, $context, $message);
     }
 
     protected function getOneclickInscriptionOption($base, $context, $description)
@@ -83,7 +85,9 @@ trait InteractsWithOneclick
 
     protected function getCardsByUserId($userId)
     {
-        $r = SqlHelper::executeSql('SELECT * FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
+        $r = SqlHelper::executeSql('SELECT * FROM '.
+            _DB_PREFIX_.TransbankInscriptions::TABLE_NAME.
+            ' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
         if (!isset($r)){
             return [];
         }
@@ -92,7 +96,9 @@ trait InteractsWithOneclick
 
     protected function getCountCardsByUserId($userId)
     {
-        return SqlHelper::getValue('SELECT count(1) FROM '._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'.TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
+        return SqlHelper::getValue('SELECT count(1) FROM '
+            ._DB_PREFIX_.TransbankInscriptions::TABLE_NAME.' WHERE `status` = "'
+            .TransbankInscriptions::STATUS_COMPLETED.'" and `user_id` = "'.pSQL($userId).'"');
     }
 
     protected function getUserIdForOneclick($context){
@@ -125,52 +131,37 @@ trait InteractsWithOneclick
                 $this->setOneclickChildCommerceCode($oneclickChildCommerceCode);
                 $this->setOneclickApiKey($oneclickApikey);
                 $this->setOneclickOrderAfterPayment($oneclickDefaultOrderStateIdAfterPayment);
-                $this->logOneclickInstallConfigLoad($oneclickMallCommerceCode, $oneclickChildCommerceCode, $oneclickDefaultOrderStateIdAfterPayment);
+                $this->logInfo("Configuración de ONECLICK se cargo de forma correcta =>
+                    oneclickMallCommerceCode: {$oneclickMallCommerceCode}
+                    , oneclickChildCommerceCode: {$oneclickChildCommerceCode},
+                    , oneclickDefaultOrderStateIdAfterPayment: {$oneclickDefaultOrderStateIdAfterPayment}");
             }
             else{
                 $this->loadDefaultOneclick();
-                $this->logOneclickInstallConfigLoadDefaultPorIncompleta();
+                $this->logInfo("Configuración por defecto de ONECLICK se cargo de
+                    forma correcta porque los valores de producción estan incompletos");
             }
         }
         else{
             $this->loadDefaultOneclick();
-            $this->logOneclickInstallConfigLoadDefault();
+            $this->logInfo("Configuración por defecto de ONECLICK se cargo de forma correcta");
         }
     }
 
     protected function oneclickUpdateSettings(){
         $theEnvironmentChanged = false;
+        $environment = Tools::getValue('form_oneclick_environment');
         if (Tools::getIsset('btn_oneclick_update')) {
-            if ($this->getFormOneclickEnvironment() !=  $this->getOneclickEnvironment()) {
+            if ($environment !=  $this->getOneclickEnvironment()) {
                 $theEnvironmentChanged = true;
             }
-            $this->setOneclickMallCommerceCode($this->getFormOneclickMallCommerceCode());
-            $this->setOneclickChildCommerceCode($this->getFormOneclickChildCommerceCode());
-            $this->setOneclickApiKey($this->getFormOneclickApiKey());
-            $this->setOneclickEnvironment($this->getFormOneclickEnvironment());
-            $this->setOneclickOrderAfterPayment($this->getDefaultWebpayOrderAfterPayment());
+            $this->setOneclickMallCommerceCode(trim(Tools::getValue('form_oneclick_mall_commerce_code')));
+            $this->setOneclickChildCommerceCode(trim(Tools::getValue('form_oneclick_child_commerce_code')));
+            $this->setOneclickApiKey(trim(Tools::getValue('form_oneclick_api_key')));
+            $this->setOneclickEnvironment($environment);
+            $this->setOneclickOrderAfterPayment((int)Tools::getValue('form_oneclick_order_after_payment'));
         } 
         return $theEnvironmentChanged;
-    }
-
-    protected function getFormOneclickMallCommerceCode(){
-        return trim(Tools::getValue('form_oneclick_mall_commerce_code'));
-    }
-
-    protected function getFormOneclickChildCommerceCode(){
-        return trim(Tools::getValue('form_oneclick_child_commerce_code'));
-    }
-
-    protected function getFormOneclickApiKey(){
-        return trim(Tools::getValue('form_oneclick_api_key'));
-    }
-
-    protected function getFormOneclickEnvironment(){
-        return Tools::getValue('form_oneclick_environment');
-    }
-
-    protected function getFormOneclickOrderAfterPayment(){
-        return (int)Tools::getValue('form_oneclick_order_after_payment');
     }
 
     protected function getOneclickMallCommerceCode(){

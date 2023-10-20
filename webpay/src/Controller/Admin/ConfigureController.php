@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\WebpayPlus\Controller\Admin;
 
+use Symfony\Component\HttpFoundation\Request;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Symfony\Component\HttpFoundation\Response;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
@@ -83,7 +84,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function saveWebpayPlusForm(): Response
+    public function saveWebpayPlusForm(Request $request): Response
     {
         $formDataHandler = $this->get('webpay.form.webpay_plus_form_data_handler');
         $form = $formDataHandler->getForm();
@@ -113,7 +114,7 @@ class ConfigureController extends FrameworkBundleAdminController
         return $this->redirectToRoute('ps_controller_webpay_configure_webpayplus');
     }
 
-    public function saveOneclickForm(): Response
+    public function saveOneclickForm(Request $request): Response
     {
         $formDataHandler = $this->get('webpay.form.oneclick_form_data_handler');
         $form = $formDataHandler->getForm();
@@ -143,7 +144,7 @@ class ConfigureController extends FrameworkBundleAdminController
         return $this->redirectToRoute('ps_controller_webpay_configure_oneclick');
     }
 
-    public function saveDiagnosisForm(): Response
+    public function saveDiagnosisForm(Request $request): Response
     {
         $formDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
         $form = $formDataHandler->getForm();

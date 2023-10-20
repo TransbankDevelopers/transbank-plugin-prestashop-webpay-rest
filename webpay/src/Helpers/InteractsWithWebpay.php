@@ -22,8 +22,9 @@ trait InteractsWithWebpay
         }
         $WPOption = new PaymentOption();
         $paymentController = $context->link->getModuleLink($base->name, 'webpaypluspayment', array(), true);
-
-        return [ $WPOption->setCallToActionText('Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus')
+        $message = "Permite el pago de productos y/o servicios, con tarjetas de crédito,
+            débito y prepago a través de Webpay Plus";
+        return [ $WPOption->setCallToActionText($message)
             ->setAction($paymentController)
             ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/wpplus_small.png')) ];
     }
@@ -48,47 +49,35 @@ trait InteractsWithWebpay
                 $this->setWebpayCommerceCode($webpayCommerceCode);
                 $this->setWebpayApiKey($webpayApikey);
                 $this->setWebpayOrderAfterPayment($webpayDefaultOrderStateIdAfterPayment);
-                $this->logWebpayPlusInstallConfigLoad($webpayCommerceCode, $webpayDefaultOrderStateIdAfterPayment);
+                $this->logInfo("Configuración de WEBPAY PLUS se cargo de forma correcta =>
+                    webpayCommerceCode: {$webpayCommerceCode}, webpayDefaultOrderStateIdAfterPayment:
+                    {$webpayDefaultOrderStateIdAfterPayment}");
             }
             else{
                 $this->loadDefaultWebpay();
-                $this->logWebpayPlusInstallConfigLoadDefaultPorIncompleta();               
+                $this->logInfo("Configuración por defecto de WEBPAY PLUS se cargo de forma
+                    correcta porque los valores de producción estan incompletos");
             }
         }
         else{
             $this->loadDefaultWebpay();
-            $this->logWebpayPlusInstallConfigLoadDefault();
+            $this->logInfo("Configuración por defecto de WEBPAY PLUS se cargo de forma correcta");
         }
     }
 
     protected function webpayUpdateSettings(){
         $theEnvironmentChanged = false;
+        $environment = Tools::getValue('form_webpay_environment');
         if (Tools::getIsset('btn_webpay_update')) {
-            if ($this->getFormWebpayEnvironment() !=  $this->getWebpayEnvironment()) {
+            if ($environment !=  $this->getWebpayEnvironment()) {
                 $theEnvironmentChanged = true;
             }
-            $this->setWebpayCommerceCode($this->getFormWebpayCommerceCode());
-            $this->setWebpayApiKey($this->getFormWebpayApiKey());
-            $this->setWebpayEnvironment($this->getFormWebpayEnvironment());
-            $this->setWebpayOrderAfterPayment($this->getFormWebpayOrderAfterPayment());
+            $this->setWebpayCommerceCode(trim(Tools::getValue('form_webpay_commerce_code')));
+            $this->setWebpayApiKey(trim(Tools::getValue('form_webpay_api_key')));
+            $this->setWebpayEnvironment($environment);
+            $this->setWebpayOrderAfterPayment((int)Tools::getValue('form_webpay_order_after_payment'));
         } 
         return $theEnvironmentChanged;
-    }
-
-    protected function getFormWebpayCommerceCode(){
-        return trim(Tools::getValue('form_webpay_commerce_code'));//storeID
-    }
-
-    protected function getFormWebpayApiKey(){
-        return trim(Tools::getValue('form_webpay_api_key'));//apiKeySecret
-    }
-
-    protected function getFormWebpayEnvironment(){
-        return Tools::getValue('form_webpay_environment');
-    }
-
-    protected function getFormWebpayOrderAfterPayment(){
-        return (int)Tools::getValue('form_webpay_order_after_payment');
     }
 
     protected function getWebpayCommerceCode(){
