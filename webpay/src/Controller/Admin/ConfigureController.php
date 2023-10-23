@@ -78,18 +78,6 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    /** @Route("/webpay/configure", name="info") */
-    public function infoAction()
-    {
-        $phpInfo = InfoUtil::getPhpInfo();
-        return $this->render('@Modules/webpay/views/templates/admin/info_configure.html.twig', [
-            'enableSidebar' => true,
-            'content' => $phpInfo['content'],
-            'layoutTitle' => $this->trans('Configuración Webpay', 'Modules.WebpayPlus.Admin'),
-            
-        ]);
-    }
-
     /** @Route("/webpay/configure", name="saveWebpayPlusForm") */
     public function saveWebpayPlusFormAction(Request $request): Response
     {

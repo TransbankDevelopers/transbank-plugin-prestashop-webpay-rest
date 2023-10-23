@@ -38,13 +38,6 @@ ps_controller_webpay_configure_logs:
         _legacy_controller: 'WebpayPlusConfigure'
         _legacy_link: 'WebpayPlusConfigure'
 
-ps_controller_webpay_configure_info:
-    path: /webpay/configure/info
-    methods: [GET, POST]
-    defaults:
-        _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::infoAction'
-        _legacy_controller: 'WebpayPlusConfigure'
-        _legacy_link: 'WebpayPlusConfigure'
 #config form
 ps_controller_webpay_configure_webpay_plus_form_save:
   path: /webpay/configure/saveWebpayPlusForm
