@@ -290,6 +290,12 @@ class WebPay extends PaymentModule
         if (!$this->active) {
             return;
         }
+        if($this->isDebugActive()){
+            $this->logInfo('*****************************************************');
+            $this->logInfo('Ejecutando hookPayment');
+            $this->logInfo(json_encode($params));
+            $this->logInfo('-----------------------------------------------------');
+        }
         Context::getContext()->smarty->assign(array(
             'logo' => \Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'),
             'title' => $this->title
