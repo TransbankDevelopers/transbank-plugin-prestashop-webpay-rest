@@ -8,7 +8,6 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
-use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Plugin\Helpers\TbkConstants;
 
 require_once __DIR__.'/vendor/autoload.php';
@@ -42,11 +41,7 @@ class WebPay extends PaymentModule
         $this->confirmUninstall = '¿Estás seguro/a que deseas desinstalar este módulo de pago?';
         $this->ps_versions_compliancy = array('min' => '1.7.6.0', 'max' => _PS_VERSION_);
         $this->pluginValidation();
-        try {
-            $this->log = TbkFactory::createLogger();
-        } catch (Exception $e) {
-            throw new EcommerceException($e->getMessage(), $e);
-        }
+        $this->log = TbkFactory::createLogger();
     }
 
     public function uninstall()
