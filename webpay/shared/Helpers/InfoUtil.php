@@ -88,16 +88,6 @@ class InfoUtil
     {
         return $_SERVER['SERVER_SOFTWARE'];
     }
-    
-    /**
-     * Este método obtiene el PHP info
-     *
-     * @return array
-     */
-    public static function getPhpInfo()
-    {
-        return ['content' => ""];
-    }
 
     public static function getSummary(){
         return [
