@@ -40,7 +40,7 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         //registro correcto
         //flujo correcto
         $this->finishInscription($ins, $token);
-        $this->redirectToOrderConfirmationByCartId($this->context->cart->id);
+        Tools::redirect('index.php?controller=order');
 
     }
 
@@ -73,11 +73,4 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         }
         return new TransbankInscriptions($result['id']);
     }
-
-    protected function redirectToOrderConfirmationByCartId($cartId)
-    {
-        Tools::redirect('index.php?controller=order');
-    }
-
-
 }
