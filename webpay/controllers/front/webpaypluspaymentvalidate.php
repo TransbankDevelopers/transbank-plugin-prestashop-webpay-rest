@@ -154,7 +154,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->logInfo("C.3. Transaccion antes del commit  => token: {$token}");
             $this->logInfo(json_encode($webpayTransaction));
         }
-        $amount = $this->getOrderTotal($cart);
+        $amount = $this->getOrderTotalOriginal($cart);
         if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
             $this->logError("C.3. El carro de compras ha sido manipulado => token: {$token}");
             $this->logError(json_encode($webpayTransaction));

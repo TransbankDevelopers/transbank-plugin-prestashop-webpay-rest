@@ -75,10 +75,10 @@ class BaseModuleFrontController extends ModuleFrontController
     }
 
     protected function getOrderTotalRound($cart){
-        return round($this->getOrderTotal($cart));
+        return round($this->getOrderTotalOriginal($cart));
     }
 
-    protected function getOrderTotal($cart){
+    protected function getOrderTotalOriginal($cart){
         if (!isset($cart))
             $cart = $this->getCartFromContext();
         return $cart->getOrderTotal(true, Cart::BOTH);// for CLP it should alway be a int
