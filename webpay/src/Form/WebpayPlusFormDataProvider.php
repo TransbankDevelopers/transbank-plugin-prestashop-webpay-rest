@@ -22,6 +22,10 @@ class WebpayPlusFormDataProvider implements FormDataProviderInterface
         $this->dataConfiguration = $dataConfiguration;
     }
 
+    public function getDataConfigurationInner(){
+        return $this->dataConfiguration;
+    }
+
     /**
      * {@inheritdoc}
      */
