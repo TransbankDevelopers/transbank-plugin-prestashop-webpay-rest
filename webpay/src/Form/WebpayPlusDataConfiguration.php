@@ -28,6 +28,10 @@ final class WebpayPlusDataConfiguration implements DataConfigurationInterface
         $this->configuration = $configuration;
     }
 
+    public function getConfigurationInner(){
+        return $this->configuration;
+    }
+
     /**
      * {@inheritdoc}
      */

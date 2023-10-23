@@ -29,6 +29,10 @@ final class OneclickDataConfiguration implements DataConfigurationInterface
         $this->configuration = $configuration;
     }
 
+    public function getConfigurationInner(){
+        return $this->configuration;
+    }
+
     /**
      * {@inheritdoc}
      */
