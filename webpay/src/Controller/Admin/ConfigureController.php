@@ -20,7 +20,7 @@ class ConfigureController extends FrameworkBundleAdminController
     use InteractsWithOneclick;
     const TAB_CLASS_NAME = 'WebpayPlusConfigure';
 
-    public function webpayplus()
+    public function webpayplusAction()
     {
         $webpayPlusFormDataHandler = $this->get('webpay.form.webpay_plus_form_data_handler');
         $webpayPlusForm = $webpayPlusFormDataHandler->getForm();
@@ -32,7 +32,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function oneclick()
+    public function oneclickAction()
     {
         $oneclickFormDataHandler = $this->get('webpay.form.oneclick_form_data_handler');
         $oneclickForm = $oneclickFormDataHandler->getForm();
@@ -44,7 +44,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function diagnosis()
+    public function diagnosisAction()
     {
         $diagnosisFormDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
         $diagnosisForm = $diagnosisFormDataHandler->getForm();
@@ -59,7 +59,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function logs()
+    public function logsAction()
     {
         $logger = TbkFactory::createLogger();
         $resume = $logger->getInfo();
@@ -73,7 +73,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function info()
+    public function infoAction()
     {
         $phpInfo = InfoUtil::getPhpInfo();
         return $this->render('@Modules/webpay/views/templates/admin/info_configure.html.twig', [
@@ -84,7 +84,7 @@ class ConfigureController extends FrameworkBundleAdminController
         ]);
     }
 
-    public function saveWebpayPlusForm(Request $request): Response
+    public function saveWebpayPlusFormAction(Request $request): Response
     {
         $formDataHandler = $this->get('webpay.form.webpay_plus_form_data_handler');
         $form = $formDataHandler->getForm();
@@ -114,7 +114,7 @@ class ConfigureController extends FrameworkBundleAdminController
         return $this->redirectToRoute('ps_controller_webpay_configure_webpayplus');
     }
 
-    public function saveOneclickForm(Request $request): Response
+    public function saveOneclickFormAction(Request $request): Response
     {
         $formDataHandler = $this->get('webpay.form.oneclick_form_data_handler');
         $form = $formDataHandler->getForm();
@@ -144,7 +144,7 @@ class ConfigureController extends FrameworkBundleAdminController
         return $this->redirectToRoute('ps_controller_webpay_configure_oneclick');
     }
 
-    public function saveDiagnosisForm(Request $request): Response
+    public function saveDiagnosisFormAction(Request $request): Response
     {
         $formDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
         $form = $formDataHandler->getForm();
