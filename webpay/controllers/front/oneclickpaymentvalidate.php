@@ -33,11 +33,11 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $this->validate($cart, $customer);
 
         $currency = $this->context->currency;
-        $total = (float) $cart->getOrderTotal(true, Cart::BOTH);
-
+        $total = $this->getOrderTotalOriginal($cart);
+        $totalRound = $this->getOrderTotalRound($cart);
         $data = $_REQUEST;
         $inscriptionId = $data['inscriptionId'];
-        $webpayTransaction = $this->authorizeTransaction($inscriptionId, $cart, $total);
+        $webpayTransaction = $this->authorizeTransaction($inscriptionId, $cart, $totalRound);
         $OKStatus = $this->getOneclickOkStatus();
 
         if($this->isDebugActive()){
