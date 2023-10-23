@@ -32,6 +32,14 @@ final class PluginLogger implements ILogger {
         $this->logger->pushHandler($stream);
     }
 
+    public function getLogger(){
+        return $this->logger;
+    }
+
+    public function getConfig(){
+        return $this->config;
+    }
+
     public function logDebug($msg)
     {
         $this->logger->debug($msg);
