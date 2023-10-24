@@ -25,7 +25,7 @@ class WebpayPlusType extends TranslatorAwareType
     private $configuration;
 
     public function __construct(
-        TranslatorInterface $translator, 
+        TranslatorInterface $translator,
         array $locales,
         Configuration $configuration
     ) {

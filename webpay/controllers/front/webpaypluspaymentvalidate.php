@@ -158,7 +158,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
             $this->logError("C.3. El carro de compras ha sido manipulado => token: {$token}");
             $this->logError(json_encode($webpayTransaction));
-            $this->handleCartManipulated($token, $webpayTransaction);
+            $this->handleCartManipulated($webpayTransaction);
         }
 
         $transbankSdkWebpay = WebpayPlusFactory::create();
@@ -248,7 +248,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
     }
 
-    protected function handleCartManipulated($token, $webpayTransaction)
+    protected function handleCartManipulated($webpayTransaction)
     {
         $error = 'El monto del carro ha cambiado, la transacción no fue completada, ningún
         cargo será realizado en su tarjeta. Por favor, reintente el pago.';

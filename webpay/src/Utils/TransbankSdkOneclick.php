@@ -2,12 +2,14 @@
 
 namespace PrestaShop\Module\WebpayPlus\Utils;
 
-use Exception;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\Oneclick\MallInscription;
 use Transbank\Webpay\Oneclick\MallTransaction;
+use Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException;
+use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
+use Transbank\Webpay\Oneclick\Exceptions\InscriptionFinishException;
 
 /**
  * Class TransbankSdkOneclick.
@@ -59,7 +61,7 @@ class TransbankSdkOneclick
      * @param $email
      * @param $returnUrl
      *
-     * @throws Exception
+     * @throws EcommerceException
      *
      * @return array
      */
@@ -83,7 +85,7 @@ class TransbankSdkOneclick
                 $errorMessage = "Error al iniciar la inscripción para => userName: {$userName}, email: {$email}";
                 throw new EcommerceException($errorMessage);
             }
-        } catch (Exception $e) {
+        } catch (InscriptionStartException $e) {
             $errorMessage = "Error al iniciar la inscripción para =>
                 userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
@@ -97,7 +99,7 @@ class TransbankSdkOneclick
      * @param $userName
      * @param $email
      *
-     * @throws Exception
+     * @throws EcommerceException
      *
      * @return array|Transbank\Webpay\Oneclick\Responses\InscriptionFinishResponse
      */
@@ -112,7 +114,7 @@ class TransbankSdkOneclick
             $resp = $this->inscription->finish($token);
             $this->log->logInfo('finish - resp: ' . json_encode($resp));
             return $resp;
-        } catch (Exception $e) {
+        } catch (InscriptionFinishException $e) {
             $errorMessage = "Error al confirmar la inscripción para =>
                 userName: {$userName}, email: {$email}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);
@@ -128,7 +130,7 @@ class TransbankSdkOneclick
      * @param $childBuyOrder
      * @param $amount
      *
-     * @throws Exception
+     * @throws EcommerceException
      *
      * @return array|Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse
      */
@@ -152,7 +154,7 @@ class TransbankSdkOneclick
             $resp = $this->transaction->authorize($username, $tbkUser, $parentBuyOrder, $details);
             $this->log->logInfo('authorize - resp: ' . json_encode($resp));
             return $resp;
-        } catch (Exception $e) {
+        } catch (MallTransactionAuthorizeException $e) {
             $errorMessage = "Error al autorizar el pago para => userName:
                 {$username}, buyOrder: {$parentBuyOrder}, error: {$e->getMessage()}";
             $this->log->logError($errorMessage);

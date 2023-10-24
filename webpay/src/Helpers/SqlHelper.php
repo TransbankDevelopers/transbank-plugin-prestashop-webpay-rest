@@ -2,35 +2,32 @@
 namespace PrestaShop\Module\WebpayPlus\Helpers;
 
 use Db;
-use Exception;
+use Transbank\Plugin\Exceptions\EcommerceException;
 
 class SqlHelper
 {
     public static function executeSql($sql){
-        try {
-            return Db::getInstance()->executeS($sql);
+        $result = Db::getInstance()->executeS($sql);
+        if ($result !== false){
+            return $result;
         }
-        catch(Exception $e) {
-            return null;
-        }
+        throw new EcommerceException("Ocurrio un error ejecutando executeSql");
     }
 
     public static function getRow($sql){
-        try {
-            return Db::getInstance()->getRow($sql);
+        $result = Db::getInstance()->getRow($sql);
+        if ($result !== false){
+            return $result;
         }
-        catch(Exception $e) {
-            return null;
-        }
+        throw new EcommerceException("Ocurrio un error ejecutando getRow");
     }
 
     public static function getValue($sql){
-        try {
-            return Db::getInstance()->getValue($sql);
+        $result = Db::getInstance()->getValue($sql);
+        if ($result !== false){
+            return $result;
         }
-        catch(Exception $e) {
-            return null;
-        }
+        throw new EcommerceException("Ocurrio un error ejecutando getValue");
     }
     
 }

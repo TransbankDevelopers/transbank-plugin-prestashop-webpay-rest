@@ -2,12 +2,12 @@
 
 namespace PrestaShop\Module\WebpayPlus\Utils;
 
-use Exception;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
+use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCreateException;
 
 /**
  * Class TransbankSdkWebpayRest.
@@ -52,7 +52,7 @@ class TransbankSdkWebpay
      * @param $buyOrder
      * @param $returnUrl
      *
-     * @throws Exception
+     * @throws EcommerceException
      *
      * @return array
      */
@@ -76,7 +76,7 @@ class TransbankSdkWebpay
                 $errorMessage = "Error creando la transacción para => buyOrder: {$buyOrder}, amount: {$amount}";
                 throw new EcommerceException($errorMessage);
             }
-        } catch (Exception $e) {
+        } catch (TransactionCreateException $e) {
             $errorMessage = "Error creando la transacción para =>
                 buyOrder: {$buyOrder}, amount: {$amount}, error: {$e->getMessage()}";
             throw new EcommerceException($errorMessage, $e);
@@ -89,7 +89,7 @@ class TransbankSdkWebpay
      * @param $tokenWs
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws Exception
+     * @throws EcommerceException
      *
      * @return array|Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse
      */
