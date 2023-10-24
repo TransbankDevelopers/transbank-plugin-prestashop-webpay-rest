@@ -33,10 +33,6 @@ class WebpayPlusType extends TranslatorAwareType
         $this->configuration = $configuration;
     }
 
-    public function getConfigurationInner(){
-        return $this->configuration;
-    }
-
     /**
      * {@inheritdoc}
      */
