@@ -4,6 +4,11 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] 2023-11-03
+- Se agrega compatibilidad con Prestashop 8 🎉
+- Se mejora utilidad de logs para seguimiento de transacciones Webpay plus y Oneclick Mall e instalación del plugin
+- Se agrega Docker para prestashop 8 y PHP 8
+
 ## [2.0.3] 2023-03-20
 - Se agrega la posibilidad a activar/desactivar WebpayPlus y Oneclick.
 - Se reducen las imágenes de WebpayPlus y Oneclick que se muestran en la pantalla de pago.
