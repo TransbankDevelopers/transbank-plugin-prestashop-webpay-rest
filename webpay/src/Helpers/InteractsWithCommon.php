@@ -30,7 +30,8 @@ trait InteractsWithCommon
     }
 
     protected function isDebugActive(){
-        return Configuration::get(DiagnosisDataConfiguration::WEBPAY_DEBUG_ACTIVE) === '1';
+        return Configuration::get(DiagnosisDataConfiguration::WEBPAY_DEBUG_ACTIVE) ===
+            DiagnosisDataConfiguration::IS_ACTIVE;
     }
 
 }

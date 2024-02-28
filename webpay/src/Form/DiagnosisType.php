@@ -36,8 +36,8 @@ class DiagnosisType extends TranslatorAwareType
             ->add('form_debug_active', SwitchType::class, [
                 'label' => $this->trans('Log Detallado', 'Modules.WebpayPlus.Admin'),
                 'choices' => [
-                    $this->trans('No', 'Modules.WebpayPlus.Admin') => 2,
-                    $this->trans('Si', 'Modules.WebpayPlus.Admin') => 1,
+                    $this->trans('No', 'Modules.WebpayPlus.Admin') => DiagnosisDataConfiguration::IS_INACTIVE,
+                    $this->trans('Si', 'Modules.WebpayPlus.Admin') => DiagnosisDataConfiguration::IS_ACTIVE,
                 ],
             ]);
     }
