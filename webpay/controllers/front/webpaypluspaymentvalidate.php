@@ -79,11 +79,11 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             }
 
             $this->processPayment($tokenWs, $webpayTransaction, $cart);
-        } else if (!isset($tokenWs) && !isset($tbktoken)) { //Flujo 2 => El pago fue anulado por tiempo de espera.
+        } elseif (!isset($tokenWs) && !isset($tbktoken)) { //Flujo 2 => El pago fue anulado por tiempo de espera.
             $this->logError("C.2. Error tipo Flujo 2: El pago fue anulado por tiempo de espera => tbkIdSesion:
                 {$tbkIdSesion}");
             $this->stopIfComingFromAnTimeoutErrorOnWebpay($tbkIdSesion);
-        } else if (!isset($tokenWs) && isset($tbktoken)) { //Flujo 3 => El pago fue anulado por el usuario.
+        } elseif (!isset($tokenWs) && isset($tbktoken)) { //Flujo 3 => El pago fue anulado por el usuario.
             $this->logError("C.2. Error tipo Flujo 3: El pago fue anulado por el usuario => tbktoken: {$tbktoken}");
             $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($tbktoken);
             $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER;
@@ -92,7 +92,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $webpayTransaction->save();
             $msg = 'Transacción abortada desde el formulario de pago. Puedes reintentar el pago. ';
             $this->setPaymentErrorPage($msg);
-        } else if (isset($tokenWs) && isset($tbktoken)) { //Flujo 4 => El pago es inválido.
+        } elseif (isset($tokenWs) && isset($tbktoken)) { //Flujo 4 => El pago es inválido.
             $this->logError("C.2. Error tipo Flujo 4: El pago es inválido  => tokenWs:
                 {$tokenWs}, tbktoken: {$tbktoken}");
             $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($tokenWs);
@@ -126,11 +126,11 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $error = 'id_customer es cero';
             $this->logError($error);
             $this->throwErrorRedirect($error);
-        } else if ($cart->id_address_delivery == 0) {
+        } elseif ($cart->id_address_delivery == 0) {
             $error = 'id_address_delivery es cero';
             $this->logError($error);
             $this->throwErrorRedirect($error);
-        } else if ($cart->id_address_invoice == 0) {
+        } elseif ($cart->id_address_invoice == 0) {
             $error = 'id_address_invoice es cero';
             $this->logError($error);
             $this->throwErrorRedirect($error);
@@ -185,7 +185,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->logError(json_encode($webpayTransaction));
             $error = 'No se pudo guardar en base de datos el resultado de la transacción';
             $this->throwErrorRedirect($error);
-        } else if (!is_array($result) && isset($result->buyOrder) && $result->responseCode === 0) {
+        } elseif (!is_array($result) && isset($result->buyOrder) && $result->responseCode === 0) {
             if ($this->isDebugActive()) {
                 $this->logInfo("C.5. Transacción con commit exitoso en Transbank y guardado => token: {$token}");
             }
@@ -238,7 +238,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $error = 'Error en el pago';
             if (is_array($result) && isset($result['error'])) {
                 $error = $result['error'];
-            } else if ($result instanceof TransactionCommitResponse) {
+            } elseif ($result instanceof TransactionCommitResponse) {
                 $error = 'La transacción ha sido rechazada. Por favor, reintente el pago. ' .
                     'Código de respuesta: ' . $result->getResponseCode() . '. Estado: ' . $result->getStatus();
             }
