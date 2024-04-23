@@ -108,7 +108,6 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                     ->setName('Fecha de Trans.')
                     ->setOptions([
                         'field' => 'created_at',
-                        'format' => 'Y/d/m H:i:s'
                     ])
             )->add((new ActionColumn('actions'))
                 ->setName('Acciones'));
