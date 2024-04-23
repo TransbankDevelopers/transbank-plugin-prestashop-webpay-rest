@@ -62,6 +62,19 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
                 continue;
             }
 
+            if ($filterName == "created_at") {
+                var_dump($value);
+                if (isset($value["from"])) {
+                    $qb->andWhere('trx.created_at >= :from')
+                        ->setParameter('from', $value["from"]);
+                }
+                if (isset($value["to"])) {
+                    $qb->andWhere('trx.created_at <= :to')
+                        ->setParameter('to', $value["to"]);
+                }
+                continue;
+            }
+
             $qb->andWhere($allowedFiltersMap[$filterName] . ' LIKE :' . $filterName)
                 ->setParameter($filterName, '%' . $value . '%');
         }
