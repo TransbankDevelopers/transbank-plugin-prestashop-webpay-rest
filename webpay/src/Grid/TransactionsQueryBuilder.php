@@ -63,7 +63,6 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
             }
 
             if ($filterName == "created_at") {
-                var_dump($value);
                 if (isset($value["from"])) {
                     $qb->andWhere('trx.created_at >= :from')
                         ->setParameter('from', $value["from"]);
