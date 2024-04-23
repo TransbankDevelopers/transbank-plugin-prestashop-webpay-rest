@@ -13,6 +13,7 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Helpers\InfoUtil;
 use Transbank\Plugin\Helpers\PrestashopInfoUtil;
+use PrestaShop\Module\WebpayPlus\Grid\TransactionsFilters;
 
 
 class ConfigureController extends FrameworkBundleAdminController
@@ -31,6 +32,21 @@ class ConfigureController extends FrameworkBundleAdminController
             'webpayPlusForm' => $webpayPlusForm->createView(),
             'enableSidebar' => true,
             'layoutTitle' => $this->trans('Configuración Webpay', 'Modules.WebpayPlus.Admin')
+        ]);
+    }
+
+    /** @Route("/webpay/transaction-list", name="transactionList") */
+    public function transactionListAction(
+        Request $request,
+        TransactionsFilters $transactionsFilters
+    ) {
+        $productGridFactory = $this->get('webpay.grid.transactions_grid_factory');
+        $productGrid = $productGridFactory->getGrid($transactionsFilters);
+
+        return $this->render('@Modules/webpay/views/templates/admin/transaction_list.html.twig', [
+            'productsGrid' => $this->presentGrid($productGrid),
+            'enableSidebar' => true,
+            'layoutTitle' => 'Transacciones Webpay',
         ]);
     }
 
@@ -69,7 +85,6 @@ class ConfigureController extends FrameworkBundleAdminController
         $logger = TbkFactory::createLogger();
         $resume = $logger->getInfo();
         $lastLog = $logger->getLogDetail(basename($resume['last']));
-        
         return $this->render('@Modules/webpay/views/templates/admin/logs_configure.html.twig', [
             'enableSidebar' => true,
             'layoutTitle' => $this->trans('Configuración Webpay', 'Modules.WebpayPlus.Admin'),
@@ -86,24 +101,22 @@ class ConfigureController extends FrameworkBundleAdminController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            if ($form->getClickedButton() === $form->get('webpay_plus_form_reset_button')){
+            if ($form->getClickedButton() === $form->get('webpay_plus_form_reset_button')) {
                 $this->loadDefaultWebpay();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
-            }
-            else if (!$form->isValid()){
+            } else if (!$form->isValid()) {
                 foreach ($form->getErrors() as $key => $error) {
                     $errors[] = $error->getMessage();
                 }
                 $this->flashErrors($errors);
-            }
-            else if ($form->getClickedButton() === $form->get('webpay_plus_form_save_button')){
+            } else if ($form->getClickedButton() === $form->get('webpay_plus_form_save_button')) {
                 $errors = $formDataHandler->save($form->getData());
                 if (empty($errors)) {
                     $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
                 } else {
                     $this->flashErrors($errors);
                 }
-            } 
+            }
         }
 
         return $this->redirectToRoute('ps_controller_webpay_configure_webpayplus');
@@ -117,24 +130,22 @@ class ConfigureController extends FrameworkBundleAdminController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            if ($form->getClickedButton() === $form->get('oneclick_form_reset_button')){
+            if ($form->getClickedButton() === $form->get('oneclick_form_reset_button')) {
                 $this->loadDefaultOneclick();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
-            }
-            else if (!$form->isValid()){
+            } else if (!$form->isValid()) {
                 foreach ($form->getErrors() as $key => $error) {
                     $errors[] = $error->getMessage();
                 }
                 $this->flashErrors($errors);
-            }
-            else if ($form->getClickedButton() === $form->get('oneclick_form_save_button')){
+            } else if ($form->getClickedButton() === $form->get('oneclick_form_save_button')) {
                 $errors = $formDataHandler->save($form->getData());
                 if (empty($errors)) {
                     $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
                 } else {
                     $this->flashErrors($errors);
                 }
-            } 
+            }
         }
 
         return $this->redirectToRoute('ps_controller_webpay_configure_oneclick');
@@ -159,5 +170,4 @@ class ConfigureController extends FrameworkBundleAdminController
 
         return $this->redirectToRoute('ps_controller_webpay_configure_diagnosis');
     }
-
 }
