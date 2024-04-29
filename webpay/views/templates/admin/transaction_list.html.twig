@@ -4,3 +4,10 @@
     {% include '@Modules/webpay/views/templates/admin/tabs.html.twig' with {'tabActive': 5} %}
     {% include '@PrestaShop/Admin/Common/Grid/grid_panel.html.twig' with {'grid': productsGrid} %}
 {% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+
+  <script src="{{ asset('themes/default/js/bundle/pagination.js') }}"></script>
+  <script src="{{ asset('../modules/webpay/views/js/transactions.bundle.js') }}"></script>
+{% endblock %}
