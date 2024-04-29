@@ -17,25 +17,16 @@ use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\ColorColumn;
 use PrestaShop\Module\WebpayPlus\Grid\TransactionsStatusChoiceProvider;
-use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
 use PrestaShop\PrestaShop\Core\Form\FormChoiceProviderInterface;
 
 
 final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefinitionFactory
 {
-    const GRID_ID = 'transactions';
+    const GRID_ID = 'webpay_transactions';
 
     /**
      * @var FormChoiceProviderInterface
      */
-    private $transactionStatusChoiceProvider;
-
-    public function __construct(
-        HookDispatcherInterface $dispatcher,
-    ) {
-        parent::__construct($dispatcher);
-        $this->transactionStatusChoiceProvider = new TransactionsStatusChoiceProvider();
-    }
 
     protected function getId()
     {
@@ -193,7 +184,7 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                 (new Filter('status', ChoiceType::class))
                     ->setAssociatedColumn('status')
                     ->setTypeOptions([
-                        'choices' => $this->transactionStatusChoiceProvider->getChoices(),
+                        'choices' => (new TransactionsStatusChoiceProvider())->getChoices(),
                         'required' => false
                     ])
             )->add(

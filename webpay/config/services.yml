@@ -112,7 +112,7 @@ services:
       - "@webpay.grid.query.transactions_query_builder" # service id of our query builder
       - "@prestashop.core.hook.dispatcher" # every doctrine query builder needs the hook dispatcher
       - "@prestashop.core.grid.query.doctrine_query_parser" # parser to get the raw SQL query
-      - "transactions" # this should match your grid id, in our case it's "products"
+      - "webpay_transactions" # this should match your grid id, in our case it's "products"
 
   webpay.grid.transactions_grid_factory:
     class: 'PrestaShop\PrestaShop\Core\Grid\GridFactory'
