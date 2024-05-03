@@ -104,12 +104,12 @@ class ConfigureController extends FrameworkBundleAdminController
             if ($form->getClickedButton() === $form->get('webpay_plus_form_reset_button')) {
                 $this->loadDefaultWebpay();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
-            } else if (!$form->isValid()) {
+            } elseif (!$form->isValid()) {
                 foreach ($form->getErrors() as $key => $error) {
                     $errors[] = $error->getMessage();
                 }
                 $this->flashErrors($errors);
-            } else if ($form->getClickedButton() === $form->get('webpay_plus_form_save_button')) {
+            } elseif ($form->getClickedButton() === $form->get('webpay_plus_form_save_button')) {
                 $errors = $formDataHandler->save($form->getData());
                 if (empty($errors)) {
                     $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
@@ -133,12 +133,12 @@ class ConfigureController extends FrameworkBundleAdminController
             if ($form->getClickedButton() === $form->get('oneclick_form_reset_button')) {
                 $this->loadDefaultOneclick();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
-            } else if (!$form->isValid()) {
+            } elseif (!$form->isValid()) {
                 foreach ($form->getErrors() as $key => $error) {
                     $errors[] = $error->getMessage();
                 }
                 $this->flashErrors($errors);
-            } else if ($form->getClickedButton() === $form->get('oneclick_form_save_button')) {
+            } elseif ($form->getClickedButton() === $form->get('oneclick_form_save_button')) {
                 $errors = $formDataHandler->save($form->getData());
                 if (empty($errors)) {
                     $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
