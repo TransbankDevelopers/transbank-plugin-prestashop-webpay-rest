@@ -88,7 +88,7 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
         WHEN status = 2 THEN "Fallo"
         WHEN status = 3 THEN "Abortado por usuario"
         WHEN status = 4 THEN "Aprobado"
-        ELSE "--"
+        ELSE status
         END';
 
         $caseColor = '
