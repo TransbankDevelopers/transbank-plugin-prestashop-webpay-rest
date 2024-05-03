@@ -11,7 +11,7 @@ class TransactionsStatusChoiceProvider implements FormChoiceProviderInterface
     {
         return [
             'Inicializado' => TransbankWebpayRestTransaction::STATUS_INITIALIZED,
-            'Failed' => TransbankWebpayRestTransaction::STATUS_FAILED,
+            'Fallida' => TransbankWebpayRestTransaction::STATUS_FAILED,
             'Cancelada por el usuario' => TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER,
             'Aprobado' => TransbankWebpayRestTransaction::STATUS_APPROVED,
         ];
