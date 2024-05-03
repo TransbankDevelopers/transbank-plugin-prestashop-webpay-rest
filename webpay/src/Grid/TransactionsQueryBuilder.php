@@ -97,7 +97,7 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
         WHEN status = 2 THEN "#E50B70"
         WHEN status = 3 THEN "#25B9D7"
         WHEN status = 4 THEN "#16C172"
-        ELSE "--"
+        ELSE "#808080"
         END';
 
 
