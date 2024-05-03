@@ -92,9 +92,13 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                 ->setOptions([
                     'field' => 'status',
                     'color_field' => 'status_color',
-                ]))->add((new DataColumn('environment'))
+                ]))
+            ->add((new DataColumn('environment'))
                 ->setName('Ambiente')
                 ->setOptions(['field' => 'environment']))
+            ->add((new DataColumn('product'))
+                ->setName('Producto')
+                ->setOptions(['field' => 'product']))
             ->add((new DateTimeColumn('created_at'))
                     ->setName('Fecha de Trans.')
                     ->setOptions([
@@ -185,6 +189,15 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                     ->setAssociatedColumn('status')
                     ->setTypeOptions([
                         'choices' => (new TransactionsStatusChoiceProvider())->getChoices(),
+                        'required' => false
+                    ])
+            )->add(
+                (new Filter('product', TextType::class))
+                    ->setAssociatedColumn('product')
+                    ->setTypeOptions([
+                        'attr' => [
+                            'placeholder' => 'Buscar por Producto'
+                        ],
                         'required' => false
                     ])
             )->add(

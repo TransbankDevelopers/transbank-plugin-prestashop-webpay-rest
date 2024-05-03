@@ -55,6 +55,7 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
             'created_at' => 'trx.created_at',
             'token' => 'trx.token',
             'environment' => 'trx.environment',
+            'product' => 'trx.product'
         ];
 
         foreach ($filters as $filterName => $value) {
@@ -100,11 +101,18 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
         ELSE "#808080"
         END';
 
+        $caseProduct = '
+        CASE
+        WHEN product = "webpay_plus" THEN  "Webpay Plus"
+        WHEN product = "webpay_oneclick" THEN "Webpay Oneclick"
+        ELSE product
+        END';
 
         $caseVCI  = "IF(vci IS NULL or vci = '', '--', vci)";
 
         $qb->select('cart_id, order_id, response_code, (' . $caseVCI . ') as vci, amount, iso_code, card_number, token,
-         (' . $caseStatus . ') as status,environment, (' . $caseColor . ') as status_color');
+         (' . $caseStatus . ') as status, environment, (' . $caseColor . ') as status_color,
+         (' . $caseProduct . ') as product');
 
         return $qb;
     }
