@@ -108,11 +108,19 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
         ELSE product
         END';
 
+        $caseEnvironment = '
+        CASE
+        WHEN environment = "TEST" THEN "Integración"
+        WHEN environment = "LIVE" THEN "Producción"
+        ELSE environment
+        END';
+
+
         $caseVCI  = "IF(vci IS NULL or vci = '', '--', vci)";
 
         $qb->select('cart_id, order_id, response_code, (' . $caseVCI . ') as vci, amount, iso_code, card_number, token,
-         (' . $caseStatus . ') as status, environment, (' . $caseColor . ') as status_color,
-         (' . $caseProduct . ') as product');
+         (' . $caseStatus . ') as status, (' . $caseEnvironment . ') as environment,
+         (' . $caseColor . ') as status_color, (' . $caseProduct . ') as product');
 
         return $qb;
     }
