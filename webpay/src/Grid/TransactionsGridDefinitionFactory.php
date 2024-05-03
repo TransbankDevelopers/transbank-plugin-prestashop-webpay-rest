@@ -54,7 +54,7 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                     ])
             )
             ->add((new DataColumn('response_code'))
-                    ->setName('C. Resp')
+                    ->setName('Código respuesta')
                     ->setOptions([
                         'field' => 'response_code',
                     ])
