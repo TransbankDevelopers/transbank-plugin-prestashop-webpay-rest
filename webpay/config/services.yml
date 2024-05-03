@@ -92,6 +92,8 @@ services:
     class: PrestaShop\Module\WebpayPlus\Form\DiagnosisDataConfiguration
     arguments: ["@prestashop.adapter.legacy.configuration"]
 
+  # transaction grid services
+
   webpay.grid.definition.factory.transactions_grid_definition_factory:
     class: 'PrestaShop\Module\WebpayPlus\Grid\TransactionsGridDefinitionFactory'
     parent: "prestashop.core.grid.definition.factory.abstract_grid_definition"
