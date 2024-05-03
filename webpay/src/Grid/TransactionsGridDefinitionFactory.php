@@ -114,45 +114,30 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
             (new Filter('cart_id', TextType::class))
                 ->setAssociatedColumn('cart_id')
                 ->setTypeOptions([
-                    'attr' => [
-                        'placeholder' => 'Buscar por Id de carrito'
-                    ],
                     'required' => false
                 ])
         )->add(
             (new Filter('order_id', TextType::class))
                 ->setAssociatedColumn('order_id')
                 ->setTypeOptions([
-                    'attr' => [
-                        'placeholder' => 'Buscar por Id de pedido'
-                    ],
                     'required' => false
                 ])
         )->add(
             (new Filter('response_code', TextType::class))
                 ->setAssociatedColumn('response_code')
                 ->setTypeOptions([
-                    'attr' => [
-                        'placeholder' => 'Buscar por C. Resp'
-                    ],
                     'required' => false
                 ])
         )->add(
             (new Filter('vci', TextType::class))
                 ->setAssociatedColumn('vci')
                 ->setTypeOptions([
-                    'attr' => [
-                        'placeholder' => 'Buscar por VCI'
-                    ],
                     'required' => false
                 ])
         )->add(
             (new Filter('amount', NumberType::class))
                 ->setAssociatedColumn('amount')
                 ->setTypeOptions([
-                    'attr' => [
-                        'placeholder' => 'Buscar por Monto'
-                    ],
                     'required' => false
                 ])
         )
@@ -160,9 +145,6 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                 (new Filter('iso_code', TextType::class))
                     ->setAssociatedColumn('iso_code')
                     ->setTypeOptions([
-                        'attr' => [
-                            'placeholder' => 'Buscar por Moneda'
-                        ],
                         'required' => false
                     ])
             )
@@ -170,18 +152,12 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                 (new Filter('card_number', TextType::class))
                     ->setAssociatedColumn('card_number')
                     ->setTypeOptions([
-                        'attr' => [
-                            'placeholder' => 'Buscar por N. Tarjeta'
-                        ],
                         'required' => false
                     ])
             )->add(
                 (new Filter('token', TextType::class))
                     ->setAssociatedColumn('token')
                     ->setTypeOptions([
-                        'attr' => [
-                            'placeholder' => 'Token'
-                        ],
                         'required' => false
                     ])
             )->add(
@@ -195,27 +171,18 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                 (new Filter('product', TextType::class))
                     ->setAssociatedColumn('product')
                     ->setTypeOptions([
-                        'attr' => [
-                            'placeholder' => 'Buscar por Producto'
-                        ],
                         'required' => false
                     ])
             )->add(
                 (new Filter('environment', TextType::class))
                     ->setAssociatedColumn('environment')
                     ->setTypeOptions([
-                        'attr' => [
-                            'placeholder' => 'Buscar por Ambiente'
-                        ],
                         'required' => false
                     ])
             )->add(
                 (new Filter('created_at', DateRangeType::class))
                     ->setAssociatedColumn('created_at')
                     ->setTypeOptions([
-                        'attr' => [
-                            'placeholder' => 'Buscar por Fecha'
-                        ],
                         'required' => false
                     ])
             )->add(
