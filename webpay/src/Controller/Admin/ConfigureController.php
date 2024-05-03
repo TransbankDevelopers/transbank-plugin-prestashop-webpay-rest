@@ -105,7 +105,7 @@ class ConfigureController extends FrameworkBundleAdminController
                 $this->loadDefaultWebpay();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
             } elseif (!$form->isValid()) {
-                foreach ($form->getErrors() as $key => $error) {
+                foreach ($form->getErrors() as $error) {
                     $errors[] = $error->getMessage();
                 }
                 $this->flashErrors($errors);
@@ -134,7 +134,7 @@ class ConfigureController extends FrameworkBundleAdminController
                 $this->loadDefaultOneclick();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
             } elseif (!$form->isValid()) {
-                foreach ($form->getErrors() as $key => $error) {
+                foreach ($form->getErrors() as $error) {
                     $errors[] = $error->getMessage();
                 }
                 $this->flashErrors($errors);
