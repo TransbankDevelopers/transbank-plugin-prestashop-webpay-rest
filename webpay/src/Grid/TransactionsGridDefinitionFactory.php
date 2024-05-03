@@ -77,7 +77,7 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                         'field' => 'iso_code',
                     ])
             )->add((new DataColumn('card_number'))
-                    ->setName('N. Tarjeta.')
+                    ->setName('Nº. Tarjeta.')
                     ->setOptions([
                         'field' => 'card_number',
                     ])
