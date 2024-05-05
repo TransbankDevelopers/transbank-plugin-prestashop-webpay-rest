@@ -2,6 +2,7 @@
 
 namespace PrestaShop\Module\WebpayPlus\Grid;
 
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\LinkColumn;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractFilterableGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
@@ -66,6 +67,19 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                 $columnCollection->add((new DateTimeColumn($key))
                         ->setName($columnName)
                         ->setOptions(['field' => $key])
+                );
+                continue;
+            }
+
+            if ($key === 'order_id') {
+                $columnCollection->add((new LinkColumn($key))
+                        ->setName($columnName)
+                        ->setOptions([
+                            'field' => $key,
+                            'route' => 'admin_orders_view',
+                            'route_param_name' => 'orderId',
+                            'route_param_field' => $key,
+                        ])
                 );
                 continue;
             }
