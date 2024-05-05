@@ -143,7 +143,6 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
     private function getGridColumnsData(): array
     {
         return [
-            'cart_id' => 'Id del carrito',
             'order_id' => 'Id del pedido',
             'response_code' => 'Código de respuesta',
             'vci' => 'VCI',
