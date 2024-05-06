@@ -38,9 +38,9 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
      * Apply filters to address query builder.
      *
      * @param array $filters
-     * @param QueryBuilder $qb
+     * @param QueryBuilder $queryBuilder
      */
-    private function applyFilters(QueryBuilder $qb, array $filters)
+    private function applyFilters(QueryBuilder $queryBuilder, array $filters)
     {
         $allowedFiltersMap = [
             'cart_id' => 'trx.cart_id',
@@ -65,24 +65,24 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
 
             if ($filterName == "created_at") {
                 if (isset($value["from"])) {
-                    $qb->andWhere('trx.created_at >= :from')
+                    $queryBuilder->andWhere('trx.created_at >= :from')
                         ->setParameter('from', $value["from"]);
                 }
                 if (isset($value["to"])) {
-                    $qb->andWhere('trx.created_at <= :to')
+                    $queryBuilder->andWhere('trx.created_at <= :to')
                         ->setParameter('to', $value["to"]);
                 }
                 continue;
             }
 
-            $qb->andWhere($allowedFiltersMap[$filterName] . ' LIKE :' . $filterName)
+            $queryBuilder->andWhere($allowedFiltersMap[$filterName] . ' LIKE :' . $filterName)
                 ->setParameter($filterName, '%' . $value . '%');
         }
     }
 
     public function getSearchQueryBuilder(SearchCriteriaInterface $searchCriteria)
     {
-        $qb = $this->getBaseQuery($searchCriteria);
+        $queryBuilder = $this->getBaseQuery($searchCriteria);
         $caseStatus = '
         CASE
         WHEN status = 1 THEN "Inicializada"
@@ -118,26 +118,26 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
 
         $caseVCI  = "IF(vci IS NULL or vci = '', '--', vci)";
 
-        $qb->select('order_id, response_code, (' . $caseVCI . ') as vci, amount, iso_code, card_number, token,
+        $queryBuilder->select('order_id, response_code, (' . $caseVCI . ') as vci, amount, iso_code, card_number, token,
          (' . $caseStatus . ') as status, (' . $caseEnvironment . ') as environment,
          (' . $caseColor . ') as status_color, (' . $caseProduct . ') as product');
 
-        return $qb;
+        return $queryBuilder;
     }
 
     public function getCountQueryBuilder(SearchCriteriaInterface $searchCriteria)
     {
-        $qb = $this->getBaseQuery($searchCriteria);
-        $qb->select('COUNT(*)');
+        $queryBuilder = $this->getBaseQuery($searchCriteria);
+        $queryBuilder->select('COUNT(*)');
 
-        return $qb;
+        return $queryBuilder;
     }
 
     private function getBaseQuery(SearchCriteriaInterface $searchCriteria)
     {
 
         $filters = $searchCriteria->getFilters();
-        $qb = $this->connection
+        $queryBuilder = $this->connection
             ->createQueryBuilder()
             ->from($this->dbPrefix . TransbankWebpayRestTransaction::TABLE_NAME, 'trx')
             ->leftJoin(
@@ -147,8 +147,8 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
                 'trx.`currency_id` = c.`id_currency`'
             );
 
-        $this->applyFilters($qb, $filters);
+        $this->applyFilters($queryBuilder, $filters);
 
-        return $qb;
+        return $queryBuilder;
     }
 }
