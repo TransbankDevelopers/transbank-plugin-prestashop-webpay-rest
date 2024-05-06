@@ -25,10 +25,6 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
 {
     const GRID_ID = 'webpay_transactions';
 
-    /**
-     * @var FormChoiceProviderInterface
-     */
-
     protected function getId()
     {
         return self::GRID_ID;
