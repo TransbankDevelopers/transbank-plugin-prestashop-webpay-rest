@@ -18,7 +18,6 @@ use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ColorColumn;
 use PrestaShop\Module\WebpayPlus\Grid\TransactionsStatusChoiceProvider;
-use PrestaShop\PrestaShop\Core\Form\FormChoiceProviderInterface;
 
 
 final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefinitionFactory
