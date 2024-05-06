@@ -51,6 +51,13 @@ trait InteractsWithTabs
                 'visible' => true,
                 'name' => $this->getNames('Configuración Webpay', 'Modules.WebpayPlus.Config'),
                 'parent_class_name' => 'AdminParentPayment',
+            ],
+            [
+                'route_name' => 'ps_controller_webpay_transaction_list',
+                'class_name' => ConfigureController::TAB_CLASS_NAME.'transactions',
+                'visible' => true,
+                'name' => $this->getNames('Transacciones Webpay', 'Modules.WebpayPlus.Config'),
+                'parent_class_name' => 'AdminParentPayment',
             ]
         ];
     }
