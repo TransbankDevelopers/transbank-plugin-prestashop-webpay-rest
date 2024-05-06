@@ -4,7 +4,7 @@ $(document).ready(function () {
     const $ = window.$;
     const Grid = window.prestashop.component.Grid;
     const {
-        FiltersResetExtension,
+        FiltersResetExtension
     } = window.prestashop.component.GridExtensions;
 
     $(() => {
