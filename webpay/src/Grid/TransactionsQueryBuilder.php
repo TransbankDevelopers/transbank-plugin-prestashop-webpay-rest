@@ -85,26 +85,26 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
         $queryBuilder = $this->getBaseQuery($searchCriteria);
         $caseStatus = '
         CASE
-        WHEN status = 1 THEN "Inicializada"
-        WHEN status = 2 THEN "Fallida"
-        WHEN status = 3 THEN "Cancelada por el usuario"
-        WHEN status = 4 THEN "Aprobada"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_INITIALIZED . ' THEN "Inicializada"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_FAILED . ' THEN "Fallida"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER . ' THEN "Cancelada por el usuario"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED . ' THEN "Aprobada"
         ELSE status
         END';
 
         $caseColor = '
         CASE
-        WHEN status = 1 THEN "#E9DF00"
-        WHEN status = 2 THEN "#E50B70"
-        WHEN status = 3 THEN "#25B9D7"
-        WHEN status = 4 THEN "#16C172"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_INITIALIZED . ' THEN "#E9DF00"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_FAILED . ' THEN "#E50B70"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER . ' THEN "#25B9D7"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED . ' THEN "#16C172"
         ELSE "#808080"
         END';
 
         $caseProduct = '
         CASE
-        WHEN product = "webpay_plus" THEN  "Webpay Plus"
-        WHEN product = "webpay_oneclick" THEN "Webpay Oneclick"
+        WHEN product = "' . TransbankWebpayRestTransaction::PRODUCT_WEBPAY_PLUS . '" THEN  "Webpay Plus"
+        WHEN product = "' . TransbankWebpayRestTransaction::PRODUCT_WEBPAY_ONECLICK . '" THEN "Webpay Oneclick"
         ELSE product
         END';
 
