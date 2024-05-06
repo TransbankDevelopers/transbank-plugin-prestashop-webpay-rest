@@ -85,10 +85,10 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
         $qb = $this->getBaseQuery($searchCriteria);
         $caseStatus = '
         CASE
-        WHEN status = 1 THEN "Inicializado"
-        WHEN status = 2 THEN "Fallo"
-        WHEN status = 3 THEN "Abortado por usuario"
-        WHEN status = 4 THEN "Aprobado"
+        WHEN status = 1 THEN "Inicializada"
+        WHEN status = 2 THEN "Fallida"
+        WHEN status = 3 THEN "Cancelada por el usuario"
+        WHEN status = 4 THEN "Aprobada"
         ELSE status
         END';
 

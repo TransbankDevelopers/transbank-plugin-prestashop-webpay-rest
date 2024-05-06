@@ -10,10 +10,10 @@ class TransactionsStatusChoiceProvider implements FormChoiceProviderInterface
     public function getChoices()
     {
         return [
-            'Inicializado' => TransbankWebpayRestTransaction::STATUS_INITIALIZED,
+            'Inicializada' => TransbankWebpayRestTransaction::STATUS_INITIALIZED,
             'Fallida' => TransbankWebpayRestTransaction::STATUS_FAILED,
             'Cancelada por el usuario' => TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER,
-            'Aprobado' => TransbankWebpayRestTransaction::STATUS_APPROVED,
+            'Aprobada' => TransbankWebpayRestTransaction::STATUS_APPROVED,
         ];
     }
 }
