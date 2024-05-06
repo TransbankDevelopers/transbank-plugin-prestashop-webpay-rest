@@ -19,9 +19,7 @@ class WebPay extends PaymentModule
     use InteractsWithCommon;
     use InteractsWithWebpayDb;
     use InteractsWithTabs;
-    
 
-    //const DEBUG_MODE = true;
     protected $_errors = array();
     public $log;
     public $title = 'Pago con tarjetas de crédito o Redcompra';
@@ -176,7 +174,7 @@ class WebPay extends PaymentModule
         if (!$webpayTransaction) {
             $this->logError('Showing confirmation page, but there is no webpayTransaction object, so we cant find an approved transaction for this order.');
         }
-        
+
         if($this->isDebugActive()){
             $this->logInfo('D.3. TransbankWebpayRestTransaction obtenida');
             $this->logInfo(isset($webpayTransaction) ? $webpayTransaction->transbank_response : 'No se encontro el registro');
@@ -209,7 +207,7 @@ class WebPay extends PaymentModule
             $responseCode = $detail['responseCode'];
             $status = $detail['status'];
         }
-        
+
         if ($paymentTypeCode == "VD") {
             $paymentType = "Débito";
         } elseif ($paymentTypeCode == "VP") {
@@ -252,12 +250,12 @@ class WebPay extends PaymentModule
 
         $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
         $orderId = $params[$nameOrderRef]->id;
-        
+
         if($this->isDebugActive()){
             $this->logInfo('D.2. Obteniendo TransbankWebpayRestTransaction desde la BD');
             $this->logInfo('nameOrderRef: '.$nameOrderRef.', orderId: '.$orderId);
         }
-        
+
         $tx = $this->getFormatTransbankWebpayRestTransactionByOrderId($orderId);
 
         $this->smarty->assign(array(
@@ -337,8 +335,8 @@ class WebPay extends PaymentModule
         else{
             $this->logError("Configuración de ONECLICK incorrecta, revise los valores");
         }
-        
-        
+
+
         return $payment_options;
     }
 
@@ -356,7 +354,7 @@ class WebPay extends PaymentModule
         return false;
     }
 
-    
+
     public function getContent()
     {
         $route = SymfonyContainer::getInstance()->get('router')->generate('ps_controller_webpay_configure');
@@ -368,7 +366,7 @@ class WebPay extends PaymentModule
     {
         $this->_errors = array();
     }
-    
+
     /**
      * @return string
      */
@@ -395,7 +393,7 @@ class WebPay extends PaymentModule
         $this->commonUpdateSettings();
         return $this->webpayUpdateSettings();
     }
-    
+
 }
 
 

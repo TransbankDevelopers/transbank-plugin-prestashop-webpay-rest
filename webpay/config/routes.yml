@@ -1,42 +1,42 @@
 ps_controller_webpay_configure:
-    path: /webpay/configure
-    methods: [GET, POST]
-    defaults:
-        _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::webpayplusAction'
-        _legacy_controller: 'WebpayPlusConfigure'
-        _legacy_link: 'WebpayPlusConfigure'
+  path: /webpay/configure
+  methods: [GET, POST]
+  defaults:
+    _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::webpayplusAction'
+    _legacy_controller: "WebpayPlusConfigure"
+    _legacy_link: "WebpayPlusConfigure"
 
 ps_controller_webpay_configure_webpayplus:
-    path: /webpay/configure/webpayplus
-    methods: [GET, POST]
-    defaults:
-        _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::webpayplusAction'
-        _legacy_controller: 'WebpayPlusConfigure'
-        _legacy_link: 'WebpayPlusConfigure'
+  path: /webpay/configure/webpayplus
+  methods: [GET, POST]
+  defaults:
+    _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::webpayplusAction'
+    _legacy_controller: "WebpayPlusConfigure"
+    _legacy_link: "WebpayPlusConfigure"
 
 ps_controller_webpay_configure_oneclick:
-    path: /webpay/configure/oneclick
-    methods: [GET, POST]
-    defaults:
-        _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::oneclickAction'
-        _legacy_controller: 'WebpayPlusConfigure'
-        _legacy_link: 'WebpayPlusConfigure'
+  path: /webpay/configure/oneclick
+  methods: [GET, POST]
+  defaults:
+    _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::oneclickAction'
+    _legacy_controller: "WebpayPlusConfigure"
+    _legacy_link: "WebpayPlusConfigure"
 
 ps_controller_webpay_configure_diagnosis:
-    path: /webpay/configure/diagnosis
-    methods: [GET, POST]
-    defaults:
-        _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::diagnosisAction'
-        _legacy_controller: 'WebpayPlusConfigure'
-        _legacy_link: 'WebpayPlusConfigure'
+  path: /webpay/configure/diagnosis
+  methods: [GET, POST]
+  defaults:
+    _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::diagnosisAction'
+    _legacy_controller: "WebpayPlusConfigure"
+    _legacy_link: "WebpayPlusConfigure"
 
 ps_controller_webpay_configure_logs:
-    path: /webpay/configure/logs
-    methods: [GET, POST]
-    defaults:
-        _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::logsAction'
-        _legacy_controller: 'WebpayPlusConfigure'
-        _legacy_link: 'WebpayPlusConfigure'
+  path: /webpay/configure/logs
+  methods: [GET, POST]
+  defaults:
+    _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::logsAction'
+    _legacy_controller: "WebpayPlusConfigure"
+    _legacy_link: "WebpayPlusConfigure"
 
 #config form
 ps_controller_webpay_configure_webpay_plus_form_save:
@@ -57,3 +57,18 @@ ps_controller_webpay_configure_diagnosis_form_save:
   defaults:
     _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::saveDiagnosisFormAction'
 
+ps_controller_webpay_transaction_list:
+  path: /webpay/transaction-list
+  methods: [GET]
+  defaults:
+    _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::transactionListAction'
+
+ps_controller_webpay_transaction_list_search:
+  path: /webpay/transaction-list
+  methods: [POST]
+  defaults:
+    _controller: PrestaShopBundle:Admin\Common:searchGrid
+    gridDefinitionFactoryServiceId: webpay.grid.definition.factory.transactions_grid_definition_factory
+    redirectRoute: ps_controller_webpay_transaction_list
+    _legacy_controller: WebpayPlusConfigure
+    _legacy_link: WebpayPlusConfigure:searchTransactionList
