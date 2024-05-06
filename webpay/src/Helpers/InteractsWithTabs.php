@@ -27,7 +27,7 @@ trait InteractsWithTabs
         );
         TabsHelper::AddTab(
             ConfigureController::TAB_CLASS_NAME,
-            $this->getNamesToManualInstall('Configuración Transacciones Webpay'),
+            $this->getNamesToManualInstall('Transacciones Webpay'),
             'WebPay',
             'AdminParentPayment'
         );
