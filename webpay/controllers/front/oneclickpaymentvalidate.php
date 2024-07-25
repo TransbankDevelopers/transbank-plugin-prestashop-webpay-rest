@@ -89,6 +89,11 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
                 {$inscriptionId}, cartId: {$cart->id}, amount: {$amount}");
         }
         $ins = new TransbankInscriptions($inscriptionId); //recuperamos la inscripcion de la tarjeta por el id
+
+        if (!$this->validatePayerMatchesCardInscription($ins)) {
+            $this->throwErrorRedirect("Datos incorrectos para autorizar la transacción.");
+        }
+
         if($this->isDebugActive()){
             $this->logInfo("B.2. Despues de obtener inscripción de la BD => inscriptionId: {$inscriptionId}");
             $this->logInfo(json_encode($ins));
@@ -173,5 +178,19 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         return $transaction;
     }
 
+    /**
+     * Validate that the user paying for the order is the same as the one who registered the card.
+     *
+     * @param TransbankInscriptions $inscriptionData The card inscription data.
+     *
+     * @return bool True if the payer matches the card inscription, false otherwise.
+     */
+    private function validatePayerMatchesCardInscription(TransbankInscriptions $inscriptionData)
+    {
+        $customerData = Context::getContext()->customer;
+        $customerEmail = $customerData->email;
+        $inscriptionEmail = $inscriptionData->email;
 
+        return $customerEmail == $inscriptionEmail;
+    }
 }
