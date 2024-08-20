@@ -188,9 +188,9 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
     private function validatePayerMatchesCardInscription(TransbankInscriptions $inscriptionData)
     {
         $customerData = Context::getContext()->customer;
-        $customerEmail = $customerData->email;
-        $inscriptionEmail = $inscriptionData->email;
+        $customerId = $customerData->id;
+        $inscriptionUserId = $inscriptionData->user_id;
 
-        return $customerEmail == $inscriptionEmail;
+        return $customerId == $inscriptionUserId;
     }
 }
