@@ -2,7 +2,7 @@
 
 namespace PrestaShop\Module\WebpayPlus\Grid;
 
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\LinkColumn;
+use PrestaShop\Module\WebpayPlus\Core\Grid\Column\Type\CustomLinkColumn;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractFilterableGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
@@ -67,7 +67,7 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
             }
 
             if ($key === 'order_id') {
-                $columnCollection->add((new LinkColumn($key))
+                $columnCollection->add((new CustomLinkColumn($key))
                         ->setName($columnName)
                         ->setOptions([
                             'field' => $key,
