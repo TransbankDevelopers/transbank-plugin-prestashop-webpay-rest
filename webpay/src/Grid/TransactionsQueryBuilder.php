@@ -120,7 +120,7 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
 
         $queryBuilder->select('order_id, response_code, (' . $caseVCI . ') as vci, amount, iso_code, card_number, token,
          (' . $caseStatus . ') as status, (' . $caseEnvironment . ') as environment,
-         (' . $caseColor . ') as status_color, (' . $caseProduct . ') as product');
+         (' . $caseColor . ') as status_color, (' . $caseProduct . ') as product, created_at');
 
         return $queryBuilder;
     }
