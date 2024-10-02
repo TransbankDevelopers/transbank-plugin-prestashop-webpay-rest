@@ -2,7 +2,7 @@
 
 namespace PrestaShop\Module\WebpayPlus\Grid;
 
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\LinkColumn;
+use PrestaShop\Module\WebpayPlus\Core\Grid\Column\Type\CustomLinkColumn;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractFilterableGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
@@ -39,35 +39,32 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
         $gridColumns = $this->getGridColumnsData();
         $columnCollection = new ColumnCollection();
 
-        foreach ($gridColumns as $key => $columnName) {
-            if ($key === 'actions') {
-                $columnCollection->add((new ActionColumn($key))
-                        ->setName($columnName)
+        $columnActions = [
+            'actions' => function ($key, $columnName) use ($columnCollection) {
+                $columnCollection->add(
+                    (new ActionColumn($key))->setName($columnName)
                 );
-                continue;
-            }
-
-            if ($key === 'status') {
-                $columnCollection->add((new ColorColumn($key))
+            },
+            'status' => function ($key, $columnName) use ($columnCollection) {
+                $columnCollection->add(
+                    (new ColorColumn($key))
                         ->setName($columnName)
                         ->setOptions([
                             'field' => $key,
                             'color_field' => 'status_color',
                         ])
                 );
-                continue;
-            }
-
-            if ($key === 'created_at') {
-                $columnCollection->add((new DateTimeColumn($key))
+            },
+            'created_at' => function ($key, $columnName) use ($columnCollection) {
+                $columnCollection->add(
+                    (new DateTimeColumn($key))
                         ->setName($columnName)
                         ->setOptions(['field' => $key])
                 );
-                continue;
-            }
-
-            if ($key === 'order_id') {
-                $columnCollection->add((new LinkColumn($key))
+            },
+            'order_id' => function ($key, $columnName) use ($columnCollection) {
+                $columnCollection->add(
+                    (new CustomLinkColumn($key))
                         ->setName($columnName)
                         ->setOptions([
                             'field' => $key,
@@ -76,13 +73,19 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                             'route_param_field' => $key,
                         ])
                 );
-                continue;
             }
+        ];
 
-            $columnCollection->add((new DataColumn($key))
-                    ->setName($columnName)
-                    ->setOptions(['field' => $key])
-            );
+        foreach ($gridColumns as $key => $columnName) {
+            if (isset($columnActions[$key])) {
+                $columnActions[$key]($key, $columnName);
+            } else {
+
+                $columnCollection->add((new DataColumn($key))
+                        ->setName($columnName)
+                        ->setOptions(['field' => $key])
+                );
+            }
         }
 
         return $columnCollection;
@@ -93,17 +96,15 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
         $gridColumns = $this->getGridColumnsData();
         $filterCollection = new FilterCollection();
 
-        foreach ($gridColumns as $key => $columnName) {
-            if ($key === 'amount') {
+        $filterActions = [
+            'amount' => function ($key) use ($filterCollection) {
                 $filterCollection->add(
                     (new Filter($key, NumberType::class))
                         ->setAssociatedColumn($key)
                         ->setTypeOptions(['required' => false])
                 );
-                continue;
-            }
-
-            if ($key === 'status') {
+            },
+            'status' => function ($key) use ($filterCollection) {
                 $filterCollection->add(
                     (new Filter($key, ChoiceType::class))
                         ->setAssociatedColumn($key)
@@ -112,19 +113,35 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                             'required' => false
                         ])
                 );
-                continue;
-            }
-
-            if ($key === 'created_at') {
+            },
+            'environment' => function ($key) use ($filterCollection) {
+                $filterCollection->add(
+                    (new Filter($key, ChoiceType::class))
+                        ->setAssociatedColumn($key)
+                        ->setTypeOptions([
+                            'choices' => (new TransactionsEnvironmentChoiceProvider())->getChoices(),
+                            'required' => false
+                        ])
+                );
+            },
+            'product' => function ($key) use ($filterCollection) {
+                $filterCollection->add(
+                    (new Filter($key, ChoiceType::class))
+                        ->setAssociatedColumn($key)
+                        ->setTypeOptions([
+                            'choices' => (new TransactionsProductChoiceProvider())->getChoices(),
+                            'required' => false
+                        ])
+                );
+            },
+            'created_at' => function ($key) use ($filterCollection) {
                 $filterCollection->add(
                     (new Filter($key, DateRangeType::class))
                         ->setAssociatedColumn($key)
                         ->setTypeOptions(['required' => false])
                 );
-                continue;
-            }
-
-            if ($key === 'actions') {
+            },
+            'actions' => function ($key) use ($filterCollection) {
                 $filterCollection->add(
                     (new Filter($key, SearchAndResetType::class))
                         ->setAssociatedColumn($key)
@@ -136,14 +153,19 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                             'redirect_route' => 'ps_controller_webpay_transaction_list',
                         ])
                 );
-                continue;
             }
+        ];
 
-            $filterCollection->add(
-                (new Filter($key, TextType::class))
-                    ->setAssociatedColumn($key)
-                    ->setTypeOptions(['required' => false])
-            );
+        foreach ($gridColumns as $key => $columnName) {
+            if (isset($filterActions[$key])) {
+                $filterActions[$key]($key);
+            } else {
+                $filterCollection->add(
+                    (new Filter($key, TextType::class))
+                        ->setAssociatedColumn($key)
+                        ->setTypeOptions(['required' => false])
+                );
+            }
         }
 
         return $filterCollection;
