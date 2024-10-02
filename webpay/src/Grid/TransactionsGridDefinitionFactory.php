@@ -114,6 +114,16 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                         ])
                 );
             },
+            'environment' => function ($key) use ($filterCollection) {
+                $filterCollection->add(
+                    (new Filter($key, ChoiceType::class))
+                        ->setAssociatedColumn($key)
+                        ->setTypeOptions([
+                            'choices' => (new TransactionsEnvironmentChoiceProvider())->getChoices(),
+                            'required' => false
+                        ])
+                );
+            },
             'product' => function ($key) use ($filterCollection) {
                 $filterCollection->add(
                     (new Filter($key, ChoiceType::class))
