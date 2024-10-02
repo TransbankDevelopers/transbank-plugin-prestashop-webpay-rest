@@ -24,7 +24,7 @@
     {% if column.options.target is defined %}
         target="{{ column.options.target }}"
     {% endif %}
-    {# Add all attributes which are not class #}
+
     {%- for attrname, attrvalue in column.options.attr -%}
         {% if attrname != 'class' %}
         {{- " " -}}
