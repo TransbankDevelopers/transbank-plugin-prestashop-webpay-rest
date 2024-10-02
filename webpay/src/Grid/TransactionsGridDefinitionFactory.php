@@ -114,6 +114,16 @@ final class TransactionsGridDefinitionFactory extends AbstractFilterableGridDefi
                         ])
                 );
             },
+            'product' => function ($key) use ($filterCollection) {
+                $filterCollection->add(
+                    (new Filter($key, ChoiceType::class))
+                        ->setAssociatedColumn($key)
+                        ->setTypeOptions([
+                            'choices' => (new TransactionsProductChoiceProvider())->getChoices(),
+                            'required' => false
+                        ])
+                );
+            },
             'created_at' => function ($key) use ($filterCollection) {
                 $filterCollection->add(
                     (new Filter($key, DateRangeType::class))
