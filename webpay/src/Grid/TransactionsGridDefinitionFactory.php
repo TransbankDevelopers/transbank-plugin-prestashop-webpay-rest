@@ -2,7 +2,7 @@
 
 namespace PrestaShop\Module\WebpayPlus\Grid;
 
-use PrestaShop\Module\WebpayPlus\Core\Grid\Column\Type\CustomLinkColumn;
+use PrestaShop\Module\WebpayPlus\Grid\Column\Type\CustomLinkColumn;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractFilterableGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
