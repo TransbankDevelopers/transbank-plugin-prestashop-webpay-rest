@@ -1,6 +1,6 @@
 <?php
 
-namespace PrestaShop\Module\WebpayPlus\Core\Grid\Column\Type;
+namespace PrestaShop\Module\WebpayPlus\Grid\Column\Type;
 
 use PrestaShop\PrestaShop\Core\Grid\Column\AbstractColumn;
 use Symfony\Component\OptionsResolver\OptionsResolver;

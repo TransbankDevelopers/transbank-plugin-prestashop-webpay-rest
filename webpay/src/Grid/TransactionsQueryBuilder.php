@@ -59,24 +59,22 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
         ];
 
         foreach ($filters as $filterName => $value) {
-            if (!array_key_exists($filterName, $allowedFiltersMap) || empty($value)) {
-                continue;
-            }
-
-            if ($filterName == "created_at") {
-                if (isset($value["from"])) {
-                    $queryBuilder->andWhere('trx.created_at >= :from')
-                        ->setParameter('from', $value["from"]);
+            if (array_key_exists($filterName, $allowedFiltersMap) && !empty($value)) {
+                if ($filterName == "created_at") {
+                    if (isset($value["from"])) {
+                        $queryBuilder->andWhere('trx.created_at >= :from')
+                            ->setParameter('from', $value["from"]);
+                    }
+                    if (isset($value["to"])) {
+                        $queryBuilder->andWhere('trx.created_at <= :to')
+                            ->setParameter('to', $value["to"]);
+                    }
+                    continue;
                 }
-                if (isset($value["to"])) {
-                    $queryBuilder->andWhere('trx.created_at <= :to')
-                        ->setParameter('to', $value["to"]);
-                }
-                continue;
-            }
 
-            $queryBuilder->andWhere($allowedFiltersMap[$filterName] . ' LIKE :' . $filterName)
-                ->setParameter($filterName, '%' . $value . '%');
+                $queryBuilder->andWhere($allowedFiltersMap[$filterName] . ' LIKE :' . $filterName)
+                    ->setParameter($filterName, '%' . $value . '%');
+            }
         }
     }
 
