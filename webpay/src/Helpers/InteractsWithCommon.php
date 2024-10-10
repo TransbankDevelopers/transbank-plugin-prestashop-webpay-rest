@@ -2,6 +2,7 @@
 
 namespace PrestaShop\Module\WebpayPlus\Helpers;
 
+use PrestaShop\Module\WebpayPlus\Form\DiagnosisDataConfiguration;
 use Configuration;
 use Tools;
 
@@ -11,11 +12,11 @@ use Tools;
 trait InteractsWithCommon
 {
     protected function getDebugActive(){
-        return Configuration::get('DEBUG_ACTIVE');
+        return Configuration::get(DiagnosisDataConfiguration::WEBPAY_DEBUG_ACTIVE);
     }
 
     protected function setDebugActive($value){
-        Configuration::updateValue('DEBUG_ACTIVE', $value);
+        Configuration::updateValue(DiagnosisDataConfiguration::WEBPAY_DEBUG_ACTIVE, $value);
     }
 
     protected function getFormDebugActive(){
@@ -29,7 +30,8 @@ trait InteractsWithCommon
     }
 
     protected function isDebugActive(){
-        return Configuration::get('DEBUG_ACTIVE') === '1';
+        return Configuration::get(DiagnosisDataConfiguration::WEBPAY_DEBUG_ACTIVE) ===
+            DiagnosisDataConfiguration::ENABLED;
     }
 
 }

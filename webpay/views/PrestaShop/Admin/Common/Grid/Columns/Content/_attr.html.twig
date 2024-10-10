@@ -1,0 +1,5 @@
+{% for attrname, attrvalue in column.options.attr %}
+    {% if attrname != 'class' %}
+        {{ attrname }}="{{ attrvalue is formview ? form_row(attrvalue)|e('html_attr') : (attrvalue is form ? form_row(attrvalue.createView())|e('html_attr') : attrvalue) }}"
+    {% endif %}
+{% endfor %}

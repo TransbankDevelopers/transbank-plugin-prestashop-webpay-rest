@@ -10,6 +10,8 @@ use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 final class DiagnosisDataConfiguration implements DataConfigurationInterface
 {
     public const WEBPAY_DEBUG_ACTIVE = 'WEBPAY_DEBUG_ACTIVE';
+    public const ENABLED = "1";
+    public const DISABLED = "2";
 
     /**
      * @var ConfigurationInterface
