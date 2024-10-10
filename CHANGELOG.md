@@ -13,14 +13,14 @@ y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.ht
 
 ### Actualiza:
 
--   Se refina la funcionalidad de log detallado
+-   Se refina la funcionalidad de log detallado.
 -   Se refina el flujo de pago de Webpay y Oneclick.
 
 ## [2.1.0] 2023-11-03
 
--   Se agrega compatibilidad con Prestashop 8 🎉
--   Se mejora utilidad de logs para seguimiento de transacciones Webpay plus y Oneclick Mall e instalación del plugin
--   Se agrega Docker para prestashop 8 y PHP 8
+-   Se agrega compatibilidad con Prestashop 8 🎉.
+-   Se mejora utilidad de logs para seguimiento de transacciones Webpay plus y Oneclick Mall e instalación del plugin.
+-   Se agrega Docker para prestashop 8 y PHP 8.
 
 ## [2.0.3] 2023-03-20
 
@@ -37,7 +37,7 @@ y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.ht
 
 ## [2.0.0-Beta] 2023-01-24
 
--   Se realiza un refactor de la totalidad del código para mejorar su legibilidad
+-   Se realiza un refactor de la totalidad del código para mejorar su legibilidad.
 -   Se migran los formularios del módulo de administración a Symfony.
 -   Se sube la versión minima soportada a 1.7.6.0
 -   Se mejora el log detallado para darle seguimiento a los errores.
