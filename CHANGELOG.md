@@ -14,7 +14,7 @@ y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.ht
 ### Actualiza:
 
 -   Se refina la funcionalidad de log detallado
--   Se refina el flujo de pago de Webpay y Onelick.
+-   Se refina el flujo de pago de Webpay y Oneclick.
 
 ## [2.1.0] 2023-11-03
 
