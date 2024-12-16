@@ -1,0 +1,13 @@
+<div id="webpay_details" class="{% if isPsGreaterOrEqual177 %}col card mt-2{% else %}panel{% endif %}">
+    <div class="{% if isPsGreaterOrEqual177 %}card-header{% else %}panel-heading{% endif %}">
+      {{ title|e('html') }}
+    </div>
+    <div class="{% if isPsGreaterOrEqual177 %}card-body{% else %}dl-horizontal{% endif %}">
+      {% for detail in details %}
+        <div>
+          <span>{{ detail.desc|e('html') }}:</span>
+          <span>{{ detail.data|e('html') }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>

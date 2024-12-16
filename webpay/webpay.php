@@ -9,6 +9,7 @@ use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Helpers\TbkConstants;
+use PrestaShop\Module\WebpayPlus\Utils\Template;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -161,12 +162,13 @@ class WebPay extends PaymentModule
             ),
         );
 
-        $this->context->smarty->assign($this->name, array(
+        $template = new Template();
+        return $template->render('admin/order/payment_detail.html.twig', [
             '_path' => $this->_path,
             'title' => $this->displayName,
             'details' => $details,
-        ));
-        return $this->display(__FILE__, 'views/templates/admin/admin_order.tpl');
+            'isPsGreaterOrEqual177' => version_compare(_PS_VERSION_, '1.7.7.0', '>=')
+        ]);
     }
 
     private function getFormatTransbankWebpayRestTransactionByOrderId($orderId){
