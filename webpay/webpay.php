@@ -72,7 +72,7 @@ class WebPay extends PaymentModule
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('displayAdminOrderLeft') &&
+            $this->registerHook('displayAdminOrderSide') &&
             $this->registerHook($this->getDisplayOrderHookName());
     }
 
@@ -88,7 +88,7 @@ class WebPay extends PaymentModule
         return $installer->installInscriptionsTable();
     }
 
-    public function hookdisplayAdminOrderLeft($params)
+    public function hookdisplayAdminOrderSide($params)
     {
         return $this->AdminDisplay($params);
     }
@@ -110,6 +110,7 @@ class WebPay extends PaymentModule
             return;
         }
 
+        $title = $this->l('Detalle del pago');
         $tx = $this->getFormatTransbankWebpayRestTransactionByOrderId($orderId);
         $details = array(
             array(
