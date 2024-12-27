@@ -1,0 +1,13 @@
+<div id="webpay_details" class="{% if isPsGreaterOrEqual177 %}card{% else %}panel{% endif %}">
+	<div class="{% if isPsGreaterOrEqual177 %}card-header{% else %}panel-heading{% endif %}">
+		<h3>{{ title|e('html') }}</h3>
+	</div>
+	<div class="{% if isPsGreaterOrEqual177 %}card-body{% else %}dl-horizontal{% endif %}">
+		{% for data in dataView %}
+			<div class="tbk-field">
+				<span class="tbk-field-name">{{ data.label|e('html') }}:</span>
+				<span class="tbk-field-value {{ data.class|e('html') }}">{{ data.value|e('html') }}</span>
+			</div>
+		{% endfor %}
+	</div>
+</div>

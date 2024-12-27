@@ -5,10 +5,12 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
+use PrestaShop\Module\WebpayPlus\Hooks\DisplayAdminOrderSide;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Helpers\TbkConstants;
+use PrestaShop\Module\WebpayPlus\Utils\Template;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -70,9 +72,9 @@ class WebPay extends PaymentModule
         return  $result &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
+            $this->registerHook('displayBackOfficeHeader') &&
             $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('displayAdminOrderLeft') &&
-            $this->registerHook($this->getDisplayOrderHookName());
+            $this->registerHook('displayAdminOrderSide');
     }
 
     protected function installWebpayTable()
@@ -87,86 +89,17 @@ class WebPay extends PaymentModule
         return $installer->installInscriptionsTable();
     }
 
-    public function hookdisplayAdminOrderLeft($params)
+    public function hookdisplayAdminOrderSide($params)
     {
-        return $this->AdminDisplay($params);
-    }
-    public function hookdisplayAdminOrderTabContent($params)
-    {
-        return $this->AdminDisplay($params);
+        $displayAdminOrderSide = new DisplayAdminOrderSide();
+        return $displayAdminOrderSide->execute($params);
     }
 
-    public function AdminDisplay($params)
+    public function hookDisplayBackOfficeHeader($params)
     {
-        if (!$this->active) {
-            return;
+        if ($this->context->controller->controller_name === 'AdminOrders') {
+            $this->context->controller->addCSS('modules/'.$this->name.'/views/css/admin.css');
         }
-
-        $orderId = $params['id_order'];
-        $bsOrder = new Order((int)$orderId);
-
-        if ($bsOrder->module != "webpay") {
-            return;
-        }
-
-        $tx = $this->getFormatTransbankWebpayRestTransactionByOrderId($orderId);
-        $details = array(
-            array(
-                'desc' => $this->l('Producto'),
-                'data' => $tx['product'] ,
-            ),
-            array(
-                'desc' => $this->l('Fecha de Transacción'),
-                'data' => $tx['transactionDate'] . " " . $tx['transactionHour'],
-            ),
-            array(
-                'desc' => $this->l('Tipo de Tarjeta'),
-                'data' => $tx['paymentType'],
-            ),
-            array(
-                'desc' => $this->l('Tipo de Cuotas'),
-                'data' => $tx['installmentType'],
-            ),
-            array(
-                'desc' => $this->l('Cantidad de Cuotas'),
-                'data' => $tx['installmentsNumber'],
-            ),
-            array(
-                'desc' => $this->l('Tarjeta'),
-                'data' => $tx['cardNumber'],
-            ),
-            array(
-                'desc' => $this->l('Total Cobrado'),
-                'data' => "$" . $tx['totalPago'],
-            ),
-            array(
-                'desc' => $this->l('Código de Autorización'),
-                'data' => $tx['authorizationCode'],
-            ),
-            array(
-                'desc' => $this->l('Respuesta del Banco'),
-                'data' => $tx['status'],
-            ),
-            array(
-                'desc' => $this->l('Orden de Compra'),
-                'data' => $tx['buyOrder'],
-            ),
-            array(
-                'desc' => $this->l('Código de Resultado'),
-                'data' => $tx['responseCode'],
-            ),
-            array(
-                'desc' => $this->l('Token'),
-                'data' => $tx['token'],
-            ),
-        );
-
-        $this->context->smarty->assign($this->name, array(
-            '_path' => $this->_path,
-            'title' => $this->displayName,
-            'details' => $details,
-        ));
-        return $this->display(__FILE__, 'views/templates/admin/admin_order.tpl');
     }
 
     private function getFormatTransbankWebpayRestTransactionByOrderId($orderId){
@@ -365,19 +298,6 @@ class WebPay extends PaymentModule
     private function pluginValidation()
     {
         $this->_errors = array();
-    }
-
-    /**
-     * @return string
-     */
-    public function getDisplayOrderHookName()
-    {
-        $displayOrder = 'displayAdminOrderLeft';
-        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
-            $displayOrder = 'displayAdminOrderTabContent';
-        }
-
-        return $displayOrder;
     }
 
     protected function logError($msg){
