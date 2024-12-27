@@ -5,6 +5,7 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
+use PrestaShop\Module\WebpayPlus\Hooks\DisplayAdminOrderSide;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
@@ -71,6 +72,7 @@ class WebPay extends PaymentModule
         return  $result &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
+            $this->registerHook('displayBackOfficeHeader') &&
             $this->registerHook('displayPaymentReturn') &&
             $this->registerHook('displayAdminOrderSide') &&
             $this->registerHook($this->getDisplayOrderHookName());
@@ -90,86 +92,20 @@ class WebPay extends PaymentModule
 
     public function hookdisplayAdminOrderSide($params)
     {
-        return $this->AdminDisplay($params);
+        $displayAdminOrderSide = new DisplayAdminOrderSide();
+        return $displayAdminOrderSide->execute($params);
     }
+
+    public function hookDisplayBackOfficeHeader($params)
+    {
+        if ($this->context->controller->controller_name === 'AdminOrders') {
+            $this->context->controller->addCSS('modules/'.$this->name.'/views/css/admin.css');
+        }
+    }
+
     public function hookdisplayAdminOrderTabContent($params)
     {
-        return $this->AdminDisplay($params);
-    }
-
-    public function AdminDisplay($params)
-    {
-        if (!$this->active) {
-            return;
-        }
-
-        $orderId = $params['id_order'];
-        $bsOrder = new Order((int)$orderId);
-
-        if ($bsOrder->module != "webpay") {
-            return;
-        }
-
-        $title = $this->l('Detalle del pago');
-        $tx = $this->getFormatTransbankWebpayRestTransactionByOrderId($orderId);
-        $details = array(
-            array(
-                'desc' => $this->l('Producto'),
-                'data' => $tx['product'] ,
-            ),
-            array(
-                'desc' => $this->l('Fecha de Transacción'),
-                'data' => $tx['transactionDate'] . " " . $tx['transactionHour'],
-            ),
-            array(
-                'desc' => $this->l('Tipo de Tarjeta'),
-                'data' => $tx['paymentType'],
-            ),
-            array(
-                'desc' => $this->l('Tipo de Cuotas'),
-                'data' => $tx['installmentType'],
-            ),
-            array(
-                'desc' => $this->l('Cantidad de Cuotas'),
-                'data' => $tx['installmentsNumber'],
-            ),
-            array(
-                'desc' => $this->l('Tarjeta'),
-                'data' => $tx['cardNumber'],
-            ),
-            array(
-                'desc' => $this->l('Total Cobrado'),
-                'data' => "$" . $tx['totalPago'],
-            ),
-            array(
-                'desc' => $this->l('Código de Autorización'),
-                'data' => $tx['authorizationCode'],
-            ),
-            array(
-                'desc' => $this->l('Respuesta del Banco'),
-                'data' => $tx['status'],
-            ),
-            array(
-                'desc' => $this->l('Orden de Compra'),
-                'data' => $tx['buyOrder'],
-            ),
-            array(
-                'desc' => $this->l('Código de Resultado'),
-                'data' => $tx['responseCode'],
-            ),
-            array(
-                'desc' => $this->l('Token'),
-                'data' => $tx['token'],
-            ),
-        );
-
-        $template = new Template();
-        return $template->render('admin/order/payment_detail.html.twig', [
-            '_path' => $this->_path,
-            'title' => $this->displayName,
-            'details' => $details,
-            'isPsGreaterOrEqual177' => version_compare(_PS_VERSION_, '1.7.7.0', '>=')
-        ]);
+        // return $this->AdminDisplay($params);
     }
 
     private function getFormatTransbankWebpayRestTransactionByOrderId($orderId){
