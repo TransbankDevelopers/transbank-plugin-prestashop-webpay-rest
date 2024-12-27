@@ -44,6 +44,12 @@ class TbkConstants
         'PARTIALLY_NULLIFIED' => 'Parcialmente anulada',
         'CAPTURED' => 'Capturada',
     ];
+
+    const PRODUCT_TYPE = [
+        'webpay_plus' => 'Webpay Plus',
+        'webpay_oneclick' => 'Webpay Oneclick'
+    ];
+
     const ECOMMERCE_PRESTASHOP = 'prestashop';
     const REPO_PRESTASHOP = 'TransbankDevelopers/transbank-plugin-prestashop-webpay-rest';
     const REPO_OFFICIAL_PRESTASHOP = 'PrestaShop/PrestaShop';
