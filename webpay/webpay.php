@@ -74,8 +74,7 @@ class WebPay extends PaymentModule
             $this->registerHook('paymentReturn') &&
             $this->registerHook('displayBackOfficeHeader') &&
             $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('displayAdminOrderSide') &&
-            $this->registerHook($this->getDisplayOrderHookName());
+            $this->registerHook('displayAdminOrderSide');
     }
 
     protected function installWebpayTable()
@@ -101,11 +100,6 @@ class WebPay extends PaymentModule
         if ($this->context->controller->controller_name === 'AdminOrders') {
             $this->context->controller->addCSS('modules/'.$this->name.'/views/css/admin.css');
         }
-    }
-
-    public function hookdisplayAdminOrderTabContent($params)
-    {
-        // return $this->AdminDisplay($params);
     }
 
     private function getFormatTransbankWebpayRestTransactionByOrderId($orderId){
@@ -304,19 +298,6 @@ class WebPay extends PaymentModule
     private function pluginValidation()
     {
         $this->_errors = array();
-    }
-
-    /**
-     * @return string
-     */
-    public function getDisplayOrderHookName()
-    {
-        $displayOrder = 'displayAdminOrderLeft';
-        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
-            $displayOrder = 'displayAdminOrderTabContent';
-        }
-
-        return $displayOrder;
     }
 
     protected function logError($msg){
