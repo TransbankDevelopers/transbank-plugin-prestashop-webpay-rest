@@ -27,6 +27,13 @@ class TbkConstants
         "NC" => self::PAYMENT_TYPE_CREDIT,
         "VP" => self::PAYMENT_TYPE_PREPAID
     ];
+
+    const INSTALLMENT_TYPE = [
+        "VC" => "Venta en cuotas",
+        "SI" => "3 cuotas sin interés",
+        "S2" => "2 cuotas sin interés",
+        "NC" => "N cuotas sin interés"
+    ];
     const ECOMMERCE_PRESTASHOP = 'prestashop';
     const REPO_PRESTASHOP = 'TransbankDevelopers/transbank-plugin-prestashop-webpay-rest';
     const REPO_OFFICIAL_PRESTASHOP = 'PrestaShop/PrestaShop';
