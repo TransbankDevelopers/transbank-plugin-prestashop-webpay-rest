@@ -34,6 +34,16 @@ class TbkConstants
         "S2" => "2 cuotas sin interés",
         "NC" => "N cuotas sin interés"
     ];
+
+    const STATUS_DESCRIPTION =  [
+        'INITIALIZED' => 'Inicializada',
+        'AUTHORIZED' => 'Autorizada',
+        'REVERSED' => 'Reversada',
+        'FAILED' => 'Fallida',
+        'NULLIFIED' => 'Anulada',
+        'PARTIALLY_NULLIFIED' => 'Parcialmente anulada',
+        'CAPTURED' => 'Capturada',
+    ];
     const ECOMMERCE_PRESTASHOP = 'prestashop';
     const REPO_PRESTASHOP = 'TransbankDevelopers/transbank-plugin-prestashop-webpay-rest';
     const REPO_OFFICIAL_PRESTASHOP = 'PrestaShop/PrestaShop';
