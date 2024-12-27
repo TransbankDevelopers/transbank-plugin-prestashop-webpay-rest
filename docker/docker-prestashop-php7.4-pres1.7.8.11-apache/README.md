@@ -1,6 +1,6 @@
 #  Prestashop Docker para desarrollo
 
-### PHP 7.4 + Mariadb + Prestashop 1.7.8.6
+### PHP 7.4 + Mariadb + Prestashop 1.7.8.11
 
 ### Requerimientos
 
@@ -30,7 +30,7 @@ De forma automática se creará una imagen Prestashop, se creará un producto de
 Para instalar Prestashop, hacer lo siguiente:
 
 ```
-cd docker-prestashop-php7.4-pres1.7.8.6-apache
+cd docker-prestashop-php7.4-pres1.7.8.11-apache
 docker compose up
 ```
 
