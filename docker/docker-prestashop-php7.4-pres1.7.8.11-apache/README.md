@@ -1,55 +1,60 @@
-#  Prestashop Docker para desarrollo
+# PrestaShop 1.7.8.11 + PHP 7.4 + Mariadb
 
-### PHP 7.4 + Mariadb + Prestashop 1.7.8.11
+## Requerimientos
 
-### Requerimientos
-
-**MacOS:**
+### **MacOS:**
 
 Instalar [Docker](https://docs.docker.com/docker-for-mac/install/), [Docker-compose](https://docs.docker.com/compose/install/#install-compose) y [Docker-sync](https://docker-sync.readthedocs.io/en/latest/).
 
-**Windows:**
+### **Windows:**
 
 Instalar [Docker](https://docs.docker.com/docker-for-windows/install/), [Docker-compose](https://docs.docker.com/compose/install/#install-compose) y [Docker-sync](https://docker-sync.readthedocs.io/en/latest/).
 
-**Linux:**
+### **Linux:**
 
 Instalar [Docker](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/) y [Docker-compose](https://docs.docker.com/compose/install/#install-compose).
 
-### Bajar dependencias del proyecto (en la carpeta Webpay)
+## Instalar dependencias del modulo (en la carpeta Webpay)
 
-```
-cd ..
+Desde la carpeta Webpay, ejecutar el comando para instalar las dependencias.
+
+```bash
+cd ../../ # En caso de estar dentro de la carpeta del contenedor.
 composer install && composer update
 ```
 
-### Como usar
+## Como usar
 
-De forma automática se creará una imagen Prestashop, se creará un producto de ejemplo.
+El contenedor expondrá una instancia de PrestaShop y una base de datos. Dejara activo de forma automática el modulo de Webpay.
 
-Para instalar Prestashop, hacer lo siguiente:
+Para correr la imagen de docker se debe ejecutar el siguiente comando:
 
-```
-cd docker-prestashop-php7.4-pres1.7.8.11-apache
+```bash
+cd docker/docker-prestashop-php7.4-pres1.7.8.11-apache
 docker compose up
 ```
 
-Para instalra el plugin comprimir la carpeta webpay en zip y subir como plugin
+## Accesos
 
-### Paneles
+### PrestaShop
 
-**Web server:** http://localhost:8080
+PrestaShop quedara disponible en el puerto 8080. Las URL son las siguientes:
 
-**Admin:** http://localhost:8080/adminop
+**Tienda:** http://localhost:8080
 
-    user: admin@admin.com
-    password: password
+**Panel de administración:** http://localhost:8080/adminop
+
+Las credenciales son:
+
+    Usuario: admin@admin.com
+    Contraseña: password
 
 
-### Importante
+## Importante
 
-Debes configurar el transportista en (Transporte / Transportistas) modificando "My carrier" para enviar a "South America", ejemplo agregando un costo de $5.
+Para poder realizar una venta, debes configurar el transportista en la sección `Transporte/Transportistas`. Desde ahí debes modificar alguno de los transportistas disponibles como "My carrier" o "PrestaShop" y habilitar la localización de destino para enviar a "South America". Puedes agregar un costo de envío, por ejemplo $5.
 
+### Capturas
 ![transporte1](img/transporte1.png)
 
 ![transporte2](img/transporte2.png)
