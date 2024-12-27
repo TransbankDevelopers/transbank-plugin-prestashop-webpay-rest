@@ -5,7 +5,7 @@ namespace PrestaShop\Module\WebpayPlus\Grid;
 use PrestaShop\Module\WebpayPlus\Grid\Column\Type\CustomLinkColumn;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractFilterableGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DateTimeColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
@@ -16,7 +16,7 @@ use PrestaShopBundle\Form\Admin\Type\DateRangeType;
 use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ColorColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\ColorColumn;
 use PrestaShop\Module\WebpayPlus\Grid\TransactionsStatusChoiceProvider;
 
 
