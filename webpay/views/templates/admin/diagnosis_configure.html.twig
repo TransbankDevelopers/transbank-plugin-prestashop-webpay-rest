@@ -4,29 +4,6 @@
 
     {% include '@Modules/webpay/views/templates/admin/tabs.html.twig' with {'tabActive': 3} %}
 
-    {{ form_start(diagnosisForm, {attr : {class: 'form'}, action: path('ps_controller_webpay_configure_diagnosis_form_save') }) }}
-    <div class="card">
-        <h3 class="card-header">
-            <i class="material-icons">settings</i> {{ 'Diagnóstico'|trans({}, 'Modules.WebpayPlus.Admin') }}
-        </h3>
-        <div class="card-block row">
-            <div class="col">
-                <div class="card-text">
-                    {{ form_widget(diagnosisForm) }}
-                </div>
-            </div>
-        </div>
-        <div class="card-footer">
-            <div class="d-flex justify-content-end">
-            <button class="btn btn-primary float-right" id="diagnosis-form-save-button">
-                {{ 'Save'|trans({}, 'Admin.Actions') }}
-            </button>
-            </div>
-        </div>
-    </div>
-    {{ form_end(diagnosisForm) }}
-
-    
     <div class="card">
         <div class="card-block row">
             <table class="table" style="width: 100%; margin: 20px;">
@@ -82,11 +59,10 @@
                     <td>{{ 'dom:'|trans({}, 'Modules.WebpayPlus.Admin') }}</td><td>{{summary.phpExtensions.dom.version}}</td>
                 </tr>
             </table>
-            
+
         </div>
-        
+
     </div>
 
 {% endblock %}
-    
-   
+

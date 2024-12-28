@@ -66,12 +66,9 @@ class ConfigureController extends FrameworkBundleAdminController
     /** @Route("/webpay/configure", name="diagnosis") */
     public function diagnosisAction()
     {
-        $diagnosisFormDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
-        $diagnosisForm = $diagnosisFormDataHandler->getForm();
         $summary = InfoUtil::getSummary();
         $eSummary = PrestashopInfoUtil::getSummary();
         return $this->render('@Modules/webpay/views/templates/admin/diagnosis_configure.html.twig', [
-            'diagnosisForm' => $diagnosisForm->createView(),
             'enableSidebar' => true,
             'layoutTitle' => $this->trans('Configuración Webpay', 'Modules.WebpayPlus.Admin'),
             'summary' => $summary,
@@ -151,23 +148,4 @@ class ConfigureController extends FrameworkBundleAdminController
         return $this->redirectToRoute('ps_controller_webpay_configure_oneclick');
     }
 
-    /** @Route("/webpay/configure", name="saveDiagnosisForm") */
-    public function saveDiagnosisFormAction(Request $request): Response
-    {
-        $formDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
-        $form = $formDataHandler->getForm();
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted()) {
-            $errors = $formDataHandler->save($form->getData());
-
-            if (empty($errors)) {
-                $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
-            } else {
-                $this->flashErrors($errors);
-            }
-        }
-
-        return $this->redirectToRoute('ps_controller_webpay_configure_diagnosis');
-    }
 }
