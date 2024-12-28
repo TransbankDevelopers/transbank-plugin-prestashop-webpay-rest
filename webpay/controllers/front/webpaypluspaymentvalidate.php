@@ -2,7 +2,6 @@
 
 use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithCommon;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use Transbank\Webpay\WebpayPlus\TransactionCommitResponse;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
@@ -15,7 +14,6 @@ use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
  */
 class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModuleFrontController
 {
-    use InteractsWithCommon;
     use InteractsWithWebpay;
     use InteractsWithWebpayDb;
 
@@ -34,11 +32,11 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $tokenWs = $params['token_ws'] ?? null;
         $tbktoken = $params['TBK_TOKEN'] ?? null;
         $tbkIdSesion = $params['TBK_ID_SESION'] ?? null;
-        if ($this->isDebugActive()) {
-            $this->logInfo("C.1. Iniciando validación luego de redirección desde tbk =>
+
+        $this->logInfo("C.1. Iniciando validación luego de redirección desde tbk =>
                 method: {$_SERVER['REQUEST_METHOD']}");
-            $this->logInfo(json_encode($params));
-        }
+        $this->logInfo(json_encode($params));
+
 
         if (isset($tokenWs)) {
             $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($tokenWs);
@@ -53,10 +51,8 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
         if (isset($tokenWs) && !isset($tbktoken)) { //Flujo 1 => Confirmar Transacción
 
-            if ($this->isDebugActive()) {
-                $this->logInfo("C.2. Tx obtenido desde la tabla webpay_transactions => token: {$tokenWs}");
-                $this->logInfo(json_encode($webpayTransaction));
-            }
+            $this->logInfo("C.2. Tx obtenido desde la tabla webpay_transactions => token: {$tokenWs}");
+            $this->logInfo(json_encode($webpayTransaction));
 
             $cart = $this->getCart($webpayTransaction->cart_id);
             $this->validateData($cart);
@@ -150,10 +146,9 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      */
     private function processPayment($token, $webpayTransaction, $cart)
     {
-        if ($this->isDebugActive()) {
-            $this->logInfo("C.3. Transaccion antes del commit  => token: {$token}");
-            $this->logInfo(json_encode($webpayTransaction));
-        }
+        $this->logInfo("C.3. Transaccion antes del commit  => token: {$token}");
+        $this->logInfo(json_encode($webpayTransaction));
+
         $amount = $this->getOrderTotalOriginal($cart);
         if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
             $this->logError("C.3. El carro de compras ha sido manipulado => token: {$token}");
@@ -186,18 +181,16 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $error = 'No se pudo guardar en base de datos el resultado de la transacción';
             $this->throwErrorRedirect($error);
         } elseif (!is_array($result) && isset($result->buyOrder) && $result->responseCode === 0) {
-            if ($this->isDebugActive()) {
-                $this->logInfo("C.5. Transacción con commit exitoso en Transbank y guardado => token: {$token}");
-            }
+            $this->logInfo("C.5. Transacción con commit exitoso en Transbank y guardado => token: {$token}");
+
             $customer = $this->getCustomer($cart->id_customer);
             $currency = Context::getContext()->currency;
             $okStatus = $this->getWebpayOkStatus();
 
-            if ($this->isDebugActive()) {
-                $this->logInfo("C.6. Procesando pago - antes de validateOrder");
-                $this->logInfo("token : {$token}, amount : {$amount}, cartId: {$cart->id}, okStatus: {$okStatus}
+            $this->logInfo("C.6. Procesando pago - antes de validateOrder");
+            $this->logInfo("token : {$token}, amount : {$amount}, cartId: {$cart->id}, okStatus: {$okStatus}
                     , currencyId: {$currency->id}, customer_secure_key: {$customer->secure_key}");
-            }
+
             $this->module->validateOrder(
                 (int) $cart->id,
                 $okStatus,
@@ -209,9 +202,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
                 false,
                 $customer->secure_key
             );
-            if ($this->isDebugActive()) {
-                $this->logInfo("C.7. Procesando pago despues de validateOrder => token: {$token}");
-            }
+            $this->logInfo("C.7. Procesando pago despues de validateOrder => token: {$token}");
 
             $order = new Order($this->module->currentOrder);
             $this->saveOrderPayment($order, $cart, $webpayTransaction->card_number);
