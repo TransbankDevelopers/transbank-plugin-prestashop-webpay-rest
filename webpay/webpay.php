@@ -55,7 +55,6 @@ class WebPay extends PaymentModule
     {
         $result = parent::install();
         /* carga la configuracion por defecto al instalar el plugin */
-        $this->setDebugActive("");
         $this->loadDefaultConfigurationWebpay();
         $this->loadDefaultConfigurationOneclick();
 
