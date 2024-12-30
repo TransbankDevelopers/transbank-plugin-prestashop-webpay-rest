@@ -84,10 +84,6 @@ class BaseModuleFrontController extends ModuleFrontController
         return $cart->getOrderTotal(true, Cart::BOTH);// for CLP it should alway be a int
     }
 
-    protected function getDebugActive(){
-        return Configuration::get('DEBUG_ACTIVE');
-    }
-
 
     protected function setPaymentErrorPage($errorMessage)
     {

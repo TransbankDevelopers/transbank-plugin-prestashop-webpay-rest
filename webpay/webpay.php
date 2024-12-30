@@ -1,6 +1,5 @@
 <?php
 
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithCommon;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
@@ -18,7 +17,6 @@ class WebPay extends PaymentModule
 {
     use InteractsWithWebpay;
     use InteractsWithOneclick;
-    use InteractsWithCommon;
     use InteractsWithWebpayDb;
     use InteractsWithTabs;
 
@@ -57,7 +55,6 @@ class WebPay extends PaymentModule
     {
         $result = parent::install();
         /* carga la configuracion por defecto al instalar el plugin */
-        $this->setDebugActive("");
         $this->loadDefaultConfigurationWebpay();
         $this->loadDefaultConfigurationOneclick();
 
@@ -108,10 +105,9 @@ class WebPay extends PaymentModule
             $this->logError('Showing confirmation page, but there is no webpayTransaction object, so we cant find an approved transaction for this order.');
         }
 
-        if($this->isDebugActive()){
-            $this->logInfo('D.3. TransbankWebpayRestTransaction obtenida');
-            $this->logInfo(isset($webpayTransaction) ? $webpayTransaction->transbank_response : 'No se encontro el registro');
-        }
+
+        $this->logInfo('D.3. TransbankWebpayRestTransaction obtenida');
+        $this->logInfo(isset($webpayTransaction) ? $webpayTransaction->transbank_response : 'No se encontro el registro');
 
         $transbankResponse = json_decode($webpayTransaction->transbank_response, true);
         $transactionDate = strtotime($transbankResponse['transactionDate']);
@@ -174,9 +170,7 @@ class WebPay extends PaymentModule
 
     public function hookPaymentReturn($params)
     {
-        if($this->isDebugActive()){
-            $this->logInfo('D.1. Retornando (hookPaymentReturn)');
-        }
+        $this->logInfo('D.1. Retornando (hookPaymentReturn)');
         if (!$this->active) {
             return;
         }
@@ -184,10 +178,8 @@ class WebPay extends PaymentModule
         $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
         $orderId = $params[$nameOrderRef]->id;
 
-        if($this->isDebugActive()){
-            $this->logInfo('D.2. Obteniendo TransbankWebpayRestTransaction desde la BD');
-            $this->logInfo('nameOrderRef: '.$nameOrderRef.', orderId: '.$orderId);
-        }
+        $this->logInfo('D.2. Obteniendo TransbankWebpayRestTransaction desde la BD');
+        $this->logInfo('nameOrderRef: '.$nameOrderRef.', orderId: '.$orderId);
 
         $tx = $this->getFormatTransbankWebpayRestTransactionByOrderId($orderId);
 
@@ -221,12 +213,12 @@ class WebPay extends PaymentModule
         if (!$this->active) {
             return;
         }
-        if($this->isDebugActive()){
-            $this->logInfo('*****************************************************');
-            $this->logInfo('Ejecutando hookPayment');
-            $this->logInfo(json_encode($params));
-            $this->logInfo('-----------------------------------------------------');
-        }
+
+        $this->logInfo('*****************************************************');
+        $this->logInfo('Ejecutando hookPayment');
+        $this->logInfo(json_encode($params));
+        $this->logInfo('-----------------------------------------------------');
+
         Context::getContext()->smarty->assign(array(
             'logo' => \Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'),
             'title' => $this->title
@@ -239,12 +231,11 @@ class WebPay extends PaymentModule
     */
     public function hookPaymentOptions($params)
     {
-        if($this->isDebugActive()){
-            $this->logInfo('*****************************************************');
-            $this->logInfo('A.1. Mostrando medios de pago Webpay Plus');
-            $this->logInfo(json_encode($params['cart']));
-            $this->logInfo('-----------------------------------------------------');
-        }
+
+        $this->logInfo('*****************************************************');
+        $this->logInfo('A.1. Mostrando medios de pago Webpay Plus');
+        $this->logInfo(json_encode($params['cart']));
+        $this->logInfo('-----------------------------------------------------');
 
         if (!$this->active) {
             return;
@@ -310,7 +301,6 @@ class WebPay extends PaymentModule
 
     public function updateSettings(){
         $this->oneclickUpdateSettings();
-        $this->commonUpdateSettings();
         return $this->webpayUpdateSettings();
     }
 

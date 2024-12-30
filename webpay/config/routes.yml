@@ -51,12 +51,6 @@ ps_controller_webpay_configure_oneclick_form_save:
   defaults:
     _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::saveOneclickFormAction'
 
-ps_controller_webpay_configure_diagnosis_form_save:
-  path: /webpay/configure/saveDiagnosisForm
-  methods: [POST]
-  defaults:
-    _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\ConfigureController::saveDiagnosisFormAction'
-
 ps_controller_webpay_transaction_list:
   path: /webpay/transaction-list
   methods: [GET]

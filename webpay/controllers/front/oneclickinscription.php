@@ -1,21 +1,18 @@
 <?php
 
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithCommon;
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 
 class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontController
 {
-    use InteractsWithCommon;
     public function initContent()
     {
         parent::initContent();
         $this->logger = TbkFactory::createLogger();
-        if($this->isDebugActive()){
-            $this->logInfo('B.1. Iniciando medio de pago Oneclick');
-        }
+        $this->logInfo('B.1. Iniciando medio de pago Oneclick');
+
         $cart = $this->getCartFromContext();
         $customer = $this->getCustomerFromContext();
         $webpay = OneclickFactory::create();

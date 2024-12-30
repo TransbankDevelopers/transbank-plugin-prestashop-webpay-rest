@@ -62,36 +62,6 @@ services:
     class: PrestaShop\Module\WebpayPlus\Form\OneclickDataConfiguration
     arguments: ["@prestashop.adapter.legacy.configuration"]
 
-  # diagnosis Form services
-
-  webpay.form.type.diagnosis:
-    class: 'PrestaShop\Module\WebpayPlus\Form\DiagnosisType'
-    arguments:
-      - "@translator"
-      - "@=service('prestashop.adapter.legacy.context').getLanguages()"
-      - "@prestashop.adapter.legacy.configuration"
-    public: true
-    tags:
-      - { name: form.type }
-
-  webpay.form.diagnosis_form_data_provider:
-    class: 'PrestaShop\Module\WebpayPlus\Form\DiagnosisFormDataProvider'
-    arguments:
-      - "@webpay.form.diagnosis_data_configuration"
-
-  webpay.form.diagnosis_form_data_handler:
-    class: 'PrestaShop\Module\WebpayPlus\Form\CustomHandler'
-    arguments:
-      - "@form.factory"
-      - "@prestashop.core.hook.dispatcher"
-      - "@webpay.form.diagnosis_form_data_provider"
-      - 'PrestaShop\Module\WebpayPlus\Form\DiagnosisType'
-      - "WebpayPlus"
-
-  webpay.form.diagnosis_data_configuration:
-    class: PrestaShop\Module\WebpayPlus\Form\DiagnosisDataConfiguration
-    arguments: ["@prestashop.adapter.legacy.configuration"]
-
   # transaction grid services
 
   webpay.grid.definition.factory.transactions_grid_definition_factory:
