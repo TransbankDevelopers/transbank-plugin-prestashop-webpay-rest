@@ -12,12 +12,20 @@ use Transbank\Plugin\Exceptions\EcommerceException;
  */
 class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontController
 {
+    /**
+     * Constructor for the payment controller.
+     * Initializes the logger instance.
+     */
     public function __construct()
     {
         parent::__construct();
         $this->logger = TbkFactory::createLogger();
     }
 
+    /**
+     * Main entry point to initialize content and process Webpay Plus transactions.
+     * Handles the creation of a Webpay Plus transaction and prepares the redirection template.
+     */
     public function initContent()
     {
         parent::initContent();
@@ -63,6 +71,21 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         }
     }
 
+    /**
+     * Saves the Webpay Plus transaction details in the database.
+     * 
+     * @param TransbankSdkWebpay $webpay The Webpay SDK instance.
+     * @param string $sessionId The unique session ID for the transaction.
+     * @param int $cartId The cart ID associated with the transaction.
+     * @param int $currencyId The currency ID for the transaction.
+     * @param string $token The token received from Webpay Plus.
+     * @param string $buyOrder The unique buy order identifier.
+     * @param float $amount The transaction amount.
+     * 
+     * @return TransbankWebpayRestTransaction The saved transaction record.
+     * 
+     * @throws EcommerceException If the transaction cannot be saved in the database.
+     */
     private function createTransbankTransactionRecord(
         TransbankSdkWebpay $webpay,
         string $sessionId,
@@ -101,8 +124,10 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
     }
 
     /**
-     * @param array $result
-     * @param $amount
+     * Prepares the redirection template for the payment page.
+     * 
+     * @param array $result The response from the Webpay Plus transaction creation.
+     * @param float $amount The transaction amount.
      */
     protected function setRedirectionTemplate(array $result, $amount)
     {
