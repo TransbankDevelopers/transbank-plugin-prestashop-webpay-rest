@@ -63,20 +63,6 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         }
     }
 
-    /**
-     * @param array $result
-     * @param $amount
-     */
-    protected function setRedirectionTemplate(array $result, $amount)
-    {
-        Context::getContext()->smarty->assign([
-            'url' => isset($result['url']) ? $result['url'] : '',
-            'token_ws' => $result['token_ws'],
-            'amount' => $amount,
-        ]);
-        $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
-    }
-
     private function createTransbankTransactionRecord(
         TransbankSdkWebpay $webpay,
         string $sessionId,
@@ -112,5 +98,19 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             throw new EcommerceException($message);
         }
         return $transaction;
+    }
+
+    /**
+     * @param array $result
+     * @param $amount
+     */
+    protected function setRedirectionTemplate(array $result, $amount)
+    {
+        Context::getContext()->smarty->assign([
+            'url' => isset($result['url']) ? $result['url'] : '',
+            'token_ws' => $result['token_ws'],
+            'amount' => $amount,
+        ]);
+        $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
     }
 }
