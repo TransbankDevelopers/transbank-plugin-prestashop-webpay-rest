@@ -1,8 +1,8 @@
 version: '3'
 services:
   web:
-    image: "prestashop/prestashop:1.7.8.6-7.4-apache"
-    container_name: "php7.4-pres1.7.8.6-apache_prestashop"
+    image: "prestashop/prestashop:8.2.0-8.1-apache"
+    container_name: "php8.1-pres8.2.0-apache_prestashop"
     environment:
       - PS_LANGUAGE=es
       - PS_INSTALL_AUTO=1
@@ -16,10 +16,13 @@ services:
       - PS_FOLDER_INSTALL=installop
       - PS_COUNTRY=cl
       - DB_NAME=prestashop
-      - DB_SERVER=php7.4-pres1.7.8.6-apache_mariadb
+      - DB_SERVER=php8.1-pres8.2.0-apache_mariadb
     volumes:
-      - ./modules:/var/www/html/modules  
       - ./log:/var/log
+      - type: bind
+        source: ../../webpay
+        target: /var/www/html/modules/webpay
+      - ../install-module.sh:/tmp/init-scripts/install-module.sh:ro
     ports:
       - "8080:80"
     links:
@@ -28,7 +31,7 @@ services:
       - mariadb
   mariadb:
     image: mariadb:10.7.8
-    container_name: php7.4-pres1.7.8.6-apache_mariadb
+    container_name: php8.1-pres8.2.0-apache_mariadb
     ports:
       - "3306:3306"
     expose:
