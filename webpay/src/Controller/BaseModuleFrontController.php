@@ -144,6 +144,8 @@ class BaseModuleFrontController extends ModuleFrontController
         return $randomString;
     }
 
+    protected function getReturnUrl(string $controllerName): string
+    {
+        return Context::getContext()->link->getModuleLink('webpay', $controllerName, [], true);
+    }
 }
-
-
