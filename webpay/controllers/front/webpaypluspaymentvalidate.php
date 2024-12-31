@@ -200,8 +200,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             throw new EcommerceException($message);
         }
 
-        // TODO: Gestionar el mensaje de error y la redirección
-        // $this->setPaymentErrorPage($error);
+        $this->setPaymentErrorPage(self::WEBPAY_FAILED_FLOW_MESSAGE);
     }
 
     private function handleTransactionAlreadyProcessed(string $token)
