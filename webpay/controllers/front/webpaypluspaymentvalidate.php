@@ -19,10 +19,16 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
     protected $responseData = [];
 
-    public function initContent()
+    public function __construct()
+    {
+        parent::__construct();
+        $this->logger = TbkFactory::createLogger();
+    }
+
+    public function initContent(): void
     {
         parent::initContent();
-        $this->logger = TbkFactory::createLogger();
+
         //Flujos:
         //1. Flujo normal (OK): solo llega token_ws
         //2. Timeout (más de 10 minutos en el formulario de Transbank): llegan TBK_ID_SESION y TBK_ORDEN_COMPRA
