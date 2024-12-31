@@ -11,6 +11,7 @@ class TransbankWebpayRestTransaction extends ObjectModel
     const STATUS_FAILED = 2;
     const STATUS_ABORTED_BY_USER = 3;
     const STATUS_APPROVED = 4;
+    const STATUS_TIMEOUT = 5;
 
     const PRODUCT_WEBPAY_PLUS = 'webpay_plus';
     const PRODUCT_WEBPAY_ONECLICK = 'webpay_oneclick';
