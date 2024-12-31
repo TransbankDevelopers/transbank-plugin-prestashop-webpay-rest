@@ -283,4 +283,15 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $tx->transbank_response = $tbkResponse;
         $tx->save();
     }
+
+    private function checkTransactionIsAlreadyProcessed(string $token): bool
+    {
+        $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
+
+        if (is_null($webpayTransaction)) {
+            return false;
+        }
+
+        return $webpayTransaction->status != TransbankWebpayRestTransaction::STATUS_INITIALIZED;
+    }
 }
