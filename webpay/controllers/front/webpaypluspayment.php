@@ -26,7 +26,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
      * Main entry point to initialize content and process Webpay Plus transactions.
      * Handles the creation of a Webpay Plus transaction and prepares the redirection template.
      */
-    public function initContent()
+    public function initContent(): void
     {
         parent::initContent();
 
