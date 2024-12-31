@@ -169,6 +169,8 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $idOrder = Order::getIdByCartId($cart->id);
         $order = new Order($idOrder);
 
+        $this->logger->logInfo("Orden creada. Order ID: {$order->id} Cart ID: {$cart->id} Token: {$token}");
+
         $webpayTransaction->order_id = $order->id;
         $webpayTransaction->save();
 
