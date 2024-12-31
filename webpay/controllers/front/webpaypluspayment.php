@@ -1,96 +1,141 @@
 <?php
 
 use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
-use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
+use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
+use PrestaShop\Module\WebpayPlus\Utils\TransbankSdkWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
+use Transbank\Plugin\Exceptions\EcommerceException;
 
 /**
  * Class WebPayWebpayplusPaymentModuleFrontController.
  */
 class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontController
 {
-
-    public function initContent()
+    /**
+     * Constructor for the payment controller.
+     * Initializes the logger instance.
+     */
+    public function __construct()
     {
-        parent::initContent();
+        parent::__construct();
         $this->logger = TbkFactory::createLogger();
-        $this->logInfo("B.1. Iniciando medio de pago Webpay Plus");
-
-
-        $randomNumber = $this->generateRandomId();
-        $cart = $this->getCartFromContext();
-        $orderId = $cart->id;
-        $webpay = WebpayPlusFactory::create();
-        $amount = $this->getOrderTotalRound($cart);
-        $buyOrder = "ps:{$randomNumber}:{$orderId}";
-        $sessionId = "ps:sessionId:{$randomNumber}:{$orderId}";
-
-        $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', [], true);
-        $this->logInfo("B.2. Preparando datos antes de crear la transacción en Transbank");
-        $this->logInfo("amount: {$amount}, sessionId: {$sessionId}, buyOrder: {$buyOrder}
-                , returnUrl: {$returnUrl}");
-
-        try {
-            $result = $webpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
-        } catch (\Exception $e) {
-            $this->logError("B.3. Transacción creada con error en Transbank");
-            $this->logError(json_encode($result));
-            $this->setPaymentErrorPage($e->getMessage());
-        }
-        $this->logInfo("B.3. Transacción creada en Transbank");
-        $this->logInfo(json_encode($result));
-
-        $transaction = $this->createTransbankWebpayRestTransaction($webpay, $sessionId, $orderId,
-            $cart->id_currency, $result['token_ws'], $buyOrder, $amount);
-        $this->logInfo("B.5. Transacción creada en la tabla webpay_transactions");
-        $this->logInfo(json_encode($transaction));
-
-        $this->setRedirectionTemplate($result, $amount);
     }
 
     /**
-     * @param array $result
-     * @param $amount
+     * Main entry point to initialize content and process Webpay Plus transactions.
+     * Handles the creation of a Webpay Plus transaction and prepares the redirection template.
      */
-    protected function setRedirectionTemplate(array $result, $amount)
+    public function initContent(): void
     {
-        Context::getContext()->smarty->assign([
-            'url'      => isset($result['url']) ? $result['url'] : '',
-            'token_ws' => $result['token_ws'],
-            'amount'   => $amount,
-        ]);
-        $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
+        parent::initContent();
+
+        try {
+            $cart = $this->getCartFromContext();
+            $cartId = $cart->id;
+            $amount = $this->getOrderTotalRound($cart);
+            $randomNumber = $this->generateRandomId();
+
+            $buyOrder = "ps:{$randomNumber}:{$cartId}";
+            $sessionId = "ps:sessionId:{$randomNumber}:{$cartId}";
+
+            $returnUrl = $this->getReturnUrl('webpaypluspaymentvalidate');
+
+            $this->logger->logInfo("Creando transacción Webpay Plus. [Datos]:");
+            $this->logInfo("amount: {$amount} sessionId: {$sessionId} buyOrder: {$buyOrder} returnUrl: {$returnUrl}");
+
+            $webpaySdk = WebpayPlusFactory::create();
+            $createResponse = $webpaySdk->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
+
+            $this->logInfo("Transacción creada. [Respuesta]:");
+            $this->logInfo(json_encode($createResponse));
+
+            $this->createTransbankTransactionRecord(
+                $webpaySdk,
+                $sessionId,
+                $cartId,
+                $cart->id_currency,
+                $createResponse['token_ws'],
+                $buyOrder,
+                $amount
+            );
+
+            $this->setRedirectionTemplate($createResponse, $amount);
+
+        } catch (\Exception | \Error $e) {
+            $this->logger->logError("Error al crear la transacción: " . $e->getMessage());
+            $this->setPaymentErrorPage(
+                "Se ha producido un error al momento de iniciar el pago. " .
+                "Por favor, inténtalo nuevamente. Si el problema persiste, contacte al comercio."
+            );
+        }
     }
 
-    private function createTransbankWebpayRestTransaction($webpay, $sessionId, $cartId, $currencyId,
-        $token, $buyOrder, $amount){
+    /**
+     * Saves the Webpay Plus transaction details in the database.
+     *
+     * @param TransbankSdkWebpay $webpay The Webpay SDK instance.
+     * @param string $sessionId The unique session ID for the transaction.
+     * @param int $cartId The cart ID associated with the transaction.
+     * @param int $currencyId The currency ID for the transaction.
+     * @param string $token The token received from Webpay Plus.
+     * @param string $buyOrder The unique buy order identifier.
+     * @param float $amount The transaction amount.
+     *
+     * @return TransbankWebpayRestTransaction The saved transaction record.
+     *
+     * @throws EcommerceException If the transaction cannot be saved in the database.
+     */
+    private function createTransbankTransactionRecord(
+        TransbankSdkWebpay $webpay,
+        string $sessionId,
+        int $cartId,
+        int $currencyId,
+        string $token,
+        string $buyOrder,
+        float $amount
+    ): TransbankWebpayRestTransaction {
 
         $transaction = new TransbankWebpayRestTransaction();
         $transaction->amount = $amount;
-        $transaction->cart_id = (int) $cartId;
+        $transaction->cart_id = $cartId;
         $transaction->buy_order = $buyOrder;
         $transaction->session_id = $sessionId;
         $transaction->token = $token;
         $transaction->status = TransbankWebpayRestTransaction::STATUS_INITIALIZED;
         $transaction->created_at = date('Y-m-d H:i:s');
         $transaction->shop_id = (int) Context::getContext()->shop->id;
-        $transaction->currency_id = (int) $currencyId;
+        $transaction->currency_id = $currencyId;
 
-        $transaction->commerce_code =  $webpay->getCommerceCode();
+        $transaction->commerce_code = $webpay->getCommerceCode();
         $transaction->environment = $webpay->getEnviroment();
         $transaction->product = TransbankWebpayRestTransaction::PRODUCT_WEBPAY_PLUS;
 
-        $this->logInfo("B.4. Preparando datos antes de crear la transacción en la tabla webpay_transactions");
+        $this->logInfo("Creando registro en la tabla webpay_transactions [Datos]:");
         $this->logInfo(json_encode($transaction));
 
-        $saved = $transaction->save();
+        $saved = $transaction->add();
         if (!$saved) {
-            $this->logError("B.5. Transacción no se pudo crear en la tabla webpay_transactions => ");
-            $this->logError(json_encode($transaction));
-            $this->setPaymentErrorPage('No se pudo crear la transacción en la tabla webpay_transactions');
+            $message = "No se pudo crear la transacción en la tabla webpay_transactions";
+            $this->logError($message);
+            throw new EcommerceException($message);
         }
         return $transaction;
     }
 
+    /**
+     * Prepares the redirection template for the payment page.
+     *
+     * @param array $result The response from the Webpay Plus transaction creation.
+     * @param float $amount The transaction amount.
+     */
+    protected function setRedirectionTemplate(array $result, $amount)
+    {
+        Context::getContext()->smarty->assign([
+            'url' => isset($result['url']) ? $result['url'] : '',
+            'token_ws' => $result['token_ws'],
+            'amount' => $amount,
+        ]);
+        $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
+    }
 }
