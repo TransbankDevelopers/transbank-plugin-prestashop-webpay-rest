@@ -2,9 +2,11 @@
 
 namespace PrestaShop\Module\WebpayPlus\Utils;
 
+use GuzzleHttp\Exception\GuzzleException;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\Options;
+use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCreateException;
@@ -86,29 +88,24 @@ class TransbankSdkWebpay
     }
 
     /**
-     * @param $tokenWs
+     * @param $token
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws EcommerceException
+     * @throws \Transbank\Plugin\Exceptions\EcommerceException
      *
-     * @return array|Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse
+     * @return \Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse
      */
-    public function commitTransaction($tokenWs)
+    public function commitTransaction(string $token): TransactionCommitResponse
     {
-        $result = [];
-
         try {
-            $this->log->logInfo('commitTransaction : tokenWs: ' . $tokenWs);
-            if ($tokenWs == null) {
+            $this->log->logInfo("commitTransaction : token: {$token}");
+            if (!isset($token)) {
                 throw new EcommerceException('El token webpay es requerido');
             }
 
-            return $this->transaction->commit($tokenWs);
-        } catch (TransactionCommitException $e) {
-            $errorMessage = "Error confirmando la transacción para => tokenWs: {$tokenWs}, error: {$e->getMessage()}";
+            return $this->transaction->commit($token);
+        } catch (TransactionCommitException | \InvalidArgumentException | GuzzleException $e) {
+            $errorMessage = "Error confirmando la transacción para el token: {$token}, error: {$e->getMessage()}";
             throw new EcommerceException($errorMessage, $e);
         }
-
-        return $result;
     }
 }
