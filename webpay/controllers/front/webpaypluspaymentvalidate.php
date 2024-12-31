@@ -239,8 +239,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $message = self::WEBPAY_ERROR_FLOW_MESSAGE;
         }
 
-        // TODO: Revisar como se debe manejar la redirección a la pantalla de error.
-        // return $this->redirectWithErrorMessage($message);
+        $this->setPaymentErrorPage($message);
     }
 
     // TODO: Validar si es necesario realizar esto.
