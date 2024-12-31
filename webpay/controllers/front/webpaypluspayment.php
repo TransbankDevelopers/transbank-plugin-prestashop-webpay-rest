@@ -114,7 +114,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $this->logInfo("Creando registro en la tabla webpay_transactions [Datos]:");
         $this->logInfo(json_encode($transaction));
 
-        $saved = $transaction->save();
+        $saved = $transaction->add();
         if (!$saved) {
             $message = "No se pudo crear la transacción en la tabla webpay_transactions";
             $this->logError($message);
