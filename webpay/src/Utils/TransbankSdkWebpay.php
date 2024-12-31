@@ -34,17 +34,19 @@ class TransbankSdkWebpay
         $this->log = TbkFactory::createLogger();
         $this->options = Transaction::getDefaultOptions();
         $environment = isset($config['ENVIRONMENT']) ? $config['ENVIRONMENT'] : null;
-        if (isset($config) && $environment == Options::ENVIRONMENT_PRODUCTION){
+        if (isset($config) && $environment == Options::ENVIRONMENT_PRODUCTION) {
             $this->options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY_SECRET']);
         }
         $this->transaction = new Transaction($this->options);
     }
 
-    public function getCommerceCode(){
+    public function getCommerceCode()
+    {
         return $this->options->getCommerceCode();
     }
 
-    public function getEnviroment(){
+    public function getEnviroment()
+    {
         return $this->options->getIntegrationType();
     }
 
@@ -66,12 +68,12 @@ class TransbankSdkWebpay
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
             $this->log->logInfo('createTransaction : amount: ' . $amount . ', sessionId: ' .
-                $sessionId .', buyOrder: ' . $buyOrder . ', txDate: ' . $txDate . ', txTime: ' . $txTime);
+                $sessionId . ', buyOrder: ' . $buyOrder . ', txDate: ' . $txDate . ', txTime: ' . $txTime);
             $initResult = $this->transaction->create($buyOrder, $sessionId, $amount, $returnUrl);
             $this->log->logInfo('createTransaction.result: ' . json_encode($initResult));
             if (isset($initResult) && isset($initResult->url) && isset($initResult->token)) {
                 $result = [
-                    'url'      => $initResult->url,
+                    'url' => $initResult->url,
                     'token_ws' => $initResult->token,
                 ];
             } else {
