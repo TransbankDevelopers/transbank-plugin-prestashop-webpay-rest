@@ -216,11 +216,8 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $this->logger->logInfo('Estado de la transacción => ' . $status);
 
         if ($status == TransbankWebpayRestTransaction::STATUS_APPROVED) {
-            $response = json_decode($webpayTransaction->transbank_response);
-            // TODO: Revisar como se debe manejar la redirección a la pantalla de éxito.
-            // $formattedResponse = TbkResponseHelper::getWebpayFormattedResponse($response);
-
-            // return $this->redirectToSuccess($formattedResponse);
+            $cart = $this->getCart($webpayTransaction->cart_id);
+            $this->redirectToPaidSuccessPaymentPage($cart);
         }
 
         if ($status == TransbankWebpayRestTransaction::STATUS_FAILED) {
