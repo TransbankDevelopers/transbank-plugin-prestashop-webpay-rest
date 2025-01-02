@@ -65,8 +65,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
 
         if ($webpayFlow == self::WEBPAY_TIMEOUT_FLOW) {
-            // TODO: Implementar flujo de timeout
-            // $this->handleFlowTimeout($request['TBK_ORDEN_COMPRA']);
+            $this->handleFlowTimeout($request['TBK_ORDEN_COMPRA']);
         }
 
         if ($webpayFlow == self::WEBPAY_ABORTED_FLOW) {
@@ -127,6 +126,27 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         } else {
             $this->handleUnauthorizedTransaction($cart, $webpayTransaction, $commitResponse);
         }
+    }
+
+    private function handleFlowTimeout(string $buyOrder)
+    {
+        $this->logger->logInfo('Procesando transacción por flujo timeout => Orden de compra: ' . $buyOrder);
+
+        $message = self::WEBPAY_TIMEOUT_FLOW_MESSAGE;
+
+        $webpayTransaction = $this->getTransbankWebpayRestTransactionByBuyOrder($buyOrder);
+        $token = $webpayTransaction->token;
+
+        if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
+            return $this->handleTransactionAlreadyProcessed($token);
+        }
+
+        return $this->handleAbortedTransaction(
+            $token,
+            $message,
+            $webpayTransaction,
+            TransbankWebpayRestTransaction::STATUS_TIMEOUT
+        );
     }
 
     private function handleAuthorizedTransaction(
@@ -203,6 +223,17 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
 
         $this->setPaymentErrorPage(self::WEBPAY_FAILED_FLOW_MESSAGE);
+    }
+
+    private function handleAbortedTransaction(string $token, string $message, TransbankWebpayRestTransaction $webpayTransaction, int $status)
+    {
+        $this->logger->logInfo('Error al procesar transacción por Transbank => token: ' . $token);
+        $this->logger->logInfo('Detalle: ' . $message);
+
+        $webpayTransaction->status = $status;
+        $webpayTransaction->save();
+
+        return $this->setPaymentErrorPage($message);
     }
 
     private function handleTransactionAlreadyProcessed(string $token)
@@ -337,5 +368,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
 
         return $webpayTransaction->status != TransbankWebpayRestTransaction::STATUS_INITIALIZED;
+    }
+
+    private function checkTransactionIsAlreadyProcessedByStatus(string $status): bool
+    {
+        return $status != TransbankWebpayRestTransaction::STATUS_INITIALIZED;
     }
 }
