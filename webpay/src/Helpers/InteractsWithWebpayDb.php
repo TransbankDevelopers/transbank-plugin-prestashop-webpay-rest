@@ -46,5 +46,16 @@ trait InteractsWithWebpayDb
         return new TransbankWebpayRestTransaction($result['id']);
     }
 
-    
+    public function getTransbankWebpayRestTransactionByBuyOrder($buyOrder): ?TransbankWebpayRestTransaction
+    {
+        $sanitizedTableName = pSQL(_DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME);
+        $sanitizedBuyOrder = pSQL($buyOrder);
+        $sql = "SELECT * FROM {$sanitizedTableName} WHERE `buy_order` = '{$sanitizedBuyOrder}'";
+
+        $result = \Db::getInstance()->getRow($sql);
+        if ($result === false) {
+            return null;
+        }
+        return new TransbankWebpayRestTransaction($result['id']);
+    }
 }
