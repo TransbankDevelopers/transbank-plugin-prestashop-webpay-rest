@@ -337,33 +337,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $this->setPaymentErrorPage($error);
     }
 
-    /**
-     * @throws PrestaShopDatabaseException
-     * @throws PrestaShopException
-     *
-     * @return void
-     */
-    private function stopIfComingFromAnTimeoutErrorOnWebpay($sessionId): void
-    {
-        $webpayTransaction = $this->getTransbankWebpayRestTransactionBySessionId($sessionId);
-        $errorMessage = "Al parecer pasaron más de 15 minutos en el formulario de pago,
-            por lo que la transacción se ha cancelado automáticamente";
-        if (!isset($webpayTransaction)) {
-            $this->setPaymentErrorPage($errorMessage);
-        }
-
-        if ($webpayTransaction->status == TransbankWebpayRestTransaction::STATUS_APPROVED) {
-            $cart = $this->getCart($webpayTransaction->cart_id);
-            $this->redirectToPaidSuccessPaymentPage($cart);
-        }
-        $this->updateTransactionStatus(
-            $webpayTransaction,
-            TransbankWebpayRestTransaction::STATUS_FAILED,
-            json_encode(['error' => $errorMessage])
-        );
-        $this->setPaymentErrorPage($errorMessage);
-    }
-
     private function updateTransactionStatus($tx, $status, $tbkResponse): void
     {
         $tx->status = $status;
