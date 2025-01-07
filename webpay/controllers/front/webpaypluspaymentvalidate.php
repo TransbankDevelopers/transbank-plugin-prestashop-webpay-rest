@@ -69,8 +69,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
 
         if ($webpayFlow == self::WEBPAY_ABORTED_FLOW) {
-            // TODO: Implementar flujo de pago abortado
-            // $this->handleFlowAborted($request['TBK_TOKEN']);
+            $this->handleFlowAborted($request['TBK_TOKEN']);
         }
 
         if ($webpayFlow == self::WEBPAY_ERROR_FLOW) {
@@ -141,12 +140,22 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             return $this->handleTransactionAlreadyProcessed($token);
         }
 
-        return $this->handleAbortedTransaction(
-            $token,
-            $message,
-            $webpayTransaction,
-            TransbankWebpayRestTransaction::STATUS_TIMEOUT
-        );
+    private function handleFlowAborted(string $token)
+    {
+        $this->logger->logInfo('Procesando transacción por flujo de pago abortado => Token: ' . $token);
+
+        $message = self::WEBPAY_CANCELED_BY_USER_FLOW_MESSAGE;
+
+        $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
+
+        if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
+            return $this->handleTransactionAlreadyProcessed($token);
+        }
+
+        $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER;
+        $webpayTransaction->save();
+
+        return $this->handleAbortedTransaction($token, $message);
     }
 
     private function handleAuthorizedTransaction(
