@@ -140,6 +140,12 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             return $this->handleTransactionAlreadyProcessed($token);
         }
 
+        $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_TIMEOUT;
+        $webpayTransaction->save();
+
+        return $this->handleAbortedTransaction($token,$message);
+    }
+
     private function handleFlowAborted(string $token)
     {
         $this->logger->logInfo('Procesando transacción por flujo de pago abortado => Token: ' . $token);
@@ -234,13 +240,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $this->setPaymentErrorPage(self::WEBPAY_FAILED_FLOW_MESSAGE);
     }
 
-    private function handleAbortedTransaction(string $token, string $message, TransbankWebpayRestTransaction $webpayTransaction, int $status)
+    private function handleAbortedTransaction(string $token, string $message): void
     {
         $this->logger->logInfo('Error al procesar transacción por Transbank => token: ' . $token);
         $this->logger->logInfo('Detalle: ' . $message);
-
-        $webpayTransaction->status = $status;
-        $webpayTransaction->save();
 
         return $this->setPaymentErrorPage($message);
     }
