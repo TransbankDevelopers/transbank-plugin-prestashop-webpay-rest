@@ -100,7 +100,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         return $webpayFlow;
     }
 
-    private function handleNormalFlow(string $token)
+    private function handleNormalFlow(string $token): void
     {
         $this->logger->logInfo('Procesando transacción por flujo Normal => token: ' . $token);
 
@@ -127,7 +127,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
     }
 
-    private function handleFlowTimeout(string $buyOrder)
+    private function handleFlowTimeout(string $buyOrder): void
     {
         $this->logger->logInfo('Procesando transacción por flujo timeout => Orden de compra: ' . $buyOrder);
 
@@ -146,7 +146,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         return $this->handleAbortedTransaction($token,$message);
     }
 
-    private function handleFlowAborted(string $token)
+    private function handleFlowAborted(string $token): void
     {
         $this->logger->logInfo('Procesando transacción por flujo de pago abortado => Token: ' . $token);
 
@@ -248,7 +248,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         return $this->setPaymentErrorPage($message);
     }
 
-    private function handleTransactionAlreadyProcessed(string $token)
+    private function handleTransactionAlreadyProcessed(string $token): void
     {
         $this->logger->logInfo("Transacción ya se encontraba procesada. Token: {$token}");
 
@@ -283,7 +283,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     }
 
     // TODO: Validar si es necesario realizar esto.
-    private function validateData($cart)
+    private function validateData($cart): void
     {
         if (!$this->module->active) {
             $error = 'El módulo no esta activo';
@@ -324,7 +324,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
     }
 
-    protected function handleCartManipulated($webpayTransaction)
+    protected function handleCartManipulated($webpayTransaction): void
     {
         $error = 'El monto del carro ha cambiado, la transacción no fue completada, ningún
         cargo será realizado en su tarjeta. Por favor, reintente el pago.';
@@ -343,7 +343,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      *
      * @return void
      */
-    private function stopIfComingFromAnTimeoutErrorOnWebpay($sessionId)
+    private function stopIfComingFromAnTimeoutErrorOnWebpay($sessionId): void
     {
         $webpayTransaction = $this->getTransbankWebpayRestTransactionBySessionId($sessionId);
         $errorMessage = "Al parecer pasaron más de 15 minutos en el formulario de pago,
@@ -364,7 +364,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $this->setPaymentErrorPage($errorMessage);
     }
 
-    private function updateTransactionStatus($tx, $status, $tbkResponse)
+    private function updateTransactionStatus($tx, $status, $tbkResponse): void
     {
         $tx->status = $status;
         $tx->transbank_response = $tbkResponse;
