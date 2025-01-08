@@ -252,7 +252,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $this->logger->logInfo("Transacción rechazada por Transbank con token: {$token}");
 
         $webpayTransaction->transbank_response = json_encode($commitResponse);
-        $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
         $webpayTransaction->response_code = $commitResponse->getResponseCode();
         $webpayTransaction->card_number = $commitResponse->getCardNumber();
         $webpayTransaction->vci = $commitResponse->getVci();
