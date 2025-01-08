@@ -29,6 +29,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     const WEBPAY_TIMEOUT_FLOW_MESSAGE = 'Orden cancelada por inactividad del usuario en el formulario de pago. Por favor, reintente el pago.';
     const WEBPAY_ERROR_FLOW_MESSAGE = 'Orden cancelada por un error en el formulario de pago. Por favor, reintente el pago.';
     const WEBPAY_EXCEPTION_FLOW_MESSAGE = 'No se pudo procesar el pago. Si el problema persiste, contacte al comercio.';
+    const WEBPAY_CART_MANIPULATED_MESSAGE = "El monto del carro ha cambiado mientras se procesaba el pago, la transacción fue cancelad. Ningún cobro fue realizado.";
 
     protected $responseData = [];
 
@@ -119,7 +120,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
         $cart = $this->getCart($webpayTransaction->cart_id);
 
-        // TODO: Agregar flujo de carro manipulado
+        if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
+            $this->handleCartManipulated($webpayTransaction);
+            return;
+        }
 
         $transbankSdk = WebpayPlusFactory::create();
         $commitResponse = $transbankSdk->commitTransaction($token);
@@ -313,6 +317,17 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $this->setPaymentErrorPage($message);
     }
 
+    protected function handleCartManipulated($webpayTransaction): void
+    {
+        $this->logger->logInfo("El carro fue modificado mientras se procesaba el pago. Token: {$webpayTransaction->token}");
+
+        $this->handleAbortedTransaction(
+            $webpayTransaction,
+            TransbankWebpayRestTransaction::STATUS_FAILED,
+            self::WEBPAY_CART_MANIPULATED_MESSAGE
+        );
+    }
+
     // TODO: Validar si es necesario realizar esto.
     private function validateData($cart): void
     {
@@ -353,19 +368,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->logError($error);
             $this->throwErrorRedirect($error);
         }
-    }
-
-    protected function handleCartManipulated($webpayTransaction): void
-    {
-        $error = 'El monto del carro ha cambiado, la transacción no fue completada, ningún
-        cargo será realizado en su tarjeta. Por favor, reintente el pago.';
-        $message = 'Carro ha sido manipulado durante el proceso de pago';
-        $this->updateTransactionStatus(
-            $webpayTransaction,
-            TransbankWebpayRestTransaction::STATUS_FAILED,
-            json_encode(['error' => $message])
-        );
-        $this->setPaymentErrorPage($error);
     }
 
     private function updateTransactionStatus($tx, $status, $tbkResponse): void
