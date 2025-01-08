@@ -22,6 +22,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     const WEBPAY_TIMEOUT_FLOW = 'timeout';
     const WEBPAY_ABORTED_FLOW = 'aborted';
     const WEBPAY_ERROR_FLOW = 'error';
+    const WEBPAY_INVALID_FLOW = 'invalid';
 
     const WEBPAY_FAILED_FLOW_MESSAGE = 'Tu transacción no pudo ser autorizada. Ningún cobro fue realizado.';
     const WEBPAY_CANCELED_BY_USER_FLOW_MESSAGE = 'Orden cancelada por el usuario.';
@@ -76,6 +77,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             // TODO: Implementar flujo de error
             // $this->handleFlowError($request['token_ws']);
         }
+
+        if ($webpayFlow == self::WEBPAY_INVALID_FLOW) {
+            throw new EcommerceException('Flujo de pago no reconocido.');
+        }
     }
 
     private function getWebpayFlow(array $request): string
@@ -83,7 +88,11 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $tokenWs = $request['token_ws'] ?? null;
         $tbkToken = $request['TBK_TOKEN'] ?? null;
         $tbkIdSession = $request['TBK_ID_SESION'] ?? null;
-        $webpayFlow = self::WEBPAY_ERROR_FLOW;
+        $webpayFlow = self::WEBPAY_INVALID_FLOW;
+
+        if (isset($tokenWs) && isset($tbkToken)) {
+            return self::WEBPAY_ERROR_FLOW;
+        }
 
         if (isset($tbkIdSession) && isset($tbkToken) && !isset($tokenWs)) {
             $webpayFlow = self::WEBPAY_ABORTED_FLOW;
