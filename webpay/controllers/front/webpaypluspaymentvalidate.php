@@ -140,27 +140,23 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     {
         $this->logger->logInfo('Procesando transacción por flujo timeout => Orden de compra: ' . $buyOrder);
 
-        $message = self::WEBPAY_TIMEOUT_FLOW_MESSAGE;
-
         $webpayTransaction = $this->getTransbankWebpayRestTransactionByBuyOrder($buyOrder);
-        $token = $webpayTransaction->token;
 
         if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
-            $this->handleTransactionAlreadyProcessed($token);
+            $this->handleTransactionAlreadyProcessed($webpayTransaction->token);
             return;
         }
 
-        $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_TIMEOUT;
-        $webpayTransaction->save();
-
-        $this->handleAbortedTransaction($token, $message);
+        $this->handleAbortedTransaction(
+            $webpayTransaction,
+            TransbankWebpayRestTransaction::STATUS_TIMEOUT,
+            self::WEBPAY_TIMEOUT_FLOW_MESSAGE
+        );
     }
 
     private function handleFlowAborted(string $token): void
     {
         $this->logger->logInfo('Procesando transacción por flujo de pago abortado => Token: ' . $token);
-
-        $message = self::WEBPAY_CANCELED_BY_USER_FLOW_MESSAGE;
 
         $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
 
@@ -169,10 +165,11 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             return;
         }
 
-        $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER;
-        $webpayTransaction->save();
-
-        $this->handleAbortedTransaction($token, $message);
+        $this->handleAbortedTransaction(
+            $webpayTransaction,
+            TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER,
+            self::WEBPAY_CANCELED_BY_USER_FLOW_MESSAGE
+        );
     }
 
     private function handleFlowError(string $token)
@@ -186,10 +183,11 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             return;
         }
 
-        $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_ERROR;
-        $webpayTransaction->save();
-
-        $this->handleAbortedTransaction($token, self::WEBPAY_ERROR_FLOW_MESSAGE);
+        $this->handleAbortedTransaction(
+            $webpayTransaction,
+            TransbankWebpayRestTransaction::STATUS_ERROR,
+            self::WEBPAY_ERROR_FLOW_MESSAGE
+        );
     }
 
     private function handleAuthorizedTransaction(
@@ -250,8 +248,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $token = $webpayTransaction->token;
         $this->logger->logInfo("Transacción rechazada por Transbank con token: {$token}");
 
-        $message = self::WEBPAY_FAILED_FLOW_MESSAGE;
-
         $webpayTransaction->transbank_response = json_encode($commitResponse);
         $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_FAILED;
         $webpayTransaction->response_code = $commitResponse->getResponseCode();
@@ -265,13 +261,20 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             throw new EcommerceException($message);
         }
 
-        $this->setPaymentErrorPage(self::WEBPAY_FAILED_FLOW_MESSAGE);
+        $this->handleAbortedTransaction(
+            $webpayTransaction,
+            TransbankWebpayRestTransaction::STATUS_FAILED,
+            self::WEBPAY_FAILED_FLOW_MESSAGE
+        );
     }
 
-    private function handleAbortedTransaction(string $token, string $message): void
+    private function handleAbortedTransaction(TransbankWebpayRestTransaction $webpayTransaction, int $status, string $message): void
     {
-        $this->logger->logInfo('Error al procesar transacción por Transbank => token: ' . $token);
-        $this->logger->logInfo('Detalle: ' . $message);
+        $this->logger->logInfo("Error al procesar transacción por Transbank => token: {$webpayTransaction->token}");
+        $this->logger->logInfo("Detalle: {$message}");
+
+        $webpayTransaction->status = $status;
+        $webpayTransaction->save();
 
         $this->setPaymentErrorPage($message);
     }
