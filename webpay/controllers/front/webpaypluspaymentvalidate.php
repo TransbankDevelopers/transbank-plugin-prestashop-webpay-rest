@@ -74,8 +74,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
 
         if ($webpayFlow == self::WEBPAY_ERROR_FLOW) {
-            // TODO: Implementar flujo de error
-            // $this->handleFlowError($request['token_ws']);
+            $this->handleFlowError($request['token_ws']);
         }
 
         if ($webpayFlow == self::WEBPAY_INVALID_FLOW) {
@@ -174,6 +173,23 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $webpayTransaction->save();
 
         $this->handleAbortedTransaction($token, $message);
+    }
+
+    private function handleFlowError(string $token)
+    {
+        $this->logger->logInfo('Procesando transacción por flujo de error en formulario de pago => Token: ' . $token);
+
+        $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
+
+        if ($this->checkTransactionIsAlreadyProcessed($token)) {
+            $this->handleTransactionAlreadyProcessed($token);
+            return;
+        }
+
+        $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_ERROR;
+        $webpayTransaction->save();
+
+        $this->handleAbortedTransaction($token, self::WEBPAY_ERROR_FLOW_MESSAGE);
     }
 
     private function handleAuthorizedTransaction(
