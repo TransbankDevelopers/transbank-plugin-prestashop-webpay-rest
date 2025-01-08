@@ -25,10 +25,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     const WEBPAY_INVALID_FLOW = 'invalid';
 
     const WEBPAY_FAILED_FLOW_MESSAGE = 'Tu transacción no pudo ser autorizada. Ningún cobro fue realizado.';
-    const WEBPAY_CANCELED_BY_USER_FLOW_MESSAGE = 'Orden cancelada por el usuario.';
-    const WEBPAY_TIMEOUT_FLOW_MESSAGE = 'Orden cancelada por inactividad del usuario en el formulario de pago.';
-    const WEBPAY_ERROR_FLOW_MESSAGE = 'Orden cancelada por un error en el formulario de pago';
-    const WEBPAY_EXCEPTION_FLOW_MESSAGE = 'No se pudo procesar el pago.';
+    const WEBPAY_CANCELED_BY_USER_FLOW_MESSAGE = 'Orden cancelada por el usuario. Por favor, reintente el pago.';
+    const WEBPAY_TIMEOUT_FLOW_MESSAGE = 'Orden cancelada por inactividad del usuario en el formulario de pago. Por favor, reintente el pago.';
+    const WEBPAY_ERROR_FLOW_MESSAGE = 'Orden cancelada por un error en el formulario de pago. Por favor, reintente el pago.';
+    const WEBPAY_EXCEPTION_FLOW_MESSAGE = 'No se pudo procesar el pago. Si el problema persiste, contacte al comercio.';
 
     protected $responseData = [];
 
@@ -52,8 +52,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->handleRequest($request);
         } catch (\Exception | \Error $e) {
             $this->logger->logError('Error en el proceso de validación de pago: ' . $e->getMessage());
-            // TODO: mejorar mensaje de error. Trabajar con uno genérico que llame a reintentar la operación o contactar al comercio en caso de problemas
-            $this->setPaymentErrorPage($e->getMessage());
+            $this->setPaymentErrorPage(self::WEBPAY_EXCEPTION_FLOW_MESSAGE);
         }
     }
 
