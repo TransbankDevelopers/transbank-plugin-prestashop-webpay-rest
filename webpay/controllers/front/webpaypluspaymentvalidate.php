@@ -428,6 +428,22 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     }
 
     /**
+     * Get the status ID for the order when the payment is completed.
+     * 
+     * @return string
+     */
+    private function getOrderStatusAfterPayment(): string
+    {
+        return Configuration::get(
+            'WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT',
+            null,
+            null,
+            null,
+            Configuration::get('PS_OS_PREPARATION')
+        );
+    }
+
+    /**
      * Checks if the transaction is already processed by the token.
      * 
      * @param string $token The transaction token.
@@ -443,22 +459,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
 
         return $webpayTransaction->status != TransbankWebpayRestTransaction::STATUS_INITIALIZED;
-    }
-
-    /**
-     * Get the status ID for the order when the payment is completed.
-     * 
-     * @return string
-     */
-    private function getOrderStatusAfterPayment(): string
-    {
-        return Configuration::get(
-            'WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT',
-            null,
-            null,
-            null,
-            Configuration::get('PS_OS_PREPARATION')
-        );
     }
 
     /**
