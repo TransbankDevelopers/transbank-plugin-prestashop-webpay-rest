@@ -167,13 +167,6 @@ trait InteractsWithWebpay
         $this->setWebpayOrderAfterPayment($this->getDefaultWebpayOrderAfterPayment());
     }
 
-    protected function getWebpayOkStatus(){
-        $OKStatus = Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
-        if ($OKStatus === '0') {
-            $OKStatus = Configuration::get('PS_OS_PREPARATION');
-        }
-        return $OKStatus;
-    }
 
     protected function configWebpayIsOk()
     {

@@ -14,7 +14,6 @@ use Transbank\Plugin\Exceptions\EcommerceException;
  */
 class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModuleFrontController
 {
-    use InteractsWithWebpay;
     use InteractsWithWebpayDb;
 
     const WEBPAY_NORMAL_FLOW = 'normal';
@@ -222,11 +221,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
         $customer = $this->getCustomer($cart->id_customer);
         $currency = Context::getContext()->currency;
-        $okStatus = $this->getWebpayOkStatus();
 
         $this->module->validateOrder(
             $cart->id,
-            $okStatus,
+            $this->getOrderStatusAfterPayment(),
             $webpayTransaction->amount,
             $this->module->displayName,
             'Pago autorizado',
@@ -349,6 +347,17 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
 
         return $webpayTransaction->status != TransbankWebpayRestTransaction::STATUS_INITIALIZED;
+    }
+
+    private function getOrderStatusAfterPayment(): string
+    {
+        return Configuration::get(
+            'WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT',
+            null,
+            null,
+            null,
+            Configuration::get('PS_OS_PREPARATION')
+        );
     }
 
     private function checkTransactionIsAlreadyProcessedByStatus(string $status): bool
