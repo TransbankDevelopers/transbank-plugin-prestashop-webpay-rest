@@ -1,6 +1,5 @@
 <?php
 
-use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
