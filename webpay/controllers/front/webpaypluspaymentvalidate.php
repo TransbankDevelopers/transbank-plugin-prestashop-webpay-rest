@@ -50,6 +50,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $this->logger->logInfo('Request: method -> ' . $requestMethod);
             $this->logger->logInfo('Request: payload -> ' . json_encode($request));
 
+            if (!$this->module->active) {
+                throw new EcommerceException('El módulo de Webpay no está activo.');
+            }
+
             $this->handleRequest($request);
         } catch (\Exception | \Error $e) {
             $this->logger->logError('Error en el proceso de validación de pago: ' . $e->getMessage());
