@@ -4,13 +4,14 @@ use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 
 /**
- * Class WebPayWebpayplusPaymentValidateModuleFrontController.
+ * This class handles the validation of payment responses from the Webpay Plus payment gateway.
+ * It processes the return flows from Webpay (success, timeout, aborted, error) and manages
+ * Webpay transactions in the PrestaShop environment.
  */
 class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModuleFrontController
 {
@@ -31,12 +32,19 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
     protected $responseData = [];
 
+    /**
+     * Constructor initializes the logger.
+     */
     public function __construct()
     {
         parent::__construct();
         $this->logger = TbkFactory::createLogger();
     }
 
+    /**
+     * Main entry point for processing the payment validation request.
+     * Determines the payment flow and handles it accordingly.
+     */
     public function initContent(): void
     {
         parent::initContent();
@@ -60,6 +68,14 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
     }
 
+    /**
+     * Handles the payment flow based on the incoming request.
+     * 
+     * @param array $request The request data from the payment gateway.
+     * 
+     * @throws EcommerceException If the payment flow is not recognized.
+     * @return void
+     */
     private function handleRequest(array $request): void
     {
         $webpayFlow = $this->getWebpayFlow($request);
@@ -85,6 +101,12 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
     }
 
+    /**
+     * Determines the type of payment flow based on the request data.
+     * 
+     * @param array $request The request data from the payment gateway.
+     * @return string The type of payment flow.
+     */
     private function getWebpayFlow(array $request): string
     {
         $tokenWs = $request['token_ws'] ?? null;
@@ -111,6 +133,12 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         return $webpayFlow;
     }
 
+    /**
+     * Processes the normal payment flow. The result of the transaction can be approved or rejected.
+     * 
+     * @param string $token The transaction token.
+     * @return void
+     */
     private function handleNormalFlow(string $token): void
     {
         $this->logger->logInfo("Procesando transacción por flujo Normal => token: {$token}");
@@ -142,6 +170,12 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         }
     }
 
+    /**
+     * Processes the payment flow when the transaction times out.
+     * 
+     * @param string $buyOrder The buy order identifier.
+     * @return void
+     */
     private function handleFlowTimeout(string $buyOrder): void
     {
         $this->logger->logInfo("Procesando transacción por flujo timeout => Orden de compra: {$buyOrder}");
@@ -160,6 +194,12 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         );
     }
 
+    /**
+     * Processes the payment flow when the user aborts the transaction.
+     * 
+     * @param string $token The transaction token.
+     * @return void
+     */
     private function handleFlowAborted(string $token): void
     {
         $this->logger->logInfo("Procesando transacción por flujo de pago abortado => Token: {$token}");
@@ -178,6 +218,12 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         );
     }
 
+    /**
+     * Processes the payment flow when an error occurs during the transaction.
+     * 
+     * @param string $token The transaction token.
+     * @return void
+     */
     private function handleFlowError(string $token): void
     {
         $this->logger->logInfo(
@@ -198,6 +244,16 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         );
     }
 
+    /**
+     * Handles the case when the transaction is authorized by Transbank.
+     * 
+     * @param Cart $cart The cart object.
+     * @param PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction $webpayTransaction The Webpay transaction object.
+     * @param Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse $commitResponse The commit response from Transbank.
+     * 
+     * @throws Transbank\Plugin\Exceptions\EcommerceException
+     * @return void
+     */
     private function handleAuthorizedTransaction(
         Cart $cart,
         TransbankWebpayRestTransaction $webpayTransaction,
@@ -247,6 +303,16 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $this->redirectToPaidSuccessPaymentPage($cart);
     }
 
+    /**
+     * Handles the case when the transaction is unauthorized by Transbank.
+     * 
+     * @param Cart $cart The cart object.
+     * @param PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction $webpayTransaction The Webpay transaction object.
+     * @param Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse $commitResponse The commit response from Transbank.
+     * 
+     * @throws Transbank\Plugin\Exceptions\EcommerceException
+     * @return void
+     */
     private function handleUnauthorizedTransaction(
         Cart $cart,
         TransbankWebpayRestTransaction $webpayTransaction,
@@ -274,6 +340,15 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         );
     }
 
+    /**
+     * Handles the case when the transaction is aborted.
+     * 
+     * @param PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction $webpayTransaction
+     * @param int $status The status ID for the transaction.
+     * @param string $message The error message.
+     * 
+     * @return void
+     */
     private function handleAbortedTransaction(
         TransbankWebpayRestTransaction $webpayTransaction,
         int $status,
@@ -290,6 +365,13 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $this->setPaymentErrorPage($message);
     }
 
+    /**
+     * Handles the case when the transaction is already processed.
+     * 
+     * @param string $token The transaction token.
+     * 
+     * @return void
+     */
     private function handleTransactionAlreadyProcessed(string $token): void
     {
         $this->logger->logInfo("Transacción ya se encontraba procesada. Token: {$token}");
@@ -325,6 +407,13 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $this->setPaymentErrorPage($message);
     }
 
+    /**
+     * Handles the case when the cart was manipulated during the payment process.
+     * 
+     * @param PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction $webpayTransaction The Webpay transaction object.
+     * 
+     * @return void
+     */
     private function handleCartManipulated($webpayTransaction): void
     {
         $this->logger->logInfo(
@@ -338,6 +427,13 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         );
     }
 
+    /**
+     * Checks if the transaction is already processed by the token.
+     * 
+     * @param string $token The transaction token.
+     * 
+     * @return bool
+     */
     private function checkTransactionIsAlreadyProcessed(string $token): bool
     {
         $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
@@ -349,6 +445,11 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         return $webpayTransaction->status != TransbankWebpayRestTransaction::STATUS_INITIALIZED;
     }
 
+    /**
+     * Get the status ID for the order when the payment is completed.
+     * 
+     * @return string
+     */
     private function getOrderStatusAfterPayment(): string
     {
         return Configuration::get(
@@ -360,6 +461,13 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         );
     }
 
+    /**
+     * Checks if the transaction is already processed by the status.
+     * 
+     * @param string $status The transaction status.
+     * 
+     * @return bool
+     */
     private function checkTransactionIsAlreadyProcessedByStatus(string $status): bool
     {
         return $status != TransbankWebpayRestTransaction::STATUS_INITIALIZED;
