@@ -181,7 +181,9 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
     private function handleFlowError(string $token): void
     {
-        $this->logger->logInfo("Procesando transacción por flujo de error en formulario de pago => Token: {$token}");
+        $this->logger->logInfo(
+            "Procesando transacción por flujo de error en formulario de pago => Token: {$token}"
+        );
 
         $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
 
@@ -274,9 +276,14 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         );
     }
 
-    private function handleAbortedTransaction(TransbankWebpayRestTransaction $webpayTransaction, int $status, string $message): void
-    {
-        $this->logger->logInfo("Error al procesar transacción por Transbank => token: {$webpayTransaction->token}");
+    private function handleAbortedTransaction(
+        TransbankWebpayRestTransaction $webpayTransaction,
+        int $status,
+        string $message
+    ): void {
+        $this->logger->logInfo(
+            "Error al procesar transacción por Transbank => token: {$webpayTransaction->token}"
+        );
         $this->logger->logInfo("Detalle: {$message}");
 
         $webpayTransaction->status = $status;
@@ -322,7 +329,9 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
     private function handleCartManipulated($webpayTransaction): void
     {
-        $this->logger->logInfo("El carro fue modificado mientras se procesaba el pago. Token: {$webpayTransaction->token}");
+        $this->logger->logInfo(
+            "El carro fue modificado mientras se procesaba el pago. Token: {$webpayTransaction->token}"
+        );
 
         $this->handleAbortedTransaction(
             $webpayTransaction,
