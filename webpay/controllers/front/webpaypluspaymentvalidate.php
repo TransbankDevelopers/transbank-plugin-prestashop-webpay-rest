@@ -327,55 +327,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         );
     }
 
-    // TODO: Validar si es necesario realizar esto.
-    private function validateData($cart): void
-    {
-        if (!$this->module->active) {
-            $error = 'El módulo no esta activo';
-            $this->logError($error);
-            $this->throwErrorRedirect($error);
-        }
-
-        if ($cart->id == null) {
-            $error = 'Cart id was null. Redirect to confirmation page of the last order';
-            $this->logError($error);
-            $id_usuario = Context::getContext()->customer->id;
-            $sql = 'SELECT id_cart FROM ' . _DB_PREFIX_ . "cart p WHERE p.id_customer = $id_usuario ORDER BY p.id_cart DESC";
-            $cart->id = SqlHelper::getValue($sql);
-            $customer = $this->getCustomer($cart->id_customer);
-            Tools::redirect('index.php?controller=order-confirmation&id_cart=' . (int) $cart->id . '&id_module='
-                . (int) $this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
-        }
-
-        if ($cart->id_customer == 0) {
-            $error = 'id_customer es cero';
-            $this->logError($error);
-            $this->throwErrorRedirect($error);
-        } elseif ($cart->id_address_delivery == 0) {
-            $error = 'id_address_delivery es cero';
-            $this->logError($error);
-            $this->throwErrorRedirect($error);
-        } elseif ($cart->id_address_invoice == 0) {
-            $error = 'id_address_invoice es cero';
-            $this->logError($error);
-            $this->throwErrorRedirect($error);
-        }
-
-        $customer = $this->getCustomer($cart->id_customer);
-        if (!Validate::isLoadedObject($customer)) {
-            $error = 'Customer not load';
-            $this->logError($error);
-            $this->throwErrorRedirect($error);
-        }
-    }
-
-    private function updateTransactionStatus($tx, $status, $tbkResponse): void
-    {
-        $tx->status = $status;
-        $tx->transbank_response = $tbkResponse;
-        $tx->save();
-    }
-
     private function checkTransactionIsAlreadyProcessed(string $token): bool
     {
         $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
