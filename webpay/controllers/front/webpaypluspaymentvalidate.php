@@ -46,9 +46,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         try {
             $requestMethod = $_SERVER['REQUEST_METHOD'];
             $request = $requestMethod === 'POST' ? $_POST : $_GET;
+            $requestPayload = json_encode($request);
             $this->logger->logInfo('Procesando retorno desde formulario de Webpay.');
-            $this->logger->logInfo('Request: method -> ' . $requestMethod);
-            $this->logger->logInfo('Request: payload -> ' . json_encode($request));
+            $this->logger->logInfo("Request method: {$requestMethod}");
+            $this->logger->logInfo("Request payload: {$requestPayload}");
 
             if (!$this->module->active) {
                 throw new EcommerceException('El módulo de Webpay no está activo.');
