@@ -114,7 +114,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
     private function handleNormalFlow(string $token): void
     {
-        $this->logger->logInfo('Procesando transacción por flujo Normal => token: ' . $token);
+        $this->logger->logInfo("Procesando transacción por flujo Normal => token: {$token}");
 
         if ($this->checkTransactionIsAlreadyProcessed($token)) {
             $this->handleTransactionAlreadyProcessed($token);
@@ -145,7 +145,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
     private function handleFlowTimeout(string $buyOrder): void
     {
-        $this->logger->logInfo('Procesando transacción por flujo timeout => Orden de compra: ' . $buyOrder);
+        $this->logger->logInfo("Procesando transacción por flujo timeout => Orden de compra: {$buyOrder}");
 
         $webpayTransaction = $this->getTransbankWebpayRestTransactionByBuyOrder($buyOrder);
 
@@ -163,7 +163,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
     private function handleFlowAborted(string $token): void
     {
-        $this->logger->logInfo('Procesando transacción por flujo de pago abortado => Token: ' . $token);
+        $this->logger->logInfo("Procesando transacción por flujo de pago abortado => Token: {$token}");
 
         $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
 
@@ -179,9 +179,9 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         );
     }
 
-    private function handleFlowError(string $token)
+    private function handleFlowError(string $token): void
     {
-        $this->logger->logInfo('Procesando transacción por flujo de error en formulario de pago => Token: ' . $token);
+        $this->logger->logInfo("Procesando transacción por flujo de error en formulario de pago => Token: {$token}");
 
         $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
 
@@ -293,7 +293,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $status = $webpayTransaction->status;
         $message = self::WEBPAY_EXCEPTION_FLOW_MESSAGE;
 
-        $this->logger->logInfo('Estado de la transacción => ' . $status);
+        $this->logger->logInfo("Estado de la transacción => {$status}");
 
         if ($status == TransbankWebpayRestTransaction::STATUS_APPROVED) {
             $cart = $this->getCart($webpayTransaction->cart_id);
