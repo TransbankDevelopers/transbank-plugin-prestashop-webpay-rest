@@ -70,7 +70,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
     /**
      * Handles the payment flow based on the incoming request.
-     * 
+     *
      * @param array $request The request data from the payment gateway.
      *
      * @throws EcommerceException If the payment flow is not recognized.
@@ -410,7 +410,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      * Handles the case when the cart was manipulated during the payment process.
      *
      * @param PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction $webpayTransaction The Webpay transaction object.
-     * 
+     *
      * @return void
      */
     private function handleCartManipulated($webpayTransaction): void
