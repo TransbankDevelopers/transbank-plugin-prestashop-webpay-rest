@@ -166,7 +166,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
                 $commitResponse
             );
         } else {
-            $this->handleUnauthorizedTransaction($cart, $webpayTransaction, $commitResponse);
+            $this->handleUnauthorizedTransaction($webpayTransaction, $commitResponse);
         }
     }
 
@@ -314,7 +314,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      * @return void
      */
     private function handleUnauthorizedTransaction(
-        Cart $cart,
         TransbankWebpayRestTransaction $webpayTransaction,
         TransactionCommitResponse $commitResponse
     ): void {
