@@ -320,7 +320,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $this->setPaymentErrorPage($message);
     }
 
-    protected function handleCartManipulated($webpayTransaction): void
+    private function handleCartManipulated($webpayTransaction): void
     {
         $this->logger->logInfo("El carro fue modificado mientras se procesaba el pago. Token: {$webpayTransaction->token}");
 
