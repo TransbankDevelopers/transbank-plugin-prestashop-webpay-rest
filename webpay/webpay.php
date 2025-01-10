@@ -99,8 +99,9 @@ class WebPay extends PaymentModule
         }
     }
 
-    private function getFormatTransbankWebpayRestTransactionByOrderId($orderId){
-        $webpayTransaction = $this->getTransbankWebpayRestTransactionByOrderId($orderId);
+    private function getFormatTransbankWebpayRestTransactionByOrderId($orderId)
+    {
+        $webpayTransaction = $this->getTransactionWebpayApprovedByOrderId($orderId);
         if (!$webpayTransaction) {
             $this->logError('Showing confirmation page, but there is no webpayTransaction object, so we cant find an approved transaction for this order.');
         }

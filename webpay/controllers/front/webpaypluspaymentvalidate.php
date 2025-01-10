@@ -148,7 +148,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             return;
         }
 
-        $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
+        $webpayTransaction = $this->getTransactionWebpayByToken($token);
         $cart = $this->getCart($webpayTransaction->cart_id);
 
         if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
@@ -180,7 +180,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     {
         $this->logger->logInfo("Procesando transacción por flujo timeout => Orden de compra: {$buyOrder}");
 
-        $webpayTransaction = $this->getTransbankWebpayRestTransactionByBuyOrder($buyOrder);
+        $webpayTransaction = $this->getTransactionWebpayByBuyOrder($buyOrder);
 
         if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
             $this->handleTransactionAlreadyProcessed($webpayTransaction->token);
@@ -204,7 +204,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     {
         $this->logger->logInfo("Procesando transacción por flujo de pago abortado => Token: {$token}");
 
-        $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
+        $webpayTransaction = $this->getTransactionWebpayByToken($token);
 
         if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
             $this->handleTransactionAlreadyProcessed($token);
@@ -230,7 +230,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             "Procesando transacción por flujo de error en formulario de pago => Token: {$token}"
         );
 
-        $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
+        $webpayTransaction = $this->getTransactionWebpayByToken($token);
 
         if ($this->checkTransactionIsAlreadyProcessed($token)) {
             $this->handleTransactionAlreadyProcessed($token);
@@ -375,7 +375,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     {
         $this->logger->logInfo("Transacción ya se encontraba procesada. Token: {$token}");
 
-        $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
+        $webpayTransaction = $this->getTransactionWebpayByToken($token);
         $status = $webpayTransaction->status;
         $message = self::WEBPAY_EXCEPTION_FLOW_MESSAGE;
 
@@ -451,7 +451,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      */
     private function checkTransactionIsAlreadyProcessed(string $token): bool
     {
-        $webpayTransaction = $this->getTransbankWebpayRestTransactionByToken($token);
+        $webpayTransaction = $this->getTransactionWebpayByToken($token);
 
         if (is_null($webpayTransaction)) {
             return false;
