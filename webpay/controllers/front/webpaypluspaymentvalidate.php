@@ -271,7 +271,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
         if (!$saved) {
             $message = "No se pudo actualizar la transacción en la tabla webpay_transactions con token: {$token}";
-            $this->logError($message);
             throw new EcommerceException($message);
         }
 
@@ -328,7 +327,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
         if (!$saved) {
             $message = "No se pudo actualizar la transacción en la tabla webpay_transactions con token: {$token}";
-            $this->logError($message);
             throw new EcommerceException($message);
         }
 
