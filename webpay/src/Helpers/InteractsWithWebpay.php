@@ -9,6 +9,7 @@ use Media;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\Webpay\Options;
 use PrestaShop\Module\WebpayPlus\Utils\StringUtils;
+use Transbank\Plugin\Helpers\TbkConstants;
 
 /**
  * Trait InteractsWithWebpay.
@@ -17,7 +18,7 @@ trait InteractsWithWebpay
 {
     protected function getWebpayPaymentOption($base, $context)
     {
-        if ($this->getWebpayActive() != 1) {
+        if ($this->getWebpayActive() != TbkConstants::ACTIVE_MODULE) {
             return [];
         }
         $WPOption = new PaymentOption();
@@ -160,7 +161,7 @@ trait InteractsWithWebpay
 
     protected function loadDefaultWebpay()
     {
-        $this->setWebpayActive($this->getDefaultWebpaykActive());
+        $this->setWebpayActive(TbkConstants::ACTIVE_MODULE);
         $this->setWebpayEnvironment($this->getDefaultWebpayEnvironment());
         $this->setWebpayCommerceCode($this->getDefaultWebpayCommerceCode());
         $this->setWebpayApiKey($this->getDefaultWebpayApiKey());
