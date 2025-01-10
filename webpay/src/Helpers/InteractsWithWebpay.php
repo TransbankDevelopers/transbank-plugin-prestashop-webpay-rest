@@ -132,42 +132,14 @@ trait InteractsWithWebpay
         Configuration::updateValue('WEBPAY_ACTIVE', $value);
     }
 
-    protected function getDefaultWebpayCommerceCode()
-    {
-        return WebpayPlus::DEFAULT_COMMERCE_CODE;
-    }
-
-    protected function getDefaultWebpayApiKey()
-    {
-        return WebpayPlus::DEFAULT_API_KEY;
-    }
-
-    protected function getDefaultWebpayEnvironment()
-    {
-        return Options::DEFAULT_INTEGRATION_TYPE;
-    }
-
-    protected function getDefaultWebpaykActive()
-    {
-        return 1;
-    }
-
-    protected function getDefaultWebpayOrderAfterPayment()
-    {
-        // We assume that the default state is "PREPARATION" and then set it
-        // as the default order status after payment for our plugin
-        return Configuration::get('PS_OS_PREPARATION');
-    }
-
     protected function loadDefaultWebpay()
     {
         $this->setWebpayActive(TbkConstants::ACTIVE_MODULE);
-        $this->setWebpayEnvironment($this->getDefaultWebpayEnvironment());
-        $this->setWebpayCommerceCode($this->getDefaultWebpayCommerceCode());
-        $this->setWebpayApiKey($this->getDefaultWebpayApiKey());
-        $this->setWebpayOrderAfterPayment($this->getDefaultWebpayOrderAfterPayment());
+        $this->setWebpayEnvironment(Options::DEFAULT_INTEGRATION_TYPE);
+        $this->setWebpayCommerceCode(WebpayPlus::DEFAULT_COMMERCE_CODE);
+        $this->setWebpayApiKey(WebpayPlus::DEFAULT_API_KEY);
+        $this->setWebpayOrderAfterPayment(Configuration::get('PS_OS_PREPARATION'));
     }
-
 
     protected function configWebpayIsOk()
     {
