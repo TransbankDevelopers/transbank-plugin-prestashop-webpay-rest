@@ -10,13 +10,21 @@ trait InteractsWithWebpayDb
 {
     public function getTransactionByOrderIdAndStatus($orderId, $status)
     {
-        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `order_id` = "' . $orderId . '" AND status = ' . $status;
+        $sanitizedTableName = pSQL(_DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME);
+        $sanitizedOrderId = pSQL($orderId);
+        $sanitizedStatus = pSQL($status);
+
+        $sql = "SELECT * FROM {$sanitizedTableName} WHERE `order_id` = '{$sanitizedOrderId}' AND `status` = {$sanitizedStatus}";
         return \Db::getInstance()->getRow($sql);
     }
 
     public function getTransactionApprovedByCartId($cartId)
     {
-        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `cart_id` = "' . pSQL($cartId) . '" and status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED;
+        $sanitizedTableName = pSQL(_DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME);
+        $sanitizedStatus = pSQL(TransbankWebpayRestTransaction::STATUS_APPROVED);
+        $sanitizedCartId = pSQL($cartId);
+
+        $sql = "SELECT * FROM {$sanitizedTableName} WHERE `cart_id` = '{$sanitizedCartId}' AND `status` = {$sanitizedStatus}";
         return \Db::getInstance()->getRow($sql);
     }
 
@@ -33,7 +41,10 @@ trait InteractsWithWebpayDb
 
     public function getTransbankWebpayRestTransactionByToken($token)
     {
-        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `token` = "' . pSQL($token) . '"';
+        $sanitizedTableName = pSQL(_DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME);
+        $sanitizedToken = pSQL($token);
+
+        $sql = "SELECT * FROM {$sanitizedTableName} WHERE `token` = '{$sanitizedToken}'";
         $result = \Db::getInstance()->getRow($sql);
         if ($result === false) {
             return null;
@@ -43,7 +54,10 @@ trait InteractsWithWebpayDb
 
     public function getTransbankWebpayRestTransactionBySessionId($sessionId): ?TransbankWebpayRestTransaction
     {
-        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME . ' WHERE `session_id` = "' . $sessionId . '"';
+        $sanitizedTableName = pSQL(_DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME);
+        $sanitizedSessionId = pSQL($sessionId);
+
+        $sql = "SELECT * FROM {$sanitizedTableName} WHERE `session_id` = '{$sanitizedSessionId}'";
         $result = \Db::getInstance()->getRow($sql);
         if ($result === false) {
             return null;
