@@ -66,7 +66,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             $this->logger->logError("Error al crear la transacción: " . $e->getMessage());
             $this->setPaymentErrorPage(
                 "Se ha producido un error al momento de iniciar el pago. " .
-                "Por favor, inténtalo nuevamente. Si el problema persiste, contacte al comercio."
+                "Por favor, inténtelo nuevamente. Si el problema persiste, contacte al comercio."
             );
         }
     }
