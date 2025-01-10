@@ -18,16 +18,6 @@ trait InteractsWithWebpayDb
         return \Db::getInstance()->getRow($sql);
     }
 
-    public function getTransactionApprovedByCartId($cartId)
-    {
-        $sanitizedTableName = pSQL(_DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME);
-        $sanitizedStatus = pSQL(TransbankWebpayRestTransaction::STATUS_APPROVED);
-        $sanitizedCartId = pSQL($cartId);
-
-        $sql = "SELECT * FROM {$sanitizedTableName} WHERE `cart_id` = '{$sanitizedCartId}' AND `status` = {$sanitizedStatus}";
-        return \Db::getInstance()->getRow($sql);
-    }
-
     public function getTransactionApprovedByOrderId($orderId)
     {
         return $this->getTransactionByOrderIdAndStatus($orderId, TransbankWebpayRestTransaction::STATUS_APPROVED);
@@ -45,19 +35,6 @@ trait InteractsWithWebpayDb
         $sanitizedToken = pSQL($token);
 
         $sql = "SELECT * FROM {$sanitizedTableName} WHERE `token` = '{$sanitizedToken}'";
-        $result = \Db::getInstance()->getRow($sql);
-        if ($result === false) {
-            return null;
-        }
-        return new TransbankWebpayRestTransaction($result['id']);
-    }
-
-    public function getTransbankWebpayRestTransactionBySessionId($sessionId): ?TransbankWebpayRestTransaction
-    {
-        $sanitizedTableName = pSQL(_DB_PREFIX_ . TransbankWebpayRestTransaction::TABLE_NAME);
-        $sanitizedSessionId = pSQL($sessionId);
-
-        $sql = "SELECT * FROM {$sanitizedTableName} WHERE `session_id` = '{$sanitizedSessionId}'";
         $result = \Db::getInstance()->getRow($sql);
         if ($result === false) {
             return null;
