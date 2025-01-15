@@ -8,6 +8,7 @@ use PrestaShop\Module\WebpayPlus\Hooks\DisplayAdminOrderSide;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
+use PrestaShop\Module\WebpayPlus\Hooks\DisplayPaymentReturn;
 use Transbank\Plugin\Helpers\TbkConstants;
 use PrestaShop\Module\WebpayPlus\Utils\Template;
 
@@ -70,6 +71,7 @@ class WebPay extends PaymentModule
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('displayBackOfficeHeader') &&
+            $this->registerHook('displayHeader') &&
             $this->registerHook('displayPaymentReturn') &&
             $this->registerHook('displayAdminOrderSide');
     }
@@ -95,7 +97,25 @@ class WebPay extends PaymentModule
     public function hookDisplayBackOfficeHeader($params)
     {
         if ($this->context->controller->controller_name === 'AdminOrders') {
-            $this->context->controller->addCSS('modules/'.$this->name.'/views/css/admin.css');
+            $this->context->controller->addCSS('modules/' . $this->name . '/views/css/admin.css');
+        }
+    }
+
+    public function hookDisplayHeader($params)
+    {
+        if ($this->context->controller->php_self === 'order-confirmation') {
+            $this->context->controller->addCSS('modules/' . $this->name . '/views/css/front.css');
+        }
+    }
+
+    public function hookDisplayPaymentReturn($params)
+    {
+        try {
+            $this->logInfo('Ejecutando hookDisplayPaymentReturn');
+            $displayPaymentReturn = new DisplayPaymentReturn();
+            return $displayPaymentReturn->execute($params);
+        } catch (Exception | Error $e) {
+            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
         }
     }
 
