@@ -91,14 +91,14 @@ class WebPay extends PaymentModule
         return $displayAdminOrderSide->execute($params);
     }
 
-    public function hookDisplayBackOfficeHeader($params)
+    public function hookDisplayBackOfficeHeader()
     {
         if ($this->context->controller->controller_name === 'AdminOrders') {
             $this->context->controller->addCSS('modules/' . $this->name . '/views/css/admin.css');
         }
     }
 
-    public function hookDisplayHeader($params)
+    public function hookDisplayHeader()
     {
         if ($this->context->controller->php_self === 'order-confirmation') {
             $this->context->controller->addCSS('modules/' . $this->name . '/views/css/front.css');
