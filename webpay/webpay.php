@@ -85,7 +85,7 @@ class WebPay extends PaymentModule
         return $installer->installInscriptionsTable();
     }
 
-    public function hookdisplayAdminOrderSide($params): ?string
+    public function hookDisplayAdminOrderSide($params): ?string
     {
         $displayAdminOrderSide = new DisplayAdminOrderSide();
         return $displayAdminOrderSide->execute($params);
