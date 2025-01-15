@@ -1,0 +1,48 @@
+.tbk_voucher {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 18px;
+    width: 400px;
+    margin-block: 15px;
+}
+
+.tbk_voucher > .tbk_voucher-header {
+    border-bottom: 1px solid #ddd;
+    width: 100%;
+    text-align: center;
+}
+
+.tbk_voucher-header > h2 {
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.tbk_voucher > .tbk_voucher-body {
+    padding: 10px 20px;
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tbk_voucher-body > .tbk_voucher-field {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tbk_voucher-body > .tbk_voucher-field:last-child {
+    border-top: 1px dashed #ddd;
+}
+
+.tbk_voucher-body > .tbk_voucher-field > span {
+    margin: 0px;
+}
+
+.tbk_voucher-body > .tbk_voucher-field > span:first-child {
+    font-weight: bold;
+}
+
+.tbk_voucher-field > h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
