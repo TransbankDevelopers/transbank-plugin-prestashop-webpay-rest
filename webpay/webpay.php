@@ -22,6 +22,15 @@ class WebPay extends PaymentModule
     public $log;
     public $title = 'Pago con tarjetas de crédito o Redcompra';
 
+    private const MODULE_HOOKS = [
+        'paymentOptions',
+        'paymentReturn',
+        'displayBackOfficeHeader',
+        'displayHeader',
+        'displayPaymentReturn',
+        'displayAdminOrderSide'
+    ];
+
     public function __construct()
     {
         $this->name = 'webpay';
@@ -64,13 +73,7 @@ class WebPay extends PaymentModule
         $this->installTab();
 
         /* Si algo falla aqui se muestran los errores */
-        return $result &&
-            $this->registerHook('paymentOptions') &&
-            $this->registerHook('paymentReturn') &&
-            $this->registerHook('displayBackOfficeHeader') &&
-            $this->registerHook('displayHeader') &&
-            $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('displayAdminOrderSide');
+        return $result && $this->registerHook(self::MODULE_HOOKS);
     }
 
     protected function installWebpayTable()
