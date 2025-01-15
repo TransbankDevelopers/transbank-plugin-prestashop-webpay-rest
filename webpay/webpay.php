@@ -119,7 +119,7 @@ class WebPay extends PaymentModule
     public function hookPayment($params): ?string
     {
         if (!$this->active) {
-            return;
+            return null;
         }
 
         $this->logInfo('*****************************************************');
@@ -146,10 +146,10 @@ class WebPay extends PaymentModule
         $this->logInfo('-----------------------------------------------------');
 
         if (!$this->active) {
-            return;
+            return null;
         }
         if (!$this->checkCurrency($params['cart'])) {
-            return;
+            return null;
         }
         $payment_options = [];
         if ($this->configWebpayIsOk()) {
