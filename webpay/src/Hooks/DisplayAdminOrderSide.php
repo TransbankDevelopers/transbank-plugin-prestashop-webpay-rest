@@ -49,7 +49,7 @@ class DisplayAdminOrderSide
             return null;
         }
 
-        $transbankTransaction = $this->getTransbankWebpayRestTransactionByOrderId($orderId);
+        $transbankTransaction = $this->getTransactionWebpayApprovedByOrderId($orderId);
         $transbankResponse = $transbankTransaction->transbank_response;
 
         if (!isset($transbankResponse)) {
