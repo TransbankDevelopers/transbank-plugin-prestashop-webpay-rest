@@ -85,27 +85,27 @@ class WebPay extends PaymentModule
         return $installer->installInscriptionsTable();
     }
 
-    public function hookdisplayAdminOrderSide($params)
+    public function hookdisplayAdminOrderSide($params): ?string
     {
         $displayAdminOrderSide = new DisplayAdminOrderSide();
         return $displayAdminOrderSide->execute($params);
     }
 
-    public function hookDisplayBackOfficeHeader()
+    public function hookDisplayBackOfficeHeader(): void
     {
         if ($this->context->controller->controller_name === 'AdminOrders') {
             $this->context->controller->addCSS('modules/' . $this->name . '/views/css/admin.css');
         }
     }
 
-    public function hookDisplayHeader()
+    public function hookDisplayHeader(): void
     {
         if ($this->context->controller->php_self === 'order-confirmation') {
             $this->context->controller->addCSS('modules/' . $this->name . '/views/css/front.css');
         }
     }
 
-    public function hookDisplayPaymentReturn($params)
+    public function hookDisplayPaymentReturn($params): ?string
     {
         try {
             $this->logInfo('Ejecutando hookDisplayPaymentReturn');
@@ -116,7 +116,7 @@ class WebPay extends PaymentModule
         }
     }
 
-    public function hookPayment($params)
+    public function hookPayment($params): ?string
     {
         if (!$this->active) {
             return;
@@ -137,7 +137,7 @@ class WebPay extends PaymentModule
     /*
         Muestra la opciones de pago disponibles
     */
-    public function hookPaymentOptions($params)
+    public function hookPaymentOptions($params): ?array
     {
 
         $this->logInfo('*****************************************************');
