@@ -82,7 +82,8 @@ class DisplayAdminOrderSide
      * @param array $formattedResponse Formatted transaction response data.
      * @return array Array of data ready to be rendered in the Twig template.
      */
-    private function buildDataForView(array $formattedResponse): array {
+    private function buildDataForView(array $formattedResponse): array
+    {
         $result = [];
         foreach ($formattedResponse as $key => $value) {
             $result[] = [
@@ -101,7 +102,8 @@ class DisplayAdminOrderSide
      * @param string $key The key to map to a label.
      * @return string The corresponding label, or the key itself if no mapping is found.
      */
-    private function getLabelTextFromKey(string $key): string {
+    private function getLabelTextFromKey(string $key): string
+    {
         $keyToLabelMap = [
             'status' => 'Estado',
             'responseCode' => 'Código de respuesta',
@@ -134,7 +136,8 @@ class DisplayAdminOrderSide
      * @param mixed $value The value of the field.
      * @return string The CSS class to apply.
      */
-    private function getClassForField(string $key, $value): string {
+    private function getClassForField(string $key, $value): string
+    {
 
         $valueToBadgeClass = [
             'Inicializada' => 'tbk-badge-warning',
