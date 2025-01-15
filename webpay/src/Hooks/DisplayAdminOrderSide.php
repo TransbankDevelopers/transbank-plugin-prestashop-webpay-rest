@@ -69,7 +69,7 @@ class DisplayAdminOrderSide
             $status = $objectResponse->status;
         }
 
-        return $this->template->render('admin/order/hook/payment_detail.html.twig', [
+        return $this->template->render('hook/payment_detail.html.twig', [
             'title' => $this->buildTitleText($product, $status),
             'isPsGreaterOrEqual177' => version_compare(_PS_VERSION_, '1.7.7.0', '>='),
             'dataView' => $this->buildDataForView($formattedResponse)
