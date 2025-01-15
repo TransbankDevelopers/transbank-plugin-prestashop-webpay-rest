@@ -87,8 +87,13 @@ class WebPay extends PaymentModule
 
     public function hookDisplayAdminOrderSide($params): ?string
     {
-        $displayAdminOrderSide = new DisplayAdminOrderSide();
-        return $displayAdminOrderSide->execute($params);
+        try {
+            $this->logInfo("Ejecutando hook displayAdminOrderSide");
+            $displayAdminOrderSide = new DisplayAdminOrderSide();
+            return $displayAdminOrderSide->execute($params);
+        } catch (Exception | Error $e) {
+            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
+        }
     }
 
     public function hookDisplayBackOfficeHeader(): void
@@ -108,7 +113,7 @@ class WebPay extends PaymentModule
     public function hookDisplayPaymentReturn($params): ?string
     {
         try {
-            $this->logInfo('Ejecutando hookDisplayPaymentReturn');
+            $this->logInfo("Ejecutando hook displayPaymentReturn");
             $displayPaymentReturn = new DisplayPaymentReturn();
             return $displayPaymentReturn->execute($params);
         } catch (Exception | Error $e) {
