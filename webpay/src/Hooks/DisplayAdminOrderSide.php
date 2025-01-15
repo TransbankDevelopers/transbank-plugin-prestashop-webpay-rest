@@ -16,7 +16,7 @@ use Transbank\Plugin\Helpers\TbkConstants;
  * when the payment was processed via the Webpay module. It renders the details of a transaction
  * using a custom Twig template.
  */
-class DisplayAdminOrderSide
+class DisplayAdminOrderSide implements HookHandlerInterface
 {
     use InteractsWithWebpayDb;
 
@@ -49,7 +49,7 @@ class DisplayAdminOrderSide
             return null;
         }
 
-        $transbankTransaction = $this->getTransbankWebpayRestTransactionByOrderId($orderId);
+        $transbankTransaction = $this->getTransactionWebpayApprovedByOrderId($orderId);
         $transbankResponse = $transbankTransaction->transbank_response;
 
         if (!isset($transbankResponse)) {
@@ -69,7 +69,7 @@ class DisplayAdminOrderSide
             $status = $objectResponse->status;
         }
 
-        return $this->template->render('admin/order/hook/payment_detail.html.twig', [
+        return $this->template->render('hook/payment_detail.html.twig', [
             'title' => $this->buildTitleText($product, $status),
             'isPsGreaterOrEqual177' => version_compare(_PS_VERSION_, '1.7.7.0', '>='),
             'dataView' => $this->buildDataForView($formattedResponse)
@@ -82,7 +82,8 @@ class DisplayAdminOrderSide
      * @param array $formattedResponse Formatted transaction response data.
      * @return array Array of data ready to be rendered in the Twig template.
      */
-    private function buildDataForView(array $formattedResponse): array {
+    private function buildDataForView(array $formattedResponse): array
+    {
         $result = [];
         foreach ($formattedResponse as $key => $value) {
             $result[] = [
@@ -101,7 +102,8 @@ class DisplayAdminOrderSide
      * @param string $key The key to map to a label.
      * @return string The corresponding label, or the key itself if no mapping is found.
      */
-    private function getLabelTextFromKey(string $key): string {
+    private function getLabelTextFromKey(string $key): string
+    {
         $keyToLabelMap = [
             'status' => 'Estado',
             'responseCode' => 'Código de respuesta',
@@ -134,7 +136,8 @@ class DisplayAdminOrderSide
      * @param mixed $value The value of the field.
      * @return string The CSS class to apply.
      */
-    private function getClassForField(string $key, $value): string {
+    private function getClassForField(string $key, $value): string
+    {
 
         $valueToBadgeClass = [
             'Inicializada' => 'tbk-badge-warning',

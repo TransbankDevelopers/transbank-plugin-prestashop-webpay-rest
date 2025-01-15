@@ -5,13 +5,11 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Hooks\DisplayAdminOrderSide;
-use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
-use Transbank\Plugin\Helpers\TbkConstants;
-use PrestaShop\Module\WebpayPlus\Utils\Template;
+use PrestaShop\Module\WebpayPlus\Hooks\DisplayPaymentReturn;
 
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
@@ -66,10 +64,11 @@ class WebPay extends PaymentModule
         $this->installTab();
 
         /* Si algo falla aqui se muestran los errores */
-        return  $result &&
+        return $result &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('displayBackOfficeHeader') &&
+            $this->registerHook('displayHeader') &&
             $this->registerHook('displayPaymentReturn') &&
             $this->registerHook('displayAdminOrderSide');
     }
@@ -86,133 +85,46 @@ class WebPay extends PaymentModule
         return $installer->installInscriptionsTable();
     }
 
-    public function hookdisplayAdminOrderSide($params)
+    public function hookDisplayAdminOrderSide($params): ?string
     {
-        $displayAdminOrderSide = new DisplayAdminOrderSide();
-        return $displayAdminOrderSide->execute($params);
+        try {
+            $this->logInfo("Ejecutando hook displayAdminOrderSide");
+            $displayAdminOrderSide = new DisplayAdminOrderSide();
+            return $displayAdminOrderSide->execute($params);
+        } catch (Exception | Error $e) {
+            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
+        }
     }
 
-    public function hookDisplayBackOfficeHeader($params)
+    public function hookDisplayBackOfficeHeader(): void
     {
         if ($this->context->controller->controller_name === 'AdminOrders') {
-            $this->context->controller->addCSS('modules/'.$this->name.'/views/css/admin.css');
+            $this->context->controller->addCSS('modules/' . $this->name . '/views/css/admin.css');
         }
     }
 
-    private function getFormatTransbankWebpayRestTransactionByOrderId($orderId)
+    public function hookDisplayHeader(): void
     {
-        $webpayTransaction = $this->getTransactionWebpayApprovedByOrderId($orderId);
-        if (!$webpayTransaction) {
-            $this->logError('Showing confirmation page, but there is no webpayTransaction object, so we cant find an approved transaction for this order.');
+        if ($this->context->controller->php_self === 'order-confirmation') {
+            $this->context->controller->addCSS('modules/' . $this->name . '/views/css/front.css');
         }
-
-
-        $this->logInfo('D.3. TransbankWebpayRestTransaction obtenida');
-        $this->logInfo(isset($webpayTransaction) ? $webpayTransaction->transbank_response : 'No se encontro el registro');
-
-        $transbankResponse = json_decode($webpayTransaction->transbank_response, true);
-        $transactionDate = strtotime($transbankResponse['transactionDate']);
-        $token = $webpayTransaction->token;
-
-        if ($webpayTransaction->product == TransbankWebpayRestTransaction::PRODUCT_WEBPAY_PLUS){
-            $amount = number_format($transbankResponse['amount'], 0, ',', '.');
-            $paymentTypeCode = $transbankResponse['paymentTypeCode'];
-            $cardNumber = $transbankResponse['cardDetail']['card_number'];
-            $installmentsNumber = $transbankResponse['installmentsNumber'] ? $transbankResponse['installmentsNumber'] : "0";
-            $authorizationCode = $transbankResponse['authorizationCode'];
-            $buyOrder = $transbankResponse['buyOrder'];
-            $installmentsAmount = $transbankResponse['installmentsAmount'] ? number_format($transbankResponse['installmentsAmount'], 0, ',', '.') : "0";
-            $responseCode = $transbankResponse['responseCode'];
-            $status = $transbankResponse['status'];
-        }
-        else{
-            $cardNumber = $transbankResponse['cardNumber'];
-            $detail = $transbankResponse['details'][0];/* Se asume que el valor se extrae del primer elemento del details */
-            $amount = number_format($detail['amount'], 0, ',', '.');
-            $paymentTypeCode = $detail['paymentTypeCode'];
-            $installmentsNumber = $detail['installmentsNumber'] ? $detail['installmentsNumber'] : "0";
-            $authorizationCode = $detail['authorizationCode'];
-            $buyOrder = $detail['buyOrder'];
-            $installmentsAmount = $detail['installmentsAmount'] ? number_format($detail['installmentsAmount'], 0, ',', '.') : "0";
-            $responseCode = $detail['responseCode'];
-            $status = $detail['status'];
-        }
-
-        if ($paymentTypeCode == "VD") {
-            $paymentType = "Débito";
-        } elseif ($paymentTypeCode == "VP") {
-            $paymentType = "Prepago";
-        } else {
-            $paymentType = "Crédito";
-        }
-        if (in_array($paymentTypeCode, ["SI", "S2", "NC", "VC"])) {
-            $installmentType = TbkConstants::PAYMENT_TYPE_CODE[$paymentTypeCode];
-        } else {
-            $installmentType = "Sin cuotas";
-        }
-
-        return [
-            'product' => $webpayTransaction->product,
-            'cardNumber' => $cardNumber,
-            'paymentType' => $paymentType,
-            'totalPago' => $amount,
-            'transactionDate' => date("d-m-Y", $transactionDate),
-            'transactionHour' => date("H:i:s", $transactionDate),
-            'buyOrder' => $buyOrder,
-            'authorizationCode' => $authorizationCode,
-            'installmentType' => $installmentType,
-            'installmentsNumber' => $installmentsNumber,
-            'installmentsAmount' => $installmentsAmount,
-            'responseCode' => $responseCode,
-            'status' => $status,
-            'token' => $token
-        ];
     }
 
-    public function hookPaymentReturn($params)
+    public function hookDisplayPaymentReturn($params): ?string
     {
-        $this->logInfo('D.1. Retornando (hookPaymentReturn)');
-        if (!$this->active) {
-            return;
+        try {
+            $this->logInfo("Ejecutando hook displayPaymentReturn");
+            $displayPaymentReturn = new DisplayPaymentReturn();
+            return $displayPaymentReturn->execute($params);
+        } catch (Exception | Error $e) {
+            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
         }
-
-        $nameOrderRef = isset($params['order']) ? 'order' : 'objOrder';
-        $orderId = $params[$nameOrderRef]->id;
-
-        $this->logInfo('D.2. Obteniendo TransbankWebpayRestTransaction desde la BD');
-        $this->logInfo('nameOrderRef: '.$nameOrderRef.', orderId: '.$orderId);
-
-        $tx = $this->getFormatTransbankWebpayRestTransactionByOrderId($orderId);
-
-        $this->smarty->assign(array(
-            'shop_name' => $this->context->shop->name,
-            'total_to_pay' =>  $params[$nameOrderRef]->getOrdersTotalPaid(),
-            'status' => 'ok',
-            'id_order' => $orderId,
-            'WEBPAY_RESULT_DESC' => "Transacción aprobada",
-            'WEBPAY_VOUCHER_NROTARJETA' => $tx['cardNumber'],
-            'WEBPAY_VOUCHER_TXDATE_FECHA' => $tx['transactionDate'],
-            'WEBPAY_VOUCHER_TXDATE_HORA' => $tx['transactionHour'],
-            'WEBPAY_VOUCHER_TOTALPAGO' => $tx['totalPago'],
-            'WEBPAY_VOUCHER_ORDENCOMPRA' => $tx['buyOrder'],
-            'WEBPAY_VOUCHER_AUTCODE' => $tx['authorizationCode'],
-            'WEBPAY_VOUCHER_TIPOCUOTAS' => $tx['installmentType'],
-            'WEBPAY_VOUCHER_TIPOPAGO' => $tx['paymentType'],
-            'WEBPAY_VOUCHER_NROCUOTAS' => $tx['installmentsNumber'],
-            'WEBPAY_VOUCHER_AMOUNT_CUOTAS' => $tx['installmentsAmount'],
-            'WEBPAY_RESULT_CODE' => $tx['responseCode'],
-        ));
-
-        if (isset($params[$nameOrderRef]->reference) && !empty($params[$nameOrderRef]->reference)) {
-            $this->smarty->assign('reference', $params[$nameOrderRef]->reference);
-        }
-        return $this->display(__FILE__, 'views/templates/hook/payment_return.tpl');
     }
 
-    public function hookPayment($params)
+    public function hookPayment($params): ?string
     {
         if (!$this->active) {
-            return;
+            return null;
         }
 
         $this->logInfo('*****************************************************');
@@ -230,7 +142,7 @@ class WebPay extends PaymentModule
     /*
         Muestra la opciones de pago disponibles
     */
-    public function hookPaymentOptions($params)
+    public function hookPaymentOptions($params): ?array
     {
 
         $this->logInfo('*****************************************************');
@@ -239,25 +151,23 @@ class WebPay extends PaymentModule
         $this->logInfo('-----------------------------------------------------');
 
         if (!$this->active) {
-            return;
+            return null;
         }
         if (!$this->checkCurrency($params['cart'])) {
-            return;
+            return null;
         }
         $payment_options = [];
-        if ($this->configWebpayIsOk()){
+        if ($this->configWebpayIsOk()) {
             /*Agregamos la opcion de pago Webpay Plus */
             array_push($payment_options, ...$this->getWebpayPaymentOption($this, $this->context));
-        }
-        else{
+        } else {
             $this->logError("Configuración de WEBPAY PLUS incorrecta, revise los valores");
         }
 
-        if ($this->configOneclickIsOk()){
+        if ($this->configOneclickIsOk()) {
             /*Agregamos la opcion de pago Webpay Oneclick */
             array_push($payment_options, ...$this->getGroupOneclickPaymentOption($this, $this->context));
-        }
-        else{
+        } else {
             $this->logError("Configuración de ONECLICK incorrecta, revise los valores");
         }
 
@@ -292,15 +202,18 @@ class WebPay extends PaymentModule
         $this->_errors = array();
     }
 
-    protected function logError($msg){
+    protected function logError($msg)
+    {
         $this->log->logError($msg);
     }
 
-    protected function logInfo($msg){
+    protected function logInfo($msg)
+    {
         $this->log->logInfo($msg);
     }
 
-    public function updateSettings(){
+    public function updateSettings()
+    {
         $this->oneclickUpdateSettings();
         return $this->webpayUpdateSettings();
     }

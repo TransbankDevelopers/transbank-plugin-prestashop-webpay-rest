@@ -1,0 +1,49 @@
+<section class="tbk_voucher">
+	<header class="tbk_voucher-header">
+		<h2>Detalles del pago</h2>
+	</header>
+	<div class="tbk_voucher-body">
+		<div class="tbk_voucher-field">
+			<span>Orden de compra:</span>
+			<span>{{ dataView.buyOrder|e('html') }}</span>
+		</div>
+		<div class="tbk_voucher-field">
+			<span>Código de autorización:</span>
+			<span>{{ dataView.authorizationCode|e('html') }}</span>
+		</div>
+		<div class="tbk_voucher-field">
+			<span>Fecha transacción:</span>
+			<span>{{ dataView.transactionDate|e('html') }}</span>
+		</div>
+		<div class="tbk_voucher-field">
+			<span>Hora transacción:</span>
+			<span>{{ dataView.transactionTime|e('html') }}</span>
+		</div>
+		<div class="tbk_voucher-field">
+			<span>Número de tarjeta:</span>
+			<span>{{ dataView.cardNumber|e('html') }}</span>
+		</div>
+		<div class="tbk_voucher-field">
+			<span>Tipo de pago:</span>
+			<span>{{ dataView.paymentType|e('html') }}</span>
+		</div>
+		<div class="tbk_voucher-field">
+			<span>Tipo de cuota:</span>
+			<span>{{ dataView.installmentType|e('html') }}</span>
+		</div>
+		<div class="tbk_voucher-field">
+			<span>Número de cuotas:</span>
+			<span>{{ dataView.installmentNumber|e('html') }}</span>
+		</div>
+		{% if dataView.installmentNumber > 0 %}
+			<div class="tbk_voucher-field">
+				<span>Monto de cada cuota:</span>
+				<span>{{ dataView.installmentAmount|e('html') }}</span>
+			</div>
+		{% endif %}
+		<div class="tbk_voucher-field">
+			<h3>Monto compra:</h3>
+			<h3>{{ dataView.amount|e('html') }}</h3>
+		</div>
+	</div>
+</section>
