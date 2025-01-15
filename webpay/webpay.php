@@ -12,7 +12,7 @@ use PrestaShop\Module\WebpayPlus\Hooks\DisplayPaymentReturn;
 use Transbank\Plugin\Helpers\TbkConstants;
 use PrestaShop\Module\WebpayPlus\Utils\Template;
 
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
@@ -67,7 +67,7 @@ class WebPay extends PaymentModule
         $this->installTab();
 
         /* Si algo falla aqui se muestran los errores */
-        return  $result &&
+        return $result &&
             $this->registerHook('paymentOptions') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('displayBackOfficeHeader') &&
@@ -155,19 +155,17 @@ class WebPay extends PaymentModule
             return;
         }
         $payment_options = [];
-        if ($this->configWebpayIsOk()){
+        if ($this->configWebpayIsOk()) {
             /*Agregamos la opcion de pago Webpay Plus */
             array_push($payment_options, ...$this->getWebpayPaymentOption($this, $this->context));
-        }
-        else{
+        } else {
             $this->logError("Configuración de WEBPAY PLUS incorrecta, revise los valores");
         }
 
-        if ($this->configOneclickIsOk()){
+        if ($this->configOneclickIsOk()) {
             /*Agregamos la opcion de pago Webpay Oneclick */
             array_push($payment_options, ...$this->getGroupOneclickPaymentOption($this, $this->context));
-        }
-        else{
+        } else {
             $this->logError("Configuración de ONECLICK incorrecta, revise los valores");
         }
 
@@ -202,15 +200,18 @@ class WebPay extends PaymentModule
         $this->_errors = array();
     }
 
-    protected function logError($msg){
+    protected function logError($msg)
+    {
         $this->log->logError($msg);
     }
 
-    protected function logInfo($msg){
+    protected function logInfo($msg)
+    {
         $this->log->logInfo($msg);
     }
 
-    public function updateSettings(){
+    public function updateSettings()
+    {
         $this->oneclickUpdateSettings();
         return $this->webpayUpdateSettings();
     }
