@@ -16,7 +16,7 @@ use Transbank\Plugin\Helpers\TbkConstants;
  * when the payment was processed via the Webpay module. It renders the details of a transaction
  * using a custom Twig template.
  */
-class DisplayAdminOrderSide
+class DisplayAdminOrderSide implements HookHandlerInterface
 {
     use InteractsWithWebpayDb;
 
