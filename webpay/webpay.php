@@ -24,7 +24,6 @@ class WebPay extends PaymentModule
 
     private const MODULE_HOOKS = [
         'paymentOptions',
-        'paymentReturn',
         'displayBackOfficeHeader',
         'displayHeader',
         'displayPaymentReturn',
