@@ -124,24 +124,6 @@ class WebPay extends PaymentModule
         }
     }
 
-    public function hookPayment($params): ?string
-    {
-        if (!$this->active) {
-            return null;
-        }
-
-        $this->logInfo('*****************************************************');
-        $this->logInfo('Ejecutando hookPayment');
-        $this->logInfo(json_encode($params));
-        $this->logInfo('-----------------------------------------------------');
-
-        Context::getContext()->smarty->assign(array(
-            'logo' => \Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'),
-            'title' => $this->title
-        ));
-        return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
-    }
-
     /*
         Muestra la opciones de pago disponibles
     */
