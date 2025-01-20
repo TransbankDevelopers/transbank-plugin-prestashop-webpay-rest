@@ -22,18 +22,14 @@ trait InteractsWithOneclick
 {
     protected function getGroupOneclickPaymentOption()
     {
-        if (!Context::getContext()->customer->isLogged()) {
-            return [];
-        }
-        if ($this->getOneclickActive() != TbkConstants::ACTIVE_MODULE) {
+        if (!$this->isCustomerLogged() || !$this->isOneclickActivated()) {
             return [];
         }
         if ($this->getCountCardsByUserId($this->getUserIdForOneclick()) > 0) {
             return $this->getOneclickPaymentOption();
         }
-        return [
-            $this->getNewOneclickPaymentOption()
-        ];
+
+        return [$this->getNewOneclickPaymentOption()];
     }
 
     protected function getOneclickPaymentOption()
@@ -302,5 +298,13 @@ trait InteractsWithOneclick
         return false;
     }
 
+    private function isCustomerLogged(): bool
+    {
+        return Context::getContext()->customer->isLogged();
+    }
 
+    private function isOneclickActivated(): bool
+    {
+        return $this->getOneclickActive() == TbkConstants::ACTIVE_MODULE;
+    }
 }
