@@ -139,6 +139,7 @@ class WebPay extends PaymentModule
             return $paymentOptions->execute($params);
         } catch (Exception | Error $e) {
             $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
+            return null;
         }
     }
 
