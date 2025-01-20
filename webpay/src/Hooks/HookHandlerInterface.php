@@ -11,7 +11,7 @@ interface HookHandlerInterface
      * Executes the logic for the hook.
      *
      * @param array $params Parameters passed to the hook.
-     * @return string|null Rendered content or null.
+     * @return array|string Result of processing the hook.
      */
-    public function execute(array $params): ?string;
+    public function execute(array $params);
 }
