@@ -8,36 +8,41 @@ use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 use Configuration;
+use Context;
 use Tools;
 use Media;
+use Link;
 use PrestaShop\Module\WebpayPlus\Utils\StringUtils;
+use Transbank\Plugin\Helpers\TbkConstants;
 
 /**
  * Trait InteractsWithOneclick.
  */
 trait InteractsWithOneclick
 {
-    protected function getGroupOneclickPaymentOption($base, $context)
+    protected function getGroupOneclickPaymentOption()
     {
-        if (!$context->customer->isLogged()) {
+        if (!Context::getContext()->customer->isLogged()) {
             return [];
         }
-        if ($this->getOneclickActive() != 1) {
+        if ($this->getOneclickActive() != TbkConstants::ACTIVE_MODULE) {
             return [];
         }
-        if ($this->getCountCardsByUserId($this->getUserIdForOneclick($context)) > 0) {
-            return $this->getOneclickPaymentOption($base, $context);
+        if ($this->getCountCardsByUserId($this->getUserIdForOneclick()) > 0) {
+            return $this->getOneclickPaymentOption();
         }
         return [
-            $this->getNewOneclickPaymentOption($base, $context)
+            $this->getNewOneclickPaymentOption()
         ];
     }
 
-    protected function getOneclickPaymentOption($base, $context)
+    protected function getOneclickPaymentOption()
     {
         $result = [];
-        $paymentController = $context->link->getModuleLink($base->name, 'oneclickpaymentvalidate', array(), true);
-        $cards = $this->getCardsByUserId($this->getUserIdForOneclick($context));
+        $link = new Link();
+        $paymentController = $link->getModuleLink(TbkConstants::MODULE_NAME, 'oneclickpaymentvalidate', array(), true);
+        $cards = $this->getCardsByUserId($this->getUserIdForOneclick());
+        $logoPath = _PS_MODULE_DIR_ . TbkConstants::MODULE_NAME . '/views/img/oneclick_small.png';
         foreach ($cards as $card) {
             $po = new PaymentOption();
             $cardNumber = $card['card_number'];
@@ -46,7 +51,7 @@ trait InteractsWithOneclick
                 $result,
                 $po->setCallToActionText($environment . $card['card_type'] . ' terminada en ' . substr($cardNumber, -4, 4))
                     ->setAction($paymentController)
-                    ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_small.png'))
+                    ->setLogo(Media::getMediaPath($logoPath))
                     ->setInputs([
                         'token' => [
                             'name' => 'inscriptionId',
@@ -57,21 +62,22 @@ trait InteractsWithOneclick
             );
         }
 
-        array_push($result, $this->getOneclickInscriptionOption($base, $context, 'Usar un nuevo método de pago'));
+        array_push($result, $this->getOneclickInscriptionOption('Usar un nuevo método de pago'));
         return $result;
     }
 
-    protected function getNewOneclickPaymentOption($base, $context)
+    protected function getNewOneclickPaymentOption()
     {
         $message = "Inscribe tu tarjeta de crédito,
             débito o prepago y luego paga con un solo click a través de Webpay Oneclick";
-        return $this->getOneclickInscriptionOption($base, $context, $message);
+        return $this->getOneclickInscriptionOption($message);
     }
 
-    protected function getOneclickInscriptionOption($base, $context, $description)
+    protected function getOneclickInscriptionOption($description)
     {
         $po = new PaymentOption();
-        $controller = $context->link->getModuleLink($base->name, 'oneclickinscription', array(), true);
+        $link = new Link();
+        $controller = $link->getModuleLink(TbkConstants::MODULE_NAME, 'oneclickinscription', array(), true);
         return $po->setCallToActionText($description)
             ->setAction($controller)
             ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_small.png'))
@@ -102,8 +108,9 @@ trait InteractsWithOneclick
             . TransbankInscriptions::STATUS_COMPLETED . '" and `user_id` = "' . pSQL($userId) . '"');
     }
 
-    protected function getUserIdForOneclick($context)
+    protected function getUserIdForOneclick()
     {
+        $context = Context::getContext();
         if ($context->customer->isLogged()) {
             return $context->customer->id;
         }
