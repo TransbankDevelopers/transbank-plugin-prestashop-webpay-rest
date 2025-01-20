@@ -77,10 +77,11 @@ trait InteractsWithOneclick
     {
         $po = new PaymentOption();
         $link = new Link();
+        $logoPath = _PS_MODULE_DIR_ . TbkConstants::MODULE_NAME . '/views/img/oneclick_small.png';
         $controller = $link->getModuleLink(TbkConstants::MODULE_NAME, 'oneclickinscription', array(), true);
         return $po->setCallToActionText($description)
             ->setAction($controller)
-            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_small.png'))
+            ->setLogo(Media::getMediaPath($logoPath))
             ->setInputs([
                 'token' => [
                     'name' => 'inscriptionId',
