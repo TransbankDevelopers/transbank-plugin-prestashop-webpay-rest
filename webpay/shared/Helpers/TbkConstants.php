@@ -54,4 +54,5 @@ class TbkConstants
     const REPO_PRESTASHOP = 'TransbankDevelopers/transbank-plugin-prestashop-webpay-rest';
     const REPO_OFFICIAL_PRESTASHOP = 'PrestaShop/PrestaShop';
     const ACTIVE_MODULE = '1';
+    const MODULE_NAME = 'webpay';
 }

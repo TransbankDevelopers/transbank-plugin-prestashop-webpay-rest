@@ -5,9 +5,11 @@ use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Hooks\DisplayAdminOrderSide;
+use PrestaShop\Module\WebpayPlus\Hooks\PaymentOptions;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use PrestaShop\Module\WebpayPlus\Hooks\DisplayPaymentReturn;
+use Transbank\Plugin\Helpers\TbkConstants;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -22,9 +24,17 @@ class WebPay extends PaymentModule
     public $log;
     public $title = 'Pago con tarjetas de crédito o Redcompra';
 
+    private const MODULE_HOOKS = [
+        'paymentOptions',
+        'displayBackOfficeHeader',
+        'displayHeader',
+        'displayPaymentReturn',
+        'displayAdminOrderSide'
+    ];
+
     public function __construct()
     {
-        $this->name = 'webpay';
+        $this->name = TbkConstants::MODULE_NAME;
         $this->tab = 'payments_gateways';
         $this->version = '1.0.0';
         $this->author = 'Transbank';
@@ -64,13 +74,7 @@ class WebPay extends PaymentModule
         $this->installTab();
 
         /* Si algo falla aqui se muestran los errores */
-        return $result &&
-            $this->registerHook('paymentOptions') &&
-            $this->registerHook('paymentReturn') &&
-            $this->registerHook('displayBackOfficeHeader') &&
-            $this->registerHook('displayHeader') &&
-            $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('displayAdminOrderSide');
+        return $result && $this->registerHook(self::MODULE_HOOKS);
     }
 
     protected function installWebpayTable()
@@ -121,74 +125,23 @@ class WebPay extends PaymentModule
         }
     }
 
-    public function hookPayment($params): ?string
-    {
-        if (!$this->active) {
-            return null;
-        }
-
-        $this->logInfo('*****************************************************');
-        $this->logInfo('Ejecutando hookPayment');
-        $this->logInfo(json_encode($params));
-        $this->logInfo('-----------------------------------------------------');
-
-        Context::getContext()->smarty->assign(array(
-            'logo' => \Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/oneclick_80px.svg'),
-            'title' => $this->title
-        ));
-        return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
-    }
-
     /*
         Muestra la opciones de pago disponibles
     */
     public function hookPaymentOptions($params): ?array
     {
+        try {
+            $this->logInfo("Ejecutando hook hookPaymentOptions");
 
-        $this->logInfo('*****************************************************');
-        $this->logInfo('A.1. Mostrando medios de pago Webpay Plus');
-        $this->logInfo(json_encode($params['cart']));
-        $this->logInfo('-----------------------------------------------------');
-
-        if (!$this->active) {
+            $cart = $params['cart'];
+            $moduleCurrencies = $this->getCurrency($cart->id_currency);
+            $paymentOptions = new PaymentOptions($moduleCurrencies);
+            return $paymentOptions->execute($params);
+        } catch (Exception | Error $e) {
+            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
             return null;
         }
-        if (!$this->checkCurrency($params['cart'])) {
-            return null;
-        }
-        $payment_options = [];
-        if ($this->configWebpayIsOk()) {
-            /*Agregamos la opcion de pago Webpay Plus */
-            array_push($payment_options, ...$this->getWebpayPaymentOption($this, $this->context));
-        } else {
-            $this->logError("Configuración de WEBPAY PLUS incorrecta, revise los valores");
-        }
-
-        if ($this->configOneclickIsOk()) {
-            /*Agregamos la opcion de pago Webpay Oneclick */
-            array_push($payment_options, ...$this->getGroupOneclickPaymentOption($this, $this->context));
-        } else {
-            $this->logError("Configuración de ONECLICK incorrecta, revise los valores");
-        }
-
-
-        return $payment_options;
     }
-
-    public function checkCurrency($cart)
-    {
-        $currency_order = new Currency($cart->id_currency);
-        $currencies_module = $this->getCurrency($cart->id_currency);
-        if (is_array($currencies_module)) {
-            foreach ($currencies_module as $currency_module) {
-                if ($currency_order->id == $currency_module['id_currency']) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
 
     public function getContent()
     {
@@ -217,7 +170,4 @@ class WebPay extends PaymentModule
         $this->oneclickUpdateSettings();
         return $this->webpayUpdateSettings();
     }
-
 }
-
-
