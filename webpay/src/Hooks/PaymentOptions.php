@@ -68,10 +68,10 @@ class PaymentOptions implements HookHandlerInterface
      */
     private function checkCurrency(Cart $cart): bool
     {
-        $currency_order = new Currency($cart->id_currency);
+        $currencyOrder = new Currency($cart->id_currency);
         if (is_array($this->moduleCurrencies)) {
             foreach ($this->moduleCurrencies as $currency_module) {
-                if ($currency_order->id == $currency_module['id_currency']) {
+                if ($currencyOrder->id == $currency_module['id_currency']) {
                     return true;
                 }
             }
