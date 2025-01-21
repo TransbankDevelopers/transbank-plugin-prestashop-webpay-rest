@@ -27,6 +27,8 @@ class PaymentOptions implements HookHandlerInterface
     /**
      * Constructor.
      * Initializes the class.
+     *
+     * @param array $moduleCurrencies Currencies supported for the module.
      */
     public function __construct(array $moduleCurrencies)
     {
