@@ -44,20 +44,20 @@ class PaymentOptions implements HookHandlerInterface
      */
     public function execute(array $params): array
     {
-        $payment_options = [];
+        $paymentOptions = [];
 
         if (!$this->checkCurrency($params['cart'])) {
-            return $payment_options;
+            return $paymentOptions;
         }
 
         if ($this->configWebpayIsOk()) {
-            $payment_options[] = $this->getWebpayPaymentOption();
+            $paymentOptions[] = $this->getWebpayPaymentOption();
         }
 
         if ($this->configOneclickIsOk()) {
-            array_push($payment_options, ...$this->getGroupOneclickPaymentOption());
+            array_push($paymentOptions, ...$this->getGroupOneclickPaymentOption());
         }
-        return $payment_options;
+        return $paymentOptions;
     }
 
     /**
