@@ -15,7 +15,7 @@ class PaymentOptions implements HookHandlerInterface
     use InteractsWithOneclick;
 
     /**
-     * @var Context Instante of the ecommerce Context.
+     * @var Context Instance of the ecommerce Context.
      */
     private $context;
 
