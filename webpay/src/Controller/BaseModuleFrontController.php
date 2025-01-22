@@ -99,16 +99,8 @@ class BaseModuleFrontController extends ModuleFrontController
 
     protected function setPaymentErrorPage($errorMessage)
     {
-        $date_tx_hora = date('H:i:s');
-        $date_tx_fecha = date('d-m-Y');
         $this->logError($errorMessage);
-        Context::getContext()->smarty->assign([
-            'WEBPAY_RESULT_CODE' => 500,
-            'WEBPAY_RESULT_DESC' => $errorMessage,
-            'WEBPAY_VOUCHER_ORDENCOMPRA' => 0,
-            'WEBPAY_VOUCHER_TXDATE_HORA' => $date_tx_hora,
-            'WEBPAY_VOUCHER_TXDATE_FECHA' => $date_tx_fecha,
-        ]);
+        Context::getContext()->smarty->assign('errorMessage', $errorMessage);
         $this->setTemplate('module:webpay/views/templates/front/payment_error.tpl');
     }
 
