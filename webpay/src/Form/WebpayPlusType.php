@@ -53,6 +53,7 @@ class WebpayPlusType extends TranslatorAwareType
                     $this->trans('No', 'Modules.WebpayPlus.Admin') => Options::DEFAULT_INTEGRATION_TYPE,
                     $this->trans('Si', 'Modules.WebpayPlus.Admin') => Options::ENVIRONMENT_PRODUCTION,
                 ],
+                'help' => $this->trans('Cuando no está activado el modo producción, se utilizarán las claves predeterminadas del entorno de pruebas.', 'Modules.WebpayPlus.Admin'),
             ])
             ->add('form_webpay_commerce_code', TextType::class, [
                 'label' => $this->trans('Código de Comercio', 'Modules.WebpayPlus.Admin'),
