@@ -54,7 +54,11 @@ final class WebpayPlusDataConfiguration implements DataConfigurationInterface
     {
         $this->configuration->set(static::WEBPAY_ACTIVE, $configuration['form_webpay_active']);
         $this->configuration->set(static::WEBPAY_STOREID, $configuration['form_webpay_commerce_code']);
-        $this->configuration->set(static::WEBPAY_API_KEY_SECRET, $configuration['form_webpay_api_key']);
+
+        if (!empty($configuration['form_webpay_api_key'])) {
+            $this->configuration->set(static::WEBPAY_API_KEY_SECRET, $configuration['form_webpay_api_key']);
+        }
+
         $this->configuration->set(static::WEBPAY_ENVIRONMENT, $configuration['form_webpay_environment']);
         $this->configuration->set(static::WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT, $configuration['form_webpay_order_after_payment']);
 
