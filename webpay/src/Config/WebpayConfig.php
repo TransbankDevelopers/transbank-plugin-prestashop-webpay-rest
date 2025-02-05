@@ -80,7 +80,7 @@ class WebpayConfig implements ModuleConfigInterface
     {
         self::setPaymentActive(TbkConstants::ACTIVE_MODULE);
         self::setEnvironment(Options::DEFAULT_INTEGRATION_TYPE);
-        self::setCommerceCoder(WebpayPlus::DEFAULT_COMMERCE_CODE);
+        self::setCommerceCode(WebpayPlus::DEFAULT_COMMERCE_CODE);
         self::setApiKey(WebpayPlus::DEFAULT_API_KEY);
         self::setOrderStateIdAfterPayment(Configuration::get('PS_OS_PREPARATION'));
     }
