@@ -2,10 +2,7 @@
 
 namespace PrestaShop\Module\WebpayPlus\Helpers;
 
-use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use Tools;
-use Media;
-use Link;
 use Transbank\Webpay\Options;
 use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\Module\WebpayPlus\Utils\StringUtils;
@@ -16,22 +13,6 @@ use Transbank\Plugin\Helpers\TbkConstants;
  */
 trait InteractsWithWebpay
 {
-    protected function getWebpayPaymentOption()
-    {
-        if (!WebpayConfig::isPaymentMethodActive()) {
-            return [];
-        }
-        $WPOption = new PaymentOption();
-        $link = new Link();
-        $paymentController = $link->getModuleLink(TbkConstants::MODULE_NAME, 'webpaypluspayment', array(), true);
-        $message = "Permite el pago de productos y/o servicios, con tarjetas de crédito,
-            débito y prepago a través de Webpay Plus";
-        $logoPath = _PS_MODULE_DIR_ . TbkConstants::MODULE_NAME . '/views/img/wpplus_small.png';
-        return
-            $WPOption->setCallToActionText($message)
-                ->setAction($paymentController)
-                ->setLogo(Media::getMediaPath($logoPath));
-    }
 
     protected function loadDefaultConfigurationWebpay(): void
     {

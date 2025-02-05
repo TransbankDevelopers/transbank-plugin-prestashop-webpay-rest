@@ -2,10 +2,14 @@
 
 namespace PrestaShop\Module\WebpayPlus\Hooks;
 
+use Link;
 use Cart;
+use Media;
 use Context;
 use Currency;
-
+use Transbank\Plugin\Helpers\TbkConstants;
+use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 
@@ -50,7 +54,7 @@ class PaymentOptions implements HookHandlerInterface
             return $paymentOptions;
         }
 
-        if ($this->configWebpayIsOk()) {
+        if (WebpayConfig::isConfigOk() && WebpayConfig::isPaymentMethodActive()) {
             $paymentOptions[] = $this->getWebpayPaymentOption();
         }
 
@@ -77,5 +81,26 @@ class PaymentOptions implements HookHandlerInterface
             }
         }
         return false;
+    }
+
+    /**
+     * Get the Webpay payment option.
+     *
+     * @return PaymentOption The payment option.
+     */
+    private function getWebpayPaymentOption(): PaymentOption
+    {
+        $WPOption = new PaymentOption();
+        $link = new Link();
+
+        $paymentController = $link->getModuleLink(TbkConstants::MODULE_NAME, 'webpaypluspayment', array(), true);
+        $message = "Permite el pago de productos y/o servicios, con tarjetas de crédito,
+            débito y prepago a través de Webpay Plus";
+        $logoPath = _PS_MODULE_DIR_ . TbkConstants::MODULE_NAME . '/views/img/wpplus_small.png';
+
+        return
+            $WPOption->setCallToActionText($message)
+                ->setAction($paymentController)
+                ->setLogo(Media::getMediaPath($logoPath));
     }
 }
