@@ -96,7 +96,7 @@ class WebpayConfig implements ModuleConfigInterface
     /**
      * @inheritDoc
      */
-    public static function setCommerceCoder(string $commerceCode): void
+    public static function setCommerceCode(string $commerceCode): void
     {
         Configuration::updateValue('WEBPAY_STOREID', $commerceCode);
     }

@@ -47,7 +47,7 @@ interface ModuleConfigInterface
      *
      * @param string $commerceCode The Commerce Code.
      */
-    public static function setCommerceCoder(string $commerceCode): void;
+    public static function setCommerceCode(string $commerceCode): void;
 
     /**
      * Sets the API Key.
