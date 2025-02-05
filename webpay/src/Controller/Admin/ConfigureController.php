@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\WebpayPlus\Controller\Admin;
 
+use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
 use Symfony\Component\HttpFoundation\Request;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -127,7 +128,7 @@ class ConfigureController extends FrameworkBundleAdminController
 
         if ($form->isSubmitted()) {
             if ($form->getClickedButton() === $form->get('oneclick_form_reset_button')) {
-                $this->loadDefaultOneclick();
+                OneclickConfig::loadDefaultConfig();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
             } elseif (!$form->isValid()) {
                 foreach ($form->getErrors() as $error) {
