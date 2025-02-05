@@ -95,4 +95,9 @@ interface ModuleConfigInterface
      * @return bool True if the payment method is active, false otherwise.
      */
     public static function isPaymentMethodActive(): bool;
+
+    /**
+     * Initializes the configuration.
+     */
+    public static function initializeConfig(): void;
 }

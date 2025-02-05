@@ -135,4 +135,14 @@ class WebpayConfig implements ModuleConfigInterface
     {
         return self::getPaymentActive() === TbkConstants::ACTIVE_MODULE;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public static function initializeConfig(): void
+    {
+        if (!self::isConfigOk()) {
+            self::loadDefaultConfig();
+        }
+    }
 }
