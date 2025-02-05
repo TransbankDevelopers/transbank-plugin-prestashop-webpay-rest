@@ -9,9 +9,9 @@ use Transbank\Webpay\Options;
 use PrestaShop\Module\WebpayPlus\Helpers\SqlHelper;
 use Configuration;
 use Context;
-use Tools;
 use Media;
 use Link;
+use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
 use PrestaShop\Module\WebpayPlus\Utils\StringUtils;
 use Transbank\Plugin\Helpers\TbkConstants;
 
@@ -116,15 +116,15 @@ trait InteractsWithOneclick
 
     protected function loadDefaultConfigurationOneclick()
     {
-        $oneclickEnviroment = $this->getDefaultOneclickEnvironment();
+        $oneclickEnviroment = OneclickConfig::getEnvironment();
         /* Si existe configuración de producción se copiara */
         if (isset($oneclickEnviroment) && $oneclickEnviroment == Options::ENVIRONMENT_PRODUCTION) {
-            $oneclickActive = $this->getOneclickActive();
+            $oneclickActive = OneclickConfig::getPaymentActive();
             $oneclickActive = isset($oneclickActive) ? $oneclickActive : 1;
-            $oneclickMallCommerceCode = $this->getOneclickMallCommerceCode();
-            $oneclickChildCommerceCode = $this->getOneclickChildCommerceCode();
-            $oneclickApikey = $this->getOneclickApiKey();
-            $oneclickDefaultOrderStateIdAfterPayment = $this->getDefaultOneclickOrderAfterPayment();
+            $oneclickMallCommerceCode = OneclickConfig::getCommerceCode();
+            $oneclickChildCommerceCode = OneclickConfig::getChildCommerceCode();
+            $oneclickApikey = OneclickConfig::getApiKey();
+            $oneclickDefaultOrderStateIdAfterPayment = OneclickConfig::getOrderStateIdAfterPayment();
             //si alguno de los datos falta se resetea
             if (
                 StringUtils::isNotBlankOrNull($oneclickMallCommerceCode)
@@ -132,22 +132,22 @@ trait InteractsWithOneclick
                 && StringUtils::isNotBlankOrNull($oneclickApikey)
                 && StringUtils::isNotBlankOrNull($oneclickDefaultOrderStateIdAfterPayment)
             ) {
-                $this->setOneclickActive($oneclickActive);
-                $this->setOneclickMallCommerceCode($oneclickMallCommerceCode);
-                $this->setOneclickChildCommerceCode($oneclickChildCommerceCode);
-                $this->setOneclickApiKey($oneclickApikey);
-                $this->setOneclickOrderAfterPayment($oneclickDefaultOrderStateIdAfterPayment);
+                OneclickConfig::setPaymentActive($oneclickActive);
+                OneclickConfig::setCommerceCode($oneclickMallCommerceCode);
+                OneclickConfig::setChildCommerceCode($oneclickChildCommerceCode);
+                OneclickConfig::setApiKey($oneclickApikey);
+                OneclickConfig::setOrderStateIdAfterPayment($oneclickDefaultOrderStateIdAfterPayment);
                 $this->logInfo("Configuración de ONECLICK se cargo de forma correcta =>
                     oneclickMallCommerceCode: {$oneclickMallCommerceCode}
                     , oneclickChildCommerceCode: {$oneclickChildCommerceCode},
                     , oneclickDefaultOrderStateIdAfterPayment: {$oneclickDefaultOrderStateIdAfterPayment}");
             } else {
-                $this->loadDefaultOneclick();
+                OneclickConfig::loadDefaultConfig();
                 $this->logInfo("Configuración por defecto de ONECLICK se cargo de
                     forma correcta porque los valores de producción estan incompletos");
             }
         } else {
-            $this->loadDefaultOneclick();
+            OneclickConfig::loadDefaultConfig();
             $this->logInfo("Configuración por defecto de ONECLICK se cargo de forma correcta");
         }
     }
@@ -263,11 +263,11 @@ trait InteractsWithOneclick
 
     protected function configOneclickIsOk()
     {
-        $oneclickEnviroment = $this->getDefaultOneclickEnvironment();
-        $oneclickMallCommerceCode = $this->getOneclickMallCommerceCode();
-        $oneclickChildCommerceCode = $this->getOneclickChildCommerceCode();
-        $oneclickApikey = $this->getOneclickApiKey();
-        $oneclickDefaultOrderStateIdAfterPayment = $this->getDefaultOneclickOrderAfterPayment();
+        $oneclickEnviroment = OneclickConfig::getEnvironment();
+        $oneclickMallCommerceCode = OneclickConfig::getCommerceCode();
+        $oneclickChildCommerceCode = OneclickConfig::getChildCommerceCode();
+        $oneclickApikey = OneclickConfig::getApiKey();
+        $oneclickDefaultOrderStateIdAfterPayment = OneclickConfig::getOrderStateIdAfterPayment();
 
         if (
             StringUtils::isNotBlankOrNull($oneclickEnviroment)
