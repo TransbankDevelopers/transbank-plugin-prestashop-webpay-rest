@@ -8,17 +8,16 @@ use Symfony\Component\HttpFoundation\Request;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Helpers\InfoUtil;
 use Transbank\Plugin\Helpers\PrestashopInfoUtil;
 use PrestaShop\Module\WebpayPlus\Grid\TransactionsFilters;
+use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 
 
 class ConfigureController extends FrameworkBundleAdminController
 {
-    use InteractsWithWebpay;
     use InteractsWithOneclick;
     const TAB_CLASS_NAME = 'WebpayPlusConfigure';
 
@@ -99,7 +98,7 @@ class ConfigureController extends FrameworkBundleAdminController
 
         if ($form->isSubmitted()) {
             if ($form->getClickedButton() === $form->get('webpay_plus_form_reset_button')) {
-                $this->loadDefaultWebpay();
+                WebpayConfig::loadDefaultConfig();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
             } elseif (!$form->isValid()) {
                 foreach ($form->getErrors() as $error) {
