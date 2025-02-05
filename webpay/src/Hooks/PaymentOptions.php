@@ -7,15 +7,14 @@ use Cart;
 use Media;
 use Context;
 use Currency;
+use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
 use Transbank\Plugin\Helpers\TbkConstants;
 use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
+use PrestaShop\Module\WebpayPlus\Repository\InscriptionRepository;
 
 class PaymentOptions implements HookHandlerInterface
 {
-    use InteractsWithOneclick;
-
     /**
      * @var Context Instance of the ecommerce Context.
      */
@@ -27,6 +26,11 @@ class PaymentOptions implements HookHandlerInterface
     private $moduleCurrencies;
 
     /**
+     * @var InscriptionRepository Instance of the inscription repository.
+     */
+    private $oneclickInscriptionRepository;
+
+    /**
      * Constructor.
      * Initializes the class.
      *
@@ -36,6 +40,7 @@ class PaymentOptions implements HookHandlerInterface
     {
         $this->context = Context::getContext();
         $this->moduleCurrencies = $moduleCurrencies;
+        $this->oneclickInscriptionRepository = new InscriptionRepository();
     }
 
     /**
@@ -56,8 +61,8 @@ class PaymentOptions implements HookHandlerInterface
             $paymentOptions[] = $this->getWebpayPaymentOption();
         }
 
-        if ($this->configOneclickIsOk()) {
-            array_push($paymentOptions, ...$this->getGroupOneclickPaymentOption());
+        if (OneclickConfig::isConfigOk() && OneclickConfig::isPaymentMethodActive() && $this->isCustomerLogged()) {
+            array_push($paymentOptions, ...$this->getOneclickPaymentOptions());
         }
         return $paymentOptions;
     }
@@ -100,5 +105,97 @@ class PaymentOptions implements HookHandlerInterface
             $WPOption->setCallToActionText($message)
                 ->setAction($paymentController)
                 ->setLogo(Media::getMediaPath($logoPath));
+    }
+    private function getOneclickPaymentOptions(): array
+    {
+        $paymentOptions = $this->getOneclickCardsPaymentOptions();
+
+        if (count($paymentOptions) > 0) {
+            $paymentOptions[] = $this->getOneclickInscriptionOption('Usar un nuevo método de pago');
+        } else {
+            $paymentOptions[] = $this->getOneclickInscriptionOption();
+        }
+
+        return $paymentOptions;
+    }
+
+    private function getOneclickCardsPaymentOptions(): array
+    {
+        $link = new Link();
+        $paymentOptions = [];
+        $paymentController = $link->getModuleLink(TbkConstants::MODULE_NAME, 'oneclickpaymentvalidate', array(), true);
+        $cards = $this->oneclickInscriptionRepository->getCardsByUserId($this->getUserId());
+        $logoPath = _PS_MODULE_DIR_ . TbkConstants::MODULE_NAME . '/views/img/oneclick_small.png';
+
+        foreach ($cards as $card) {
+            $po = new PaymentOption();
+            $cardNumber = $card['card_number'];
+            $environment = $card['environment'] == 'TEST' ? '[TEST] ' : '';
+
+            array_push(
+                $paymentOptions,
+                $po->setCallToActionText($environment . $card['card_type'] . ' terminada en ' . substr($cardNumber, -4, 4))
+                    ->setAction($paymentController)
+                    ->setLogo(Media::getMediaPath($logoPath))
+                    ->setInputs([
+                        'token' => [
+                            'name' => 'inscriptionId',
+                            'type' => 'hidden',
+                            'value' => $card['id']
+                        ],
+                    ])
+            );
+        }
+
+        return $paymentOptions;
+    }
+
+    /**
+     * Get the Oneclick inscription payment option.
+     *
+     * @return PaymentOption The payment option.
+     */
+    private function getOneclickInscriptionOption($description = null): PaymentOption
+    {
+        $po = new PaymentOption();
+        $link = new Link();
+
+        $defaultDescription = "Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick";
+        $logoPath = _PS_MODULE_DIR_ . TbkConstants::MODULE_NAME . '/views/img/oneclick_small.png';
+        $controller = $link->getModuleLink(TbkConstants::MODULE_NAME, 'oneclickinscription', array(), true);
+        return $po->setCallToActionText($description ?? $defaultDescription)
+            ->setAction($controller)
+            ->setLogo(Media::getMediaPath($logoPath))
+            ->setInputs([
+                'token' => [
+                    'name' => 'inscriptionId',
+                    'type' => 'hidden',
+                    'value' => 0
+                ],
+            ]);
+    }
+
+    /**
+     * Get the user ID.
+     *
+     * @return int|null The user ID if the customer is logged, otherwise null.
+     */
+    private function getUserId(): ?int
+    {
+        $context = Context::getContext();
+        if ($this->isCustomerLogged()) {
+            return $context->customer->id;
+        }
+        return null;
+    }
+
+    /**
+     * Check if the customer is logged.
+     *
+     * @return bool true if the customer is logged, otherwise false.
+     */
+    private function isCustomerLogged(): bool
+    {
+        return $this->context->customer->isLogged();
     }
 }
