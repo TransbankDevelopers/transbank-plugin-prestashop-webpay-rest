@@ -78,7 +78,7 @@ interface ModuleConfigInterface
     public static function setPaymentActive(string $paymentActive): void;
 
     /**
-     * Loads the default configuration.
+     * Loads the default configuration in the ecommerce database.
      */
     public static function loadDefaultConfig(): void;
 
