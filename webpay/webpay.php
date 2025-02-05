@@ -1,5 +1,6 @@
 <?php
 
+use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
@@ -62,8 +63,7 @@ class WebPay extends PaymentModule
     public function install()
     {
         $result = parent::install();
-        /* carga la configuracion por defecto al instalar el plugin */
-        $this->loadDefaultConfigurationWebpay();
+        WebpayConfig::initializeConfig();
         $this->loadDefaultConfigurationOneclick();
 
         /* Se instalan las tablas, si falla se sigue con la instalación */
