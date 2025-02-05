@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\Request;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Helpers\InfoUtil;
 use Transbank\Plugin\Helpers\PrestashopInfoUtil;
@@ -19,7 +18,6 @@ use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 
 class ConfigureController extends FrameworkBundleAdminController
 {
-    use InteractsWithOneclick;
     const TAB_CLASS_NAME = 'WebpayPlusConfigure';
 
     /** @Route("/webpay/configure", name="webpayplus") */

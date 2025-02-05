@@ -5,7 +5,6 @@ use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
 /**
