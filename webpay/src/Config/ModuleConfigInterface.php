@@ -88,4 +88,11 @@ interface ModuleConfigInterface
      * @return bool True if the configuration is OK, false otherwise.
      */
     public static function isConfigOk(): bool;
+
+    /**
+     * Checks if the payment method is active.
+     *
+     * @return bool True if the payment method is active, false otherwise.
+     */
+    public static function isPaymentMethodActive(): bool;
 }

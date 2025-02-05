@@ -127,4 +127,12 @@ class WebpayConfig implements ModuleConfigInterface
     {
         Configuration::updateValue('WEBPAY_ACTIVE', $paymentActive);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public static function isPaymentMethodActive(): bool
+    {
+        return self::getPaymentActive() === TbkConstants::ACTIVE_MODULE;
+    }
 }
