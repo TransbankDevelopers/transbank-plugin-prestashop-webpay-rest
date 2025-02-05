@@ -10,12 +10,10 @@ use Currency;
 use Transbank\Plugin\Helpers\TbkConstants;
 use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 
 class PaymentOptions implements HookHandlerInterface
 {
-    use InteractsWithWebpay;
     use InteractsWithOneclick;
 
     /**

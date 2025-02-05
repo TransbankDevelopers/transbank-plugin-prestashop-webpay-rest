@@ -152,23 +152,6 @@ trait InteractsWithOneclick
         }
     }
 
-    protected function oneclickUpdateSettings()
-    {
-        $theEnvironmentChanged = false;
-        $environment = Tools::getValue('form_oneclick_environment');
-        if (Tools::getIsset('btn_oneclick_update')) {
-            if ($environment != $this->getOneclickEnvironment()) {
-                $theEnvironmentChanged = true;
-            }
-            $this->setOneclickMallCommerceCode(trim(Tools::getValue('form_oneclick_mall_commerce_code')));
-            $this->setOneclickChildCommerceCode(trim(Tools::getValue('form_oneclick_child_commerce_code')));
-            $this->setOneclickApiKey(trim(Tools::getValue('form_oneclick_api_key')));
-            $this->setOneclickEnvironment($environment);
-            $this->setOneclickOrderAfterPayment((int) Tools::getValue('form_oneclick_order_after_payment'));
-        }
-        return $theEnvironmentChanged;
-    }
-
     protected function getOneclickMallCommerceCode()
     {
         return Configuration::get('ONECLICK_MALL_COMMERCE_CODE');

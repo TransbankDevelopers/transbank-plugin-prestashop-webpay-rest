@@ -1,7 +1,6 @@
 <?php
 
 use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
@@ -16,7 +15,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
-    use InteractsWithWebpay;
     use InteractsWithOneclick;
     use InteractsWithWebpayDb;
     use InteractsWithTabs;
@@ -163,11 +161,5 @@ class WebPay extends PaymentModule
     protected function logInfo($msg)
     {
         $this->log->logInfo($msg);
-    }
-
-    public function updateSettings()
-    {
-        $this->oneclickUpdateSettings();
-        return $this->webpayUpdateSettings();
     }
 }
