@@ -1,5 +1,6 @@
 <?php
 
+use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
@@ -431,13 +432,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      */
     private function getOrderStatusAfterPayment(): string
     {
-        return Configuration::get(
-            'WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT',
-            null,
-            null,
-            null,
-            Configuration::get('PS_OS_PREPARATION')
-        );
+        return WebpayConfig::getOrderStateIdAfterPayment() ?? Configuration::get('PS_OS_PREPARATION');
     }
 
     /**
