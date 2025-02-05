@@ -1,7 +1,7 @@
 <?php
 
+use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
 use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Hooks\DisplayAdminOrderSide;
@@ -15,7 +15,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
-    use InteractsWithOneclick;
     use InteractsWithWebpayDb;
     use InteractsWithTabs;
 
@@ -62,7 +61,7 @@ class WebPay extends PaymentModule
     {
         $result = parent::install();
         WebpayConfig::initializeConfig();
-        $this->loadDefaultConfigurationOneclick();
+        OneclickConfig::initializeConfig();
 
         /* Se instalan las tablas, si falla se sigue con la instalación */
         $resultInstallWebpayTable = $this->installWebpayTable();
