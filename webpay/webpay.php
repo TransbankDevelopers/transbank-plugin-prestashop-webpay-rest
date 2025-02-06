@@ -92,7 +92,7 @@ class WebPay extends PaymentModule
             $this->logInfo("Ejecutando hook displayAdminOrderSide");
             $displayAdminOrderSide = new DisplayAdminOrderSide();
             return $displayAdminOrderSide->execute($params);
-        } catch (Exception | Error $e) {
+        } catch (Throwable $e) {
             $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
         }
     }
@@ -117,7 +117,7 @@ class WebPay extends PaymentModule
             $this->logInfo("Ejecutando hook displayPaymentReturn");
             $displayPaymentReturn = new DisplayPaymentReturn();
             return $displayPaymentReturn->execute($params);
-        } catch (Exception | Error $e) {
+        } catch (Throwable $e) {
             $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
         }
     }
@@ -134,7 +134,7 @@ class WebPay extends PaymentModule
             $moduleCurrencies = $this->getCurrency($cart->id_currency);
             $paymentOptions = new PaymentOptions($moduleCurrencies);
             return $paymentOptions->execute($params);
-        } catch (Exception | Error $e) {
+        } catch (Throwable $e) {
             $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
             return null;
         }

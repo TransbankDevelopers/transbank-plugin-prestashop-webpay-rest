@@ -62,7 +62,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
 
             $this->setRedirectionTemplate($createResponse, $amount);
 
-        } catch (\Exception | \Error $e) {
+        } catch (Throwable $e) {
             $this->logger->logError("Error al crear la transacción: " . $e->getMessage());
             $this->setPaymentErrorPage(
                 "Se ha producido un error al momento de iniciar el pago. " .
