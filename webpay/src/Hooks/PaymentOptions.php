@@ -93,7 +93,7 @@ class PaymentOptions implements HookHandlerInterface
      */
     private function getWebpayPaymentOption(): PaymentOption
     {
-        $WPOption = new PaymentOption();
+        $paymentOption = new PaymentOption();
         $link = new Link();
 
         $paymentController = $link->getModuleLink(TbkConstants::MODULE_NAME, 'webpaypluspayment', array(), true);
@@ -102,7 +102,7 @@ class PaymentOptions implements HookHandlerInterface
         $logoPath = _PS_MODULE_DIR_ . TbkConstants::MODULE_NAME . '/views/img/wpplus_small.png';
 
         return
-            $WPOption->setCallToActionText($message)
+            $paymentOption->setCallToActionText($message)
                 ->setAction($paymentController)
                 ->setLogo(Media::getMediaPath($logoPath));
     }
