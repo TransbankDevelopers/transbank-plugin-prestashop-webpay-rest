@@ -106,6 +106,12 @@ class PaymentOptions implements HookHandlerInterface
                 ->setAction($paymentController)
                 ->setLogo(Media::getMediaPath($logoPath));
     }
+
+    /**
+     * Get the Oneclick payment options.
+     *
+     * @return array The payment options.
+     */
     private function getOneclickPaymentOptions(): array
     {
         $paymentOptions = $this->getOneclickCardsPaymentOptions();
@@ -119,6 +125,11 @@ class PaymentOptions implements HookHandlerInterface
         return $paymentOptions;
     }
 
+    /**
+     * Get the Oneclick cards payment options.
+     *
+     * @return array The payment options.
+     */
     private function getOneclickCardsPaymentOptions(): array
     {
         $link = new Link();
