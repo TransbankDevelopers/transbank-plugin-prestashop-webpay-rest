@@ -116,10 +116,10 @@ class PaymentOptions implements HookHandlerInterface
     {
         $paymentOptions = $this->getOneclickCardsPaymentOptions();
 
-        if (count($paymentOptions) > 0) {
-            $paymentOptions[] = $this->getOneclickInscriptionOption('Usar un nuevo método de pago');
-        } else {
+        if (empty($paymentOptions)) {
             $paymentOptions[] = $this->getOneclickInscriptionOption();
+        } else {
+            $paymentOptions[] = $this->getOneclickInscriptionOption('Usar un nuevo método de pago');
         }
 
         return $paymentOptions;
