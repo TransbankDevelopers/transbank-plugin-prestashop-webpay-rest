@@ -1,10 +1,10 @@
 <?php
 
+use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
 /**
@@ -12,8 +12,6 @@ use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
  */
 class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFrontController
 {
-    use InteractsWithOneclick;
-
     protected $responseData = [];
 
     /**
@@ -34,19 +32,19 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $data = $_REQUEST;
         $inscriptionId = $data['inscriptionId'];
         $webpayTransaction = $this->authorizeTransaction($inscriptionId, $cart, $totalRound);
-        $OKStatus = $this->getOneclickOkStatus();
+        $orderAfterPaymentStatus = $this->getOrderStatusAfterPayment();
 
         $this->logInfo('C.4. Procesando pago - antes de validateOrder');
-        $this->logInfo("amount : {$total}, cartId: {$cart->id}, OKStatus: {$OKStatus},
+        $this->logInfo("amount : {$total}, cartId: {$cart->id}, orderState: {$orderAfterPaymentStatus},
                 currencyId: {$currency->id}, customer_secure_key: {$customer->secure_key}");
 
         $this->module->validateOrder(
             (int) $cart->id,
-            $OKStatus,
+            $orderAfterPaymentStatus,
             $total,
             'Webpay Oneclick',
             'Pago exitoso',
-            []/* variables */,
+            []/* variables */ ,
             (int) $currency->id,
             false,
             $customer->secure_key
@@ -70,7 +68,8 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         return $this->redirectToPaidSuccessPaymentPage($cart);
     }
 
-    private function authorizeTransaction($inscriptionId, $cart, $amount){
+    private function authorizeTransaction($inscriptionId, $cart, $amount)
+    {
         /* 1. Creamos la transaccion antes de intentar autorizarla con tbk */
         $orderId = $cart->id;
         $randomNumber = $this->generateRandomId();
@@ -85,22 +84,22 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
             $this->throwErrorRedirect("Datos incorrectos para autorizar la transacción.");
         }
 
-            $this->logInfo("B.2. Despues de obtener inscripción de la BD => inscriptionId: {$inscriptionId}");
-            $this->logInfo(json_encode($ins));
+        $this->logInfo("B.2. Despues de obtener inscripción de la BD => inscriptionId: {$inscriptionId}");
+        $this->logInfo(json_encode($ins));
 
         $webpay = OneclickFactory::create(); //creamos un objeto Oneclick y autorizamos la transacción con la tarjeta recuperada
 
         /*Creamos la transaccion antes de autorizarla */
         $transaction = new TransbankWebpayRestTransaction();
-        $transaction->cart_id = (int)$cart->id;
-        $transaction->session_id = 'ps:sessionId:'.$randomNumber;
+        $transaction->cart_id = (int) $cart->id;
+        $transaction->session_id = 'ps:sessionId:' . $randomNumber;
         $transaction->created_at = date('Y-m-d H:i:s');
         //$transaction->shop_id = (int) Context::getContext()->shop->id;
         $transaction->currency_id = (int) $cart->id_currency;
 
         $transaction->environment = $webpay->getEnviroment();
         $transaction->product = TransbankWebpayRestTransaction::PRODUCT_WEBPAY_ONECLICK;
-        $transaction->commerce_code =  $webpay->getCommerceCode();
+        $transaction->commerce_code = $webpay->getCommerceCode();
         $transaction->child_commerce_code = $webpay->getChildCommerceCode();
         $transaction->amount = $amount;
         $transaction->token = $childBuyOrder;
@@ -134,7 +133,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $this->logInfo("B.5. Transacción con autorización en Transbank => username: {$ins->username}, tbkToken:
             {$ins->tbk_token}, parentBuyOrder: {$parentBuyOrder}, childBuyOrder: {$childBuyOrder}, amount: {$amount}");
         $this->logInfo(json_encode($resp));
-        if (!is_array($resp) && $resp->isApproved()){
+        if (!is_array($resp) && $resp->isApproved()) {
             $this->logInfo("***** AUTORIZADO POR TBK OK *****");
             $this->logInfo("TRANSACCION VALIDADA POR TBK => username: {$ins->username}, tbkToken: {$ins->tbk_token}
                 , parentBuyOrder: {$parentBuyOrder} childBuyOrder: {$childBuyOrder}, amount: {$amount}");
@@ -148,7 +147,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
             /* 2.1. Si arroja un error y guardamos el error*/
             $transaction->transbank_response = json_encode($resp);
             $saved = $transaction->save();
-            $this->throwErrorRedirect('Error: '.$resp['detail']);
+            $this->throwErrorRedirect('Error: ' . $resp['detail']);
         }
 
         /* 2.2 no arrojo error pero la operación podria haber sido rechazada */
@@ -158,7 +157,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $saved = $transaction->save();
 
         /* Si no se aprueba la orden */
-        if (!$resp->isApproved()){
+        if (!$resp->isApproved()) {
             $this->logError("B.6. Transacción con autorización rechazada => parentBuyOrder:
                 {$parentBuyOrder}, childBuyOrder: {$childBuyOrder}");
             $this->logError(json_encode($resp));
@@ -181,5 +180,15 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $inscriptionUserId = $inscriptionData->user_id;
 
         return $customerId == $inscriptionUserId;
+    }
+
+    /**
+     * Get the status ID for the order when the payment is completed.
+     *
+     * @return string
+     */
+    private function getOrderStatusAfterPayment(): string
+    {
+        return OneclickConfig::getOrderStateIdAfterPayment() ?? Configuration::get('PS_OS_PREPARATION');
     }
 }

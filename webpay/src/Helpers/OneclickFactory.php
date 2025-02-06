@@ -2,18 +2,23 @@
 
 namespace PrestaShop\Module\WebpayPlus\Helpers;
 
-use Configuration;
+use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
 use PrestaShop\Module\WebpayPlus\Utils\TransbankSdkOneclick;
 
 class OneclickFactory
 {
-    public static function create()
+    /**
+     * Create a new instance of TransbankSdkOneclick
+     *
+     * @return TransbankSdkOneclick
+     */
+    public static function create(): TransbankSdkOneclick
     {
         $config = [
-            'ENVIRONMENT'    => Configuration::get('ONECLICK_ENVIRONMENT'),
-            'API_KEY_SECRET' => Configuration::get('ONECLICK_API_KEY'),
-            'COMMERCE_CODE'  => Configuration::get('ONECLICK_MALL_COMMERCE_CODE'),
-            'CHILD_COMMERCE_CODE'  => Configuration::get('ONECLICK_CHILD_COMMERCE_CODE')
+            'ENVIRONMENT' => OneclickConfig::getEnvironment(),
+            'API_KEY_SECRET' => OneclickConfig::getApiKey(),
+            'COMMERCE_CODE' => OneclickConfig::getCommerceCode(),
+            'CHILD_COMMERCE_CODE' => OneclickConfig::getChildCommerceCode()
         ];
 
         return new TransbankSdkOneclick($config);

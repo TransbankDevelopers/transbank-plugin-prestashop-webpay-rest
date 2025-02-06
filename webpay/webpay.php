@@ -1,7 +1,7 @@
 <?php
 
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
+use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
+use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Hooks\DisplayAdminOrderSide;
@@ -15,8 +15,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
-    use InteractsWithWebpay;
-    use InteractsWithOneclick;
     use InteractsWithWebpayDb;
     use InteractsWithTabs;
 
@@ -62,9 +60,8 @@ class WebPay extends PaymentModule
     public function install()
     {
         $result = parent::install();
-        /* carga la configuracion por defecto al instalar el plugin */
-        $this->loadDefaultConfigurationWebpay();
-        $this->loadDefaultConfigurationOneclick();
+        WebpayConfig::initializeConfig();
+        OneclickConfig::initializeConfig();
 
         /* Se instalan las tablas, si falla se sigue con la instalación */
         $resultInstallWebpayTable = $this->installWebpayTable();
@@ -95,7 +92,7 @@ class WebPay extends PaymentModule
             $this->logInfo("Ejecutando hook displayAdminOrderSide");
             $displayAdminOrderSide = new DisplayAdminOrderSide();
             return $displayAdminOrderSide->execute($params);
-        } catch (Exception | Error $e) {
+        } catch (Throwable $e) {
             $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
         }
     }
@@ -120,7 +117,7 @@ class WebPay extends PaymentModule
             $this->logInfo("Ejecutando hook displayPaymentReturn");
             $displayPaymentReturn = new DisplayPaymentReturn();
             return $displayPaymentReturn->execute($params);
-        } catch (Exception | Error $e) {
+        } catch (Throwable $e) {
             $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
         }
     }
@@ -137,7 +134,7 @@ class WebPay extends PaymentModule
             $moduleCurrencies = $this->getCurrency($cart->id_currency);
             $paymentOptions = new PaymentOptions($moduleCurrencies);
             return $paymentOptions->execute($params);
-        } catch (Exception | Error $e) {
+        } catch (Throwable $e) {
             $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
             return null;
         }
@@ -163,11 +160,5 @@ class WebPay extends PaymentModule
     protected function logInfo($msg)
     {
         $this->log->logInfo($msg);
-    }
-
-    public function updateSettings()
-    {
-        $this->oneclickUpdateSettings();
-        return $this->webpayUpdateSettings();
     }
 }

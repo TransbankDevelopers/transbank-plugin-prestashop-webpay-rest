@@ -62,7 +62,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
 
             $this->setRedirectionTemplate($createResponse, $amount);
 
-        } catch (\Exception | \Error $e) {
+        } catch (Throwable $e) {
             $this->logger->logError("Error al crear la transacción: " . $e->getMessage());
             $this->setPaymentErrorPage(
                 "Se ha producido un error al momento de iniciar el pago. " .
@@ -94,7 +94,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         string $token,
         string $buyOrder,
         float $amount
-    ): TransbankWebpayRestTransaction {
+    ): void {
 
         $transaction = new TransbankWebpayRestTransaction();
         $transaction->amount = $amount;
@@ -120,7 +120,6 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             $this->logError($message);
             throw new EcommerceException($message);
         }
-        return $transaction;
     }
 
     /**
