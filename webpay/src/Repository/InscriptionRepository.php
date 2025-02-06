@@ -44,11 +44,9 @@ class InscriptionRepository
      */
     public function getCardsByUserId($userId): array
     {
-        $inscriptions = $this->getInscriptionsByConditions([
+        return $this->getInscriptionsByConditions([
             'user_id' => $userId,
             'status' => TransbankInscriptions::STATUS_COMPLETED,
         ]);
-
-        return $inscriptions;
     }
 }
