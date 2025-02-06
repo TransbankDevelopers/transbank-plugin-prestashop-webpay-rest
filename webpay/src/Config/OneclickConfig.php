@@ -8,7 +8,7 @@ use Transbank\Webpay\Oneclick;
 use Transbank\Plugin\Helpers\TbkConstants;
 use PrestaShop\Module\WebpayPlus\Utils\StringUtils;
 
-class OneclickConfig implements ModuleConfigInterface
+class OneclickConfig extends AbstractModuleConfig
 {
 
     /**
@@ -16,8 +16,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function getApiKey(): ?string
     {
-        $value = Configuration::get('ONECLICK_API_KEY');
-        return $value ?: null;
+        return self::getConfigValue('ONECLICK_API_KEY');
     }
 
     /**
@@ -25,8 +24,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function getCommerceCode(): ?string
     {
-        $value = Configuration::get('ONECLICK_MALL_COMMERCE_CODE');
-        return $value ?: null;
+        return self::getConfigValue('ONECLICK_MALL_COMMERCE_CODE');
     }
 
     /**
@@ -36,8 +34,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function getChildCommerceCode(): ?string
     {
-        $value = Configuration::get('ONECLICK_CHILD_COMMERCE_CODE');
-        return $value ?: null;
+        return self::getConfigValue('ONECLICK_CHILD_COMMERCE_CODE');
     }
 
     /**
@@ -45,8 +42,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function getEnvironment(): ?string
     {
-        $value = Configuration::get('ONECLICK_ENVIRONMENT');
-        return $value ?: null;
+        return self::getConfigValue('ONECLICK_ENVIRONMENT');
     }
 
     /**
@@ -54,8 +50,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function getOrderStateIdAfterPayment(): ?string
     {
-        $value = Configuration::get('ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
-        return $value ?: null;
+        return self::getConfigValue('ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
     }
 
     /**
@@ -63,8 +58,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function getPaymentActive(): ?string
     {
-        $value = Configuration::get('ONECLICK_ACTIVE');
-        return $value ?: null;
+        return self::getConfigValue('ONECLICK_ACTIVE');
     }
 
     /**
@@ -111,7 +105,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function setApiKey(string $apiKey): void
     {
-        Configuration::updateValue('ONECLICK_API_KEY', $apiKey);
+        self::setConfigValue('ONECLICK_API_KEY', $apiKey);
     }
 
     /**
@@ -119,7 +113,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function setCommerceCode(string $commerceCode): void
     {
-        Configuration::updateValue('ONECLICK_MALL_COMMERCE_CODE', $commerceCode);
+        self::setConfigValue('ONECLICK_MALL_COMMERCE_CODE', $commerceCode);
     }
 
     /**
@@ -130,7 +124,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function setChildCommerceCode(string $childCommerceCode): void
     {
-        Configuration::updateValue('ONECLICK_CHILD_COMMERCE_CODE', $childCommerceCode);
+        self::setConfigValue('ONECLICK_CHILD_COMMERCE_CODE', $childCommerceCode);
     }
 
     /**
@@ -138,7 +132,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function setEnvironment(string $environment): void
     {
-        Configuration::updateValue('ONECLICK_ENVIRONMENT', $environment);
+        self::setConfigValue('ONECLICK_ENVIRONMENT', $environment);
     }
 
     /**
@@ -146,7 +140,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function setOrderStateIdAfterPayment(string $orderStateIdAfterPayment): void
     {
-        Configuration::updateValue(
+        self::setConfigValue(
             'ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT',
             $orderStateIdAfterPayment
         );
@@ -157,7 +151,7 @@ class OneclickConfig implements ModuleConfigInterface
      */
     public static function setPaymentActive(string $paymentActive): void
     {
-        Configuration::updateValue('ONECLICK_ACTIVE', $paymentActive);
+        self::setConfigValue('ONECLICK_ACTIVE', $paymentActive);
     }
 
     /**

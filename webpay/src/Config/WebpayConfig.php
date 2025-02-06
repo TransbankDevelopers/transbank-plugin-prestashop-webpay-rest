@@ -9,7 +9,7 @@ use Transbank\Plugin\Helpers\TbkConstants;
 use PrestaShop\Module\WebpayPlus\Utils\StringUtils;
 use PrestaShop\Module\WebpayPlus\Config\ModuleConfigInterface;
 
-class WebpayConfig implements ModuleConfigInterface
+class WebpayConfig extends AbstractModuleConfig
 {
 
     /**
@@ -17,8 +17,7 @@ class WebpayConfig implements ModuleConfigInterface
      */
     public static function getApiKey(): ?string
     {
-        $value = Configuration::get('WEBPAY_API_KEY_SECRET');
-        return $value ?: null;
+        return self::getConfigValue('WEBPAY_API_KEY_SECRET');
     }
 
     /**
@@ -26,8 +25,7 @@ class WebpayConfig implements ModuleConfigInterface
      */
     public static function getCommerceCode(): ?string
     {
-        $value = Configuration::get('WEBPAY_STOREID');
-        return $value ?: null;
+        return self::getConfigValue('WEBPAY_STOREID');
     }
 
     /**
@@ -35,8 +33,7 @@ class WebpayConfig implements ModuleConfigInterface
      */
     public static function getEnvironment(): ?string
     {
-        $value = Configuration::get('WEBPAY_ENVIRONMENT');
-        return $value ?: null;
+        return self::getConfigValue('WEBPAY_ENVIRONMENT');
     }
 
     /**
@@ -44,8 +41,7 @@ class WebpayConfig implements ModuleConfigInterface
      */
     public static function getOrderStateIdAfterPayment(): ?string
     {
-        $value = Configuration::get('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
-        return $value ?: null;
+        return self::getConfigValue('WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT');
     }
 
     /**
@@ -53,8 +49,7 @@ class WebpayConfig implements ModuleConfigInterface
      */
     public static function getPaymentActive(): ?string
     {
-        $value = Configuration::get('WEBPAY_ACTIVE');
-        return $value ?: null;
+        return self::getConfigValue('WEBPAY_ACTIVE');
     }
 
     /**
@@ -90,7 +85,7 @@ class WebpayConfig implements ModuleConfigInterface
      */
     public static function setApiKey(string $apiKey): void
     {
-        Configuration::updateValue('WEBPAY_API_KEY_SECRET', $apiKey);
+        self::setConfigValue('WEBPAY_API_KEY_SECRET', $apiKey);
     }
 
     /**
@@ -98,7 +93,7 @@ class WebpayConfig implements ModuleConfigInterface
      */
     public static function setCommerceCode(string $commerceCode): void
     {
-        Configuration::updateValue('WEBPAY_STOREID', $commerceCode);
+        self::setConfigValue('WEBPAY_STOREID', $commerceCode);
     }
 
     /**
@@ -106,7 +101,7 @@ class WebpayConfig implements ModuleConfigInterface
      */
     public static function setEnvironment(string $environment): void
     {
-        Configuration::updateValue('WEBPAY_ENVIRONMENT', $environment);
+        self::setConfigValue('WEBPAY_ENVIRONMENT', $environment);
     }
 
     /**
@@ -114,7 +109,7 @@ class WebpayConfig implements ModuleConfigInterface
      */
     public static function setOrderStateIdAfterPayment(string $orderStateIdAfterPayment): void
     {
-        Configuration::updateValue(
+        self::setConfigValue(
             'WEBPAY_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT',
             $orderStateIdAfterPayment
         );
@@ -125,7 +120,7 @@ class WebpayConfig implements ModuleConfigInterface
      */
     public static function setPaymentActive(string $paymentActive): void
     {
-        Configuration::updateValue('WEBPAY_ACTIVE', $paymentActive);
+        self::setConfigValue('WEBPAY_ACTIVE', $paymentActive);
     }
 
     /**
