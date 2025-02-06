@@ -32,15 +32,15 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         $data = $_REQUEST;
         $inscriptionId = $data['inscriptionId'];
         $webpayTransaction = $this->authorizeTransaction($inscriptionId, $cart, $totalRound);
-        $OKStatus = $this->getOrderStatusAfterPayment();
+        $orderAfterPaymentStatus = $this->getOrderStatusAfterPayment();
 
         $this->logInfo('C.4. Procesando pago - antes de validateOrder');
-        $this->logInfo("amount : {$total}, cartId: {$cart->id}, OKStatus: {$OKStatus},
+        $this->logInfo("amount : {$total}, cartId: {$cart->id}, orderState: {$orderAfterPaymentStatus},
                 currencyId: {$currency->id}, customer_secure_key: {$customer->secure_key}");
 
         $this->module->validateOrder(
             (int) $cart->id,
-            $OKStatus,
+            $orderAfterPaymentStatus,
             $total,
             'Webpay Oneclick',
             'Pago exitoso',
