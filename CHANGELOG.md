@@ -13,7 +13,7 @@ Esta versión es compatible desde la versión de PrestaShop 1.7.8.0 en adelante.
 ### Actualiza:
 
 -   Se refina el flujo de pago de Webpay Plus.
--   Se cambio el campo del API Key por uno de tipo password en el panel de configuración para Webpay Plus y Webpay Oneclick..
+-   Se cambio el campo del API Key por uno de tipo password en el panel de configuración para Webpay Plus y Webpay Oneclick.
 -   Se actualiza diseño del comprobante de pago para Webpay Plus y Webpay Oneclick.
 -   Se refina el flujo de registro de logs.
 -   Se actualiza la compatibilidad del plugin. Esta versión es compatible desde la versión de PrestaShop 1.7.8.0 en adelante.
