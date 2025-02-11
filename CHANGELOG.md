@@ -8,7 +8,7 @@ y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.ht
 ## [2.3.0] 2025-02-11
 
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
-Esta versión es compatible desde la versión de PrestaShop 1.7.8.x en adelante.
+Esta versión es compatible desde la versión de PrestaShop 1.7.8.0 en adelante.
 
 ### Actualiza:
 
@@ -16,7 +16,7 @@ Esta versión es compatible desde la versión de PrestaShop 1.7.8.x en adelante.
 -   Se cambio el campo del API Key por uno de tipo password en el panel de configuración para Webpay Plus y Webpay Oneclick..
 -   Se actualiza diseño del comprobante de pago para Webpay Plus y Webpay Oneclick.
 -   Se refina el flujo de registro de logs.
--   Se actualiza la compatibilidad del plugin. Esta versión es compatible desde la versión de PrestaShop 1.7.8.x en adelante.
+-   Se actualiza la compatibilidad del plugin. Esta versión es compatible desde la versión de PrestaShop 1.7.8.0 en adelante.
 
 ## [2.2.0] 2024-10-10
 
