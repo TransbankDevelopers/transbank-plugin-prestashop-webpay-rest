@@ -5,6 +5,19 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] 2025-02-11
+
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+Esta versión es compatible desde la versión de PrestaShop 1.7.8.x en adelante.
+
+### Actualiza:
+
+-   Se refina el flujo de pago de Webpay Plus.
+-   Se cambio el campo del API Key por uno de tipo password en el panel de configuración para Webpay Plus y Webpay Oneclick..
+-   Se actualiza diseño del comprobante de pago para Webpay Plus y Webpay Oneclick.
+-   Se refina el flujo de registro de logs.
+-   Se actualiza la compatibilidad del plugin. Esta versión es compatible desde la versión de PrestaShop 1.7.8.x en adelante.
+
 ## [2.2.0] 2024-10-10
 
 ### Agrega:
