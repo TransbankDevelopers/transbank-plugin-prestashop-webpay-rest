@@ -46,7 +46,7 @@ Esta versión es compatible desde la versión de PrestaShop 1.7.8.0 en adelante.
 
 ## [2.0.1-Beta] 2023-01-30
 
--   Se agrega un servicio para recolectar datos que nos permitira darle mayor seguimiento a las versiones del plugin y las versiones de PrestaShop mas usadas.
+-   Se agrega un servicio para recolectar datos que nos permitirá darle mayor seguimiento a las versiones del plugin y las versiones de PrestaShop mas usadas.
 
 ## [2.0.0-Beta] 2023-01-24
 
