@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\WebpayPlus\Controller\Admin;
 
+use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
 use Symfony\Component\HttpFoundation\Request;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpay;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithOneclick;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Helpers\InfoUtil;
 use Transbank\Plugin\Helpers\PrestashopInfoUtil;
 use PrestaShop\Module\WebpayPlus\Grid\TransactionsFilters;
+use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 
 
 class ConfigureController extends FrameworkBundleAdminController
 {
-    use InteractsWithWebpay;
-    use InteractsWithOneclick;
     const TAB_CLASS_NAME = 'WebpayPlusConfigure';
 
     /** @Route("/webpay/configure", name="webpayplus") */
@@ -66,12 +64,9 @@ class ConfigureController extends FrameworkBundleAdminController
     /** @Route("/webpay/configure", name="diagnosis") */
     public function diagnosisAction()
     {
-        $diagnosisFormDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
-        $diagnosisForm = $diagnosisFormDataHandler->getForm();
         $summary = InfoUtil::getSummary();
         $eSummary = PrestashopInfoUtil::getSummary();
         return $this->render('@Modules/webpay/views/templates/admin/diagnosis_configure.html.twig', [
-            'diagnosisForm' => $diagnosisForm->createView(),
             'enableSidebar' => true,
             'layoutTitle' => $this->trans('Configuración Webpay', 'Modules.WebpayPlus.Admin'),
             'summary' => $summary,
@@ -102,7 +97,7 @@ class ConfigureController extends FrameworkBundleAdminController
 
         if ($form->isSubmitted()) {
             if ($form->getClickedButton() === $form->get('webpay_plus_form_reset_button')) {
-                $this->loadDefaultWebpay();
+                WebpayConfig::loadDefaultConfig();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
             } elseif (!$form->isValid()) {
                 foreach ($form->getErrors() as $error) {
@@ -131,7 +126,7 @@ class ConfigureController extends FrameworkBundleAdminController
 
         if ($form->isSubmitted()) {
             if ($form->getClickedButton() === $form->get('oneclick_form_reset_button')) {
-                $this->loadDefaultOneclick();
+                OneclickConfig::loadDefaultConfig();
                 $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
             } elseif (!$form->isValid()) {
                 foreach ($form->getErrors() as $error) {
@@ -151,23 +146,4 @@ class ConfigureController extends FrameworkBundleAdminController
         return $this->redirectToRoute('ps_controller_webpay_configure_oneclick');
     }
 
-    /** @Route("/webpay/configure", name="saveDiagnosisForm") */
-    public function saveDiagnosisFormAction(Request $request): Response
-    {
-        $formDataHandler = $this->get('webpay.form.diagnosis_form_data_handler');
-        $form = $formDataHandler->getForm();
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted()) {
-            $errors = $formDataHandler->save($form->getData());
-
-            if (empty($errors)) {
-                $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
-            } else {
-                $this->flashErrors($errors);
-            }
-        }
-
-        return $this->redirectToRoute('ps_controller_webpay_configure_diagnosis');
-    }
 }

@@ -5,6 +5,19 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] 2025-02-11
+
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+Esta versión es compatible desde la versión de PrestaShop 1.7.8.0 en adelante.
+
+### Actualiza:
+
+-   Se refina el flujo de pago de Webpay Plus.
+-   Se cambio el campo del API Key por uno de tipo password en el panel de configuración para Webpay Plus y Webpay Oneclick.
+-   Se actualiza diseño del comprobante de pago para Webpay Plus y Webpay Oneclick.
+-   Se refina el flujo de registro de logs.
+-   Se actualiza la compatibilidad del plugin. Esta versión es compatible desde la versión de PrestaShop 1.7.8.0 en adelante.
+
 ## [2.2.0] 2024-10-10
 
 ### Agrega:
@@ -18,9 +31,9 @@ y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.ht
 
 ## [2.1.0] 2023-11-03
 
--   Se agrega compatibilidad con Prestashop 8 🎉.
+-   Se agrega compatibilidad con PrestaShop 8 🎉.
 -   Se mejora utilidad de logs para seguimiento de transacciones Webpay plus y Oneclick Mall e instalación del plugin.
--   Se agrega Docker para prestashop 8 y PHP 8.
+-   Se agrega Docker para PrestaShop 8 y PHP 8.
 
 ## [2.0.3] 2023-03-20
 
@@ -33,7 +46,7 @@ y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.ht
 
 ## [2.0.1-Beta] 2023-01-30
 
--   Se agrega un servicio para recolectar datos que nos permitira darle mayor seguimiento a las versiones del plugin y las versiones de Prestashop mas usadas.
+-   Se agrega un servicio para recolectar datos que nos permitirá darle mayor seguimiento a las versiones del plugin y las versiones de PrestaShop mas usadas.
 
 ## [2.0.0-Beta] 2023-01-24
 
@@ -41,7 +54,7 @@ y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.ht
 -   Se migran los formularios del módulo de administración a Symfony.
 -   Se sube la versión minima soportada a 1.7.6.0
 -   Se mejora el log detallado para darle seguimiento a los errores.
--   Se mejora visualmente el módulo de administracion para Webpay.
+-   Se mejora visualmente el módulo de administración para Webpay.
 -   Se agrego un módulo de administración para Oneclick.
 -   Se agrego la opción de inscribir tarjetas utilizando Oneclick.
 -   Se agrego soporte para agregar multiples tarjetas por usuario para Oneclick.
@@ -73,7 +86,7 @@ y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.ht
 -   Permite configurar estado del pedido [PR 13](https://github.com/TransbankDevelopers/transbank-plugin-prestashop-webpay-rest/pull/13).
 -   Se agregan datos de la transacción al detalle de la orden [PR 12](https://github.com/TransbankDevelopers/transbank-plugin-prestashop-webpay-rest/pull/12).
 -   Se mejora coding style [PR 14](https://github.com/TransbankDevelopers/transbank-plugin-prestashop-webpay-rest/pull/14).
--   Se mejora compatibilidad con Prestashop 1.7.7 [PR 18](https://github.com/TransbankDevelopers/transbank-plugin-prestashop-webpay-rest/pull/18).
+-   Se mejora compatibilidad con PrestaShop 1.7.7 [PR 18](https://github.com/TransbankDevelopers/transbank-plugin-prestashop-webpay-rest/pull/18).
 
 ## [1.0.1] - 2020-11-12
 

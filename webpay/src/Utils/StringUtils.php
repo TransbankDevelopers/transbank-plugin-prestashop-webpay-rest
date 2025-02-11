@@ -4,14 +4,16 @@ namespace PrestaShop\Module\WebpayPlus\Utils;
 
 class StringUtils
 {
-    public static function isNotBlankOrNull($str){
-        if (!isset($str)){
-            return false;
-        }
-        else if (empty(trim($str))){
-            return false;
-        }
-        return true;
+    /**
+     * Check if a string is not blank or null.
+     *
+     * @param string $str The string to check.
+     *
+     * @return bool True if the string is not blank or null, false otherwise.
+     */
+    public static function isNotBlankOrNull($str): bool
+    {
+        return isset($str) && !empty(trim($str));
     }
 
 }

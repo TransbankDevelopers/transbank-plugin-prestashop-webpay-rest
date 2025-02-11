@@ -58,7 +58,10 @@ final class OneclickDataConfiguration implements DataConfigurationInterface
         $this->configuration->set(static::ONECLICK_ACTIVE, $configuration['form_oneclick_active']);
         $this->configuration->set(static::ONECLICK_MALL_COMMERCE_CODE, $configuration['form_oneclick_mall_commerce_code']);
         $this->configuration->set(static::ONECLICK_CHILD_COMMERCE_CODE, $configuration['form_oneclick_child_commerce_code']);
-        $this->configuration->set(static::ONECLICK_API_KEY, $configuration['form_oneclick_api_key']);
+
+        if (!empty($configuration['form_oneclick_api_key'])) {
+            $this->configuration->set(static::ONECLICK_API_KEY, $configuration['form_oneclick_api_key']);
+        }
         $this->configuration->set(static::ONECLICK_ENVIRONMENT, $configuration['form_oneclick_environment']);
         $this->configuration->set(static::ONECLICK_DEFAULT_ORDER_STATE_ID_AFTER_PAYMENT, $configuration['form_oneclick_order_after_payment']);
         return [];

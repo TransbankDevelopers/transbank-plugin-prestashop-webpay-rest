@@ -11,6 +11,7 @@ use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use PrestaShop\PrestaShop\Adapter\Configuration;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -52,6 +53,7 @@ class OneclickType extends TranslatorAwareType
                     $this->trans('No', 'Modules.WebpayPlus.Admin') => Options::DEFAULT_INTEGRATION_TYPE,
                     $this->trans('Si', 'Modules.WebpayPlus.Admin') => Options::ENVIRONMENT_PRODUCTION,
                 ],
+                'help' => $this->trans('Cuando no está activado el modo producción, se utilizarán las claves predeterminadas del entorno de pruebas.', 'Modules.WebpayPlus.Admin'),
             ])
             ->add('form_oneclick_mall_commerce_code', TextType::class, [
                 'label' => $this->trans('Código de Comercio Mall', 'Modules.WebpayPlus.Admin'),
@@ -69,13 +71,14 @@ class OneclickType extends TranslatorAwareType
                     new Length(['min' => 12, 'max' => 12]),
                 ]
             ])
-            ->add('form_oneclick_api_key', TextType::class, [
+            ->add('form_oneclick_api_key', PasswordType::class, [
                 'label' => $this->trans('API Key (llave secreta)', 'Modules.WebpayPlus.Admin'),
                 'error_bubbling' => true,
+                'required' => false,
                 'constraints' => [
-                    new NotBlank(),
                     new Length(['min' => 12]),
-                ]
+                ],
+                'help' => $this->trans('Si no deseas cambiar el API Key, deja este campo vacío.', 'Modules.WebpayPlus.Admin'),
             ])
             ->add('form_oneclick_order_after_payment', ChoiceType::class, [
                 'label' => $this->trans('Estado Pago Aceptado', 'Modules.WebpayPlus.Admin'),
@@ -86,6 +89,6 @@ class OneclickType extends TranslatorAwareType
             ])
             ->add('oneclick_form_save_button', SubmitType::class, ['label' => $this->trans('Save', 'Modules.WebpayPlus.Admin')])
             ->add('oneclick_form_reset_button', SubmitType::class, ['label' => $this->trans('Reset', 'Modules.WebpayPlus.Admin')])
-            ;
+        ;
     }
 }

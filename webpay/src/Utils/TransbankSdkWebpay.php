@@ -2,9 +2,11 @@
 
 namespace PrestaShop\Module\WebpayPlus\Utils;
 
+use GuzzleHttp\Exception\GuzzleException;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\Options;
+use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCreateException;
@@ -32,17 +34,19 @@ class TransbankSdkWebpay
         $this->log = TbkFactory::createLogger();
         $this->options = Transaction::getDefaultOptions();
         $environment = isset($config['ENVIRONMENT']) ? $config['ENVIRONMENT'] : null;
-        if (isset($config) && $environment == Options::ENVIRONMENT_PRODUCTION){
+        if (isset($config) && $environment == Options::ENVIRONMENT_PRODUCTION) {
             $this->options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY_SECRET']);
         }
         $this->transaction = new Transaction($this->options);
     }
 
-    public function getCommerceCode(){
+    public function getCommerceCode()
+    {
         return $this->options->getCommerceCode();
     }
 
-    public function getEnviroment(){
+    public function getEnviroment()
+    {
         return $this->options->getIntegrationType();
     }
 
@@ -64,12 +68,12 @@ class TransbankSdkWebpay
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
             $this->log->logInfo('createTransaction : amount: ' . $amount . ', sessionId: ' .
-                $sessionId .', buyOrder: ' . $buyOrder . ', txDate: ' . $txDate . ', txTime: ' . $txTime);
+                $sessionId . ', buyOrder: ' . $buyOrder . ', txDate: ' . $txDate . ', txTime: ' . $txTime);
             $initResult = $this->transaction->create($buyOrder, $sessionId, $amount, $returnUrl);
             $this->log->logInfo('createTransaction.result: ' . json_encode($initResult));
             if (isset($initResult) && isset($initResult->url) && isset($initResult->token)) {
                 $result = [
-                    'url'      => $initResult->url,
+                    'url' => $initResult->url,
                     'token_ws' => $initResult->token,
                 ];
             } else {
@@ -86,29 +90,24 @@ class TransbankSdkWebpay
     }
 
     /**
-     * @param $tokenWs
+     * @param $token
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws EcommerceException
+     * @throws \Transbank\Plugin\Exceptions\EcommerceException
      *
-     * @return array|Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse
+     * @return \Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse
      */
-    public function commitTransaction($tokenWs)
+    public function commitTransaction(string $token): TransactionCommitResponse
     {
-        $result = [];
-
         try {
-            $this->log->logInfo('commitTransaction : tokenWs: ' . $tokenWs);
-            if ($tokenWs == null) {
+            $this->log->logInfo("commitTransaction : token: {$token}");
+            if (!isset($token)) {
                 throw new EcommerceException('El token webpay es requerido');
             }
 
-            return $this->transaction->commit($tokenWs);
-        } catch (TransactionCommitException $e) {
-            $errorMessage = "Error confirmando la transacción para => tokenWs: {$tokenWs}, error: {$e->getMessage()}";
+            return $this->transaction->commit($token);
+        } catch (TransactionCommitException | \InvalidArgumentException | GuzzleException $e) {
+            $errorMessage = "Error confirmando la transacción para el token: {$token}, error: {$e->getMessage()}";
             throw new EcommerceException($errorMessage, $e);
         }
-
-        return $result;
     }
 }
