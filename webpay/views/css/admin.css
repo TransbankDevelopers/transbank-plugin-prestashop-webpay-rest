@@ -32,7 +32,7 @@
 }
 
 .tbk-field-value.tbk-token {
-    white-space: nowrap; 
+    white-space: nowrap;
     overflow: scroll;
     max-width: 80%;
 }
@@ -42,7 +42,7 @@
     border-radius: 4px;
     font-size: 12px;
     font-weight: bold;
-    color: white
+    color: white;
 }
 
 .tbk-badge-success {
