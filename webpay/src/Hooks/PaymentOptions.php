@@ -12,9 +12,9 @@ use Transbank\Plugin\Helpers\TbkConstants;
 use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use PrestaShop\Module\WebpayPlus\Repository\InscriptionRepository;
-use PrestaShop\Module\WebpayPlus\Helpers\AbstractLoggerHook;
+use PrestaShop\Module\WebpayPlus\Hooks\AbstractHookHandler;
 
-class PaymentOptions extends AbstractLoggerHook implements HookHandlerInterface
+class PaymentOptions extends AbstractHookHandler
 {
     /**
      * @var Context Instance of the ecommerce Context.
@@ -39,7 +39,7 @@ class PaymentOptions extends AbstractLoggerHook implements HookHandlerInterface
      */
     public function __construct(array $moduleCurrencies)
     {
-        parent::__construct(); // Call the parent constructor to initialize the logger
+        parent::__construct();
         $this->context = Context::getContext();
         $this->moduleCurrencies = $moduleCurrencies;
         $this->oneclickInscriptionRepository = new InscriptionRepository();

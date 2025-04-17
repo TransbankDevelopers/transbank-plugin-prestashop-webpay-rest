@@ -1,10 +1,11 @@
 <?php
 
-namespace PrestaShop\Module\WebpayPlus\Helpers;
+namespace PrestaShop\Module\WebpayPlus\Hooks;
 
 use Transbank\Plugin\Helpers\PluginLogger;
+use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
-abstract class AbstractLoggerHook
+abstract class AbstractHookHandler implements HookHandlerInterface
 {
     /**
      * @var PluginLogger Instance of the logger.
@@ -20,30 +21,19 @@ abstract class AbstractLoggerHook
     }
 
     /**
-     * INFO Log
-     *
-     * @param string $message
+     * Methods.
      */
+
     protected function logInfo(string $message): void
     {
         $this->logger->logInfo($message);
     }
 
-    /**
-     * DEBUG Log
-     *
-     * @param string $message
-     */
     protected function logDebug(string $message): void
     {
         $this->logger->logDebug($message);
     }
 
-    /**
-     * ERROR Log
-     *
-     * @param string $message
-     */
     protected function logError(string $message): void
     {
         $this->logger->logError($message);

@@ -3,12 +3,12 @@
 namespace PrestaShop\Module\WebpayPlus\Hooks;
 
 use Order;
-use PrestaShop\Module\WebpayPlus\Helpers\AbstractLoggerHook;
 use PrestaShop\Module\WebpayPlus\Utils\Template;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkResponseUtil;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use Transbank\Plugin\Helpers\TbkConstants;
+use PrestaShop\Module\WebpayPlus\Hooks\AbstractHookHandler;
 
 /**
  * Class DisplayAdminOrderSide
@@ -17,7 +17,7 @@ use Transbank\Plugin\Helpers\TbkConstants;
  * when the payment was processed via the Webpay module. It renders the details of a transaction
  * using a custom Twig template.
  */
-class DisplayAdminOrderSide extends AbstractLoggerHook implements HookHandlerInterface
+class DisplayAdminOrderSide extends AbstractHookHandler 
 {
     use InteractsWithWebpayDb;
 
@@ -32,7 +32,7 @@ class DisplayAdminOrderSide extends AbstractLoggerHook implements HookHandlerInt
      */
     public function __construct()
     {
-        parent::__construct(); // Initialize the logger
+        parent::__construct();
         $this->template = new Template();
     }
 

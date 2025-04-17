@@ -2,13 +2,13 @@
 
 namespace PrestaShop\Module\WebpayPlus\Hooks;
 
-use PrestaShop\Module\WebpayPlus\Helpers\AbstractLoggerHook;
 use PrestaShop\Module\WebpayPlus\Utils\Template;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkResponseUtil;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
+use PrestaShop\Module\WebpayPlus\Hooks\AbstractHookHandler;
 
-class DisplayPaymentReturn extends AbstractLoggerHook implements HookHandlerInterface
+class DisplayPaymentReturn extends AbstractHookHandler
 {
     use InteractsWithWebpayDb;
 
@@ -23,7 +23,7 @@ class DisplayPaymentReturn extends AbstractLoggerHook implements HookHandlerInte
      */
     public function __construct()
     {
-        parent::__construct(); // Initialize the logger
+        parent::__construct();
         $this->template = new Template();
     }
 
