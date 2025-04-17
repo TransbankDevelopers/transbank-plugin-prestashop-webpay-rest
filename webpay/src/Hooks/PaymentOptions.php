@@ -12,8 +12,9 @@ use Transbank\Plugin\Helpers\TbkConstants;
 use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use PrestaShop\Module\WebpayPlus\Repository\InscriptionRepository;
+use PrestaShop\Module\WebpayPlus\Helpers\AbstractLoggerHook;
 
-class PaymentOptions implements HookHandlerInterface
+class PaymentOptions extends AbstractLoggerHook implements HookHandlerInterface
 {
     /**
      * @var Context Instance of the ecommerce Context.
@@ -38,6 +39,7 @@ class PaymentOptions implements HookHandlerInterface
      */
     public function __construct(array $moduleCurrencies)
     {
+        parent::__construct(); // Call the parent constructor to initialize the logger
         $this->context = Context::getContext();
         $this->moduleCurrencies = $moduleCurrencies;
         $this->oneclickInscriptionRepository = new InscriptionRepository();
@@ -51,19 +53,33 @@ class PaymentOptions implements HookHandlerInterface
      */
     public function execute(array $params): array
     {
+        $this->logInfo('Parámetros recibidos en hookPaymentOptions: ' . json_encode($params));
+
         $paymentOptions = [];
 
         if (!$this->checkCurrency($params['cart'])) {
+            $this->logError('La moneda configurada no es válida para el carrito.');
             return $paymentOptions;
         }
 
         if (WebpayConfig::isConfigOk() && WebpayConfig::isPaymentMethodActive()) {
+            $this->logInfo('Configuración de Webpay se encuentra activa correctamente.');
             $paymentOptions[] = $this->getWebpayPaymentOption();
         }
 
         if (OneclickConfig::isConfigOk() && OneclickConfig::isPaymentMethodActive() && $this->isCustomerLogged()) {
+            $this->logInfo('Configuración de Oneclick se encuentra activa correctamente y el cliente tiene su sesión iniciada.');
             array_push($paymentOptions, ...$this->getOneclickPaymentOptions());
         }
+
+        $this->logInfo('PaymentOptions generado: ' . json_encode(array_map(function ($option) {
+            return [
+                'callToActionText' => $option->getCallToActionText(),
+                'action' => $option->getAction(),
+                'logo' => $option->getLogo(),
+                'inputs' => $option->getInputs()
+            ];
+        }, $paymentOptions), JSON_UNESCAPED_UNICODE));
         return $paymentOptions;
     }
 
