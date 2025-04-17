@@ -17,7 +17,7 @@ use PrestaShop\Module\WebpayPlus\Hooks\AbstractHookHandler;
  * when the payment was processed via the Webpay module. It renders the details of a transaction
  * using a custom Twig template.
  */
-class DisplayAdminOrderSide extends AbstractHookHandler 
+class DisplayAdminOrderSide extends AbstractHookHandler
 {
     use InteractsWithWebpayDb;
 
