@@ -2,12 +2,13 @@
 
 namespace PrestaShop\Module\WebpayPlus\Hooks;
 
+use PrestaShop\Module\WebpayPlus\Helpers\AbstractLoggerHook;
 use PrestaShop\Module\WebpayPlus\Utils\Template;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkResponseUtil;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 
-class DisplayPaymentReturn implements HookHandlerInterface
+class DisplayPaymentReturn extends AbstractLoggerHook implements HookHandlerInterface
 {
     use InteractsWithWebpayDb;
 
@@ -22,6 +23,7 @@ class DisplayPaymentReturn implements HookHandlerInterface
      */
     public function __construct()
     {
+        parent::__construct(); // Initialize the logger
         $this->template = new Template();
     }
 
@@ -33,7 +35,10 @@ class DisplayPaymentReturn implements HookHandlerInterface
      */
     public function execute(array $params): ?string
     {
+        $this->logInfo('Parámetros recibidos en el hook displayPaymentReturn: ' . json_encode($params));
+
         $order = $params['order'];
+        $this->logInfo('ID de la orden: ' . $order->id);
 
         if ($order->module != "webpay") {
             return null;
@@ -43,6 +48,8 @@ class DisplayPaymentReturn implements HookHandlerInterface
         $transbankResponse = $transbankTransaction->transbank_response;
 
         $product = $transbankTransaction->product;
+        $this->logInfo('Producto: ' . $product);
+
         $objectResponse = json_decode($transbankResponse);
 
         $formattedResponse = [];
@@ -51,6 +58,8 @@ class DisplayPaymentReturn implements HookHandlerInterface
         } else {
             $formattedResponse = TbkResponseUtil::getWebpayFormattedResponse($objectResponse);
         }
+
+        $this->logInfo('Respuesta de Transbank: ' . json_encode($formattedResponse, JSON_UNESCAPED_UNICODE));
 
         return $this->template->render('hook/payment_return.html.twig', [
             'dataView' => $formattedResponse
