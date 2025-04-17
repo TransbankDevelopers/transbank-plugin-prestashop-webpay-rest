@@ -22,7 +22,7 @@ abstract class AbstractLoggerHook
     /**
      * INFO Log
      *
-     * @param string $message 
+     * @param string $message
      */
     protected function logInfo(string $message): void
     {
@@ -31,7 +31,7 @@ abstract class AbstractLoggerHook
 
     /**
      * DEBUG Log
-     * 
+     *
      * @param string $message
      */
     protected function logDebug(string $message): void
@@ -41,7 +41,7 @@ abstract class AbstractLoggerHook
 
     /**
      * ERROR Log
-     * 
+     *
      * @param string $message
      */
     protected function logError(string $message): void
