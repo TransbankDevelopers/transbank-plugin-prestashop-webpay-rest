@@ -3,6 +3,7 @@
 namespace PrestaShop\Module\WebpayPlus\Hooks;
 
 use Order;
+use PrestaShop\Module\WebpayPlus\Helpers\AbstractLoggerHook;
 use PrestaShop\Module\WebpayPlus\Utils\Template;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkResponseUtil;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
@@ -16,7 +17,7 @@ use Transbank\Plugin\Helpers\TbkConstants;
  * when the payment was processed via the Webpay module. It renders the details of a transaction
  * using a custom Twig template.
  */
-class DisplayAdminOrderSide implements HookHandlerInterface
+class DisplayAdminOrderSide extends AbstractLoggerHook implements HookHandlerInterface
 {
     use InteractsWithWebpayDb;
 
@@ -31,6 +32,7 @@ class DisplayAdminOrderSide implements HookHandlerInterface
      */
     public function __construct()
     {
+        parent::__construct(); // Initialize the logger
         $this->template = new Template();
     }
 
@@ -42,7 +44,10 @@ class DisplayAdminOrderSide implements HookHandlerInterface
      */
     public function execute(array $params): ?string
     {
+        $this->logInfo("Parámetros recibidos en el hook displayAdminOrderSide: " . json_encode($params));
+
         $orderId = $params['id_order'];
+        $this->logInfo("ID de la orden: " . $orderId);
         $order = new Order($orderId);
 
         if ($order->module != "webpay") {
@@ -57,6 +62,7 @@ class DisplayAdminOrderSide implements HookHandlerInterface
         }
 
         $product = $transbankTransaction->product;
+        $this->logInfo("Producto: " . $product);
         $objectResponse = json_decode($transbankResponse);
 
         $formattedResponse = [];
@@ -68,6 +74,8 @@ class DisplayAdminOrderSide implements HookHandlerInterface
             $formattedResponse['token'] = $transbankTransaction->token;
             $status = $objectResponse->status;
         }
+
+        $this->logInfo("Respuesta de Transbank: " . json_encode($formattedResponse, JSON_UNESCAPED_UNICODE));
 
         return $this->template->render('hook/payment_detail.html.twig', [
             'title' => $this->buildTitleText($product, $status),
