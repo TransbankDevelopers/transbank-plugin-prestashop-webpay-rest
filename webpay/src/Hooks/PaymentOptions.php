@@ -53,7 +53,7 @@ class PaymentOptions extends AbstractHookHandler
      */
     public function execute(array $params): array
     {
-        $this->logInfo('Parámetros recibidos en hookPaymentOptions: ' . json_encode($params));
+        $this->logInfo("Ejecutando hook hookPaymentOptions");
 
         $paymentOptions = [];
 

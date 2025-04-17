@@ -35,7 +35,7 @@ class DisplayPaymentReturn extends AbstractHookHandler
      */
     public function execute(array $params): ?string
     {
-        $this->logInfo('Parámetros recibidos en el hook displayPaymentReturn: ' . json_encode($params));
+        $this->logInfo("Ejecutando hook displayPaymentReturn");
 
         $order = $params['order'];
         $this->logInfo('ID de la orden: ' . $order->id);

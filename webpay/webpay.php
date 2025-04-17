@@ -89,7 +89,6 @@ class WebPay extends PaymentModule
     public function hookDisplayAdminOrderSide($params): ?string
     {
         try {
-            $this->logInfo("Ejecutando hook displayAdminOrderSide");
             $displayAdminOrderSide = new DisplayAdminOrderSide();
             return $displayAdminOrderSide->execute($params);
         } catch (Throwable $e) {
@@ -114,7 +113,6 @@ class WebPay extends PaymentModule
     public function hookDisplayPaymentReturn($params): ?string
     {
         try {
-            $this->logInfo("Ejecutando hook displayPaymentReturn");
             $displayPaymentReturn = new DisplayPaymentReturn();
             return $displayPaymentReturn->execute($params);
         } catch (Throwable $e) {
@@ -128,8 +126,6 @@ class WebPay extends PaymentModule
     public function hookPaymentOptions($params): ?array
     {
         try {
-            $this->logInfo("Ejecutando hook hookPaymentOptions");
-
             $cart = $params['cart'];
             $moduleCurrencies = $this->getCurrency($cart->id_currency);
             $paymentOptions = new PaymentOptions($moduleCurrencies);

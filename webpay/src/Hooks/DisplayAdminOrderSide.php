@@ -44,7 +44,7 @@ class DisplayAdminOrderSide extends AbstractHookHandler
      */
     public function execute(array $params): ?string
     {
-        $this->logInfo("Parámetros recibidos en el hook displayAdminOrderSide: " . json_encode($params));
+        $this->logInfo("Ejecutando hook displayAdminOrderSide");
 
         $orderId = $params['id_order'];
         $this->logInfo("ID de la orden: " . $orderId);
