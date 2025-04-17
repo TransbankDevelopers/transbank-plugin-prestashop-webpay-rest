@@ -12,17 +12,10 @@ abstract class AbstractHookHandler implements HookHandlerInterface
      */
     protected $logger;
 
-    /**
-     * Constructor.
-     */
     public function __construct()
     {
         $this->logger = TbkFactory::createLogger();
     }
-
-    /**
-     * Methods.
-     */
 
     protected function logInfo(string $message): void
     {
