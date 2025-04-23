@@ -24,7 +24,9 @@ abstract class AbstractHookHandler implements HookHandlerInterface
 
     protected function logDebug(string $message): void
     {
-        $this->logger->logDebug($message);
+        if (defined('_PS_MODE_DEV_') && _PS_MODE_DEV_) {
+            $this->logger->logDebug($message);
+        }
     }
 
     protected function logError(string $message): void
