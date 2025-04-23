@@ -53,26 +53,35 @@ class PaymentOptions extends AbstractHookHandler
      */
     public function execute(array $params): array
     {
-        $this->logInfo("Ejecutando hook hookPaymentOptions");
+        $this->logInfo('Ejecutando hook PaymentOptions');
+        $this->logDebug('Parámetros recibidos: '. json_encode($params, JSON_UNESCAPED_UNICODE));
 
         $paymentOptions = [];
+
+        $this->logInfo('Comprobando la moneda configurada en el carrito');
 
         if (!$this->checkCurrency($params['cart'])) {
             $this->logError('La moneda configurada no es válida para el carrito.');
             return $paymentOptions;
+        } else {
+            $this->logInfo('Moneda configurada es válida para el carrito');
         }
+
+        $this->logInfo('Comprobando configuración de WebPay');
 
         if (WebpayConfig::isConfigOk() && WebpayConfig::isPaymentMethodActive()) {
             $this->logInfo('Configuración de Webpay se encuentra activa correctamente.');
             $paymentOptions[] = $this->getWebpayPaymentOption();
         }
 
+        $this->logInfo('Comprobando configuración de Oneclick');
+
         if (OneclickConfig::isConfigOk() && OneclickConfig::isPaymentMethodActive() && $this->isCustomerLogged()) {
             $this->logInfo('Configuración de Oneclick se encuentra activa correctamente y el cliente tiene su sesión iniciada.');
             array_push($paymentOptions, ...$this->getOneclickPaymentOptions());
         }
 
-        $this->logInfo('PaymentOptions generado: ' . json_encode(array_map(function ($option) {
+        $this->logDebug('PaymentOptions generado: ' . json_encode(array_map(function ($option) {
             return [
                 'callToActionText' => $option->getCallToActionText(),
                 'action' => $option->getAction(),
@@ -80,6 +89,8 @@ class PaymentOptions extends AbstractHookHandler
                 'inputs' => $option->getInputs()
             ];
         }, $paymentOptions), JSON_UNESCAPED_UNICODE));
+
+        $this->logInfo('El hook PaymentOptions se ejecutó correctamente');
         return $paymentOptions;
     }
 
