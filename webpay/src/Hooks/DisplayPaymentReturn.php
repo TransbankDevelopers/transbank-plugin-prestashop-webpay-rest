@@ -35,31 +35,43 @@ class DisplayPaymentReturn extends AbstractHookHandler
      */
     public function execute(array $params): ?string
     {
-        $this->logInfo("Ejecutando hook displayPaymentReturn");
+        $this->logInfo('Ejecutando hook DisplayPaymentReturn');
+        $this->logDebug('Parámetros recibidos: '. json_encode($params, JSON_UNESCAPED_UNICODE));
 
         $order = $params['order'];
-        $this->logInfo('ID de la orden: ' . $order->id);
+        $this->logDebug('ID de la orden: ' . $order->id);
 
+        $this->logInfo('Comprobando que la orden usa el módulo Webpay');
         if ($order->module != "webpay") {
+            $this->logInfo('Orden no usa el módulo Webpay');
             return null;
+        } else {
+            $this->logInfo('Orden usa el módulo Webpay');
         }
-
+        
+        $this->logInfo('Cargando respuesta de Transbank');
         $transbankTransaction = $this->getTransactionWebpayApprovedByOrderId($order->id);
         $transbankResponse = $transbankTransaction->transbank_response;
+        $this->logInfo('Respuesta de Transbank ha sido cargada');
 
         $product = $transbankTransaction->product;
-        $this->logInfo('Producto: ' . $product);
+        $this->logDebug('Producto asociado: ' . $product);
 
         $objectResponse = json_decode($transbankResponse);
 
+        $this->logDebug('Aplicando formato a respuesta recibida');
         $formattedResponse = [];
         if ($product === TransbankWebpayRestTransaction::PRODUCT_WEBPAY_ONECLICK) {
             $formattedResponse = TbkResponseUtil::getOneclickFormattedResponse($objectResponse);
+            $this->logDebug('Respuesta formateada como transacción Oneclick');
         } else {
             $formattedResponse = TbkResponseUtil::getWebpayFormattedResponse($objectResponse);
+            $this->logDebug('Respuesta formateada como transacción Webpay');
         }
 
-        $this->logInfo('Respuesta de Transbank: ' . json_encode($formattedResponse, JSON_UNESCAPED_UNICODE));
+        $this->logDebug('Respuesta formateada: ' . json_encode($formattedResponse, JSON_UNESCAPED_UNICODE));
+
+        $this->logInfo('El hook DisplayPaymentReturn se ejecutó correctamente');
 
         return $this->template->render('hook/payment_return.html.twig', [
             'dataView' => $formattedResponse
