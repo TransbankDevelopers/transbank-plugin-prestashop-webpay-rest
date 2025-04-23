@@ -44,38 +44,53 @@ class DisplayAdminOrderSide extends AbstractHookHandler
      */
     public function execute(array $params): ?string
     {
-        $this->logInfo("Ejecutando hook displayAdminOrderSide");
+        $this->logInfo('Ejecutando hook DisplayAdminOrderSide');
+        $this->logDebug('Parámetros recibidos: '. json_encode($params, JSON_UNESCAPED_UNICODE));
 
         $orderId = $params['id_order'];
-        $this->logInfo("ID de la orden: " . $orderId);
+        $this->logDebug('ID de la orden: ' . $orderId);
         $order = new Order($orderId);
 
+        $this->logInfo('Comprobando que la orden usa el módulo Webpay');
         if ($order->module != "webpay") {
+            $this->logInfo('Orden no usa el módulo Webpay');
             return null;
+        } else {
+            $this->logInfo('Orden usa el módulo Webpay');
         }
 
+        $this->logInfo('Cargando respuesta de Transbank');
         $transbankTransaction = $this->getTransactionWebpayApprovedByOrderId($orderId);
         $transbankResponse = $transbankTransaction->transbank_response;
 
         if (!isset($transbankResponse)) {
+            $this->logError('No se encontró respuesta de Transbank para la orden');
             return null;
+        } else {
+            $this->logInfo('Respuesta de Transbank ha sido cargada');
         }
 
+
         $product = $transbankTransaction->product;
-        $this->logInfo("Producto: " . $product);
+        $this->logDebug('Producto asociado: ' . $product);
         $objectResponse = json_decode($transbankResponse);
 
+        $this->logDebug('Aplicando formato a respuesta recibida');
         $formattedResponse = [];
         if ($product === TransbankWebpayRestTransaction::PRODUCT_WEBPAY_ONECLICK) {
             $formattedResponse = TbkResponseUtil::getOneclickStatusFormattedResponse($objectResponse);
+            $this->logDebug('Respuesta formateada como transacción Oneclick');
             $status = $objectResponse->details[0]->status;
         } else {
             $formattedResponse = TbkResponseUtil::getWebpayStatusFormattedResponse($objectResponse);
+            $this->logDebug('Respuesta formateada como transacción Webpay');
             $formattedResponse['token'] = $transbankTransaction->token;
             $status = $objectResponse->status;
         }
 
-        $this->logInfo("Respuesta de Transbank: " . json_encode($formattedResponse, JSON_UNESCAPED_UNICODE));
+        $this->logDebug('Respuesta formateada: ' . json_encode($formattedResponse, JSON_UNESCAPED_UNICODE));
+
+        $this->logInfo('El hook DisplayAdminOrderSide se ejecutó correctamente');
 
         return $this->template->render('hook/payment_detail.html.twig', [
             'title' => $this->buildTitleText($product, $status),
