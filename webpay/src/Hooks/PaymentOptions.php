@@ -58,23 +58,15 @@ class PaymentOptions extends AbstractHookHandler
 
         $paymentOptions = [];
 
-        $this->logInfo('Comprobando la moneda configurada en el carrito');
-
         if (!$this->checkCurrency($params['cart'])) {
             $this->logError('La moneda configurada no es válida para el carrito.');
             return $paymentOptions;
         }
-        
-        $this->logInfo('Moneda configurada es válida para el carrito');
-
-        $this->logInfo('Comprobando configuración de WebPay');
 
         if (WebpayConfig::isConfigOk() && WebpayConfig::isPaymentMethodActive()) {
             $this->logInfo('Configuración de Webpay se encuentra activa correctamente.');
             $paymentOptions[] = $this->getWebpayPaymentOption();
         }
-
-        $this->logInfo('Comprobando configuración de Oneclick');
 
         if (OneclickConfig::isConfigOk() && OneclickConfig::isPaymentMethodActive() && $this->isCustomerLogged()) {
             $this->logInfo('Configuración de Oneclick se encuentra activa correctamente y el cliente tiene su sesión iniciada.');
