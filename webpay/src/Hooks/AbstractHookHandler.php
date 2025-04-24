@@ -2,7 +2,6 @@
 
 namespace PrestaShop\Module\WebpayPlus\Hooks;
 
-use Transbank\Plugin\Helpers\PluginLogger;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 
 abstract class AbstractHookHandler implements HookHandlerInterface
