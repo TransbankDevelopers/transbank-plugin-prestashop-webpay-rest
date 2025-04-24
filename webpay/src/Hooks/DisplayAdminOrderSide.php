@@ -55,9 +55,9 @@ class DisplayAdminOrderSide extends AbstractHookHandler
         if ($order->module != "webpay") {
             $this->logInfo('Orden no usa el módulo Webpay');
             return null;
-        } else {
-            $this->logInfo('Orden usa el módulo Webpay');
-        }
+        } 
+        
+        $this->logInfo('Orden usa el módulo Webpay');
 
         $this->logInfo('Cargando respuesta de Transbank');
         $transbankTransaction = $this->getTransactionWebpayApprovedByOrderId($orderId);
@@ -66,10 +66,9 @@ class DisplayAdminOrderSide extends AbstractHookHandler
         if (!isset($transbankResponse)) {
             $this->logError('No se encontró respuesta de Transbank para la orden');
             return null;
-        } else {
-            $this->logInfo('Respuesta de Transbank ha sido cargada');
         }
-
+        
+        $this->logInfo('Respuesta de Transbank ha sido cargada');
 
         $product = $transbankTransaction->product;
         $this->logDebug('Producto asociado: ' . $product);

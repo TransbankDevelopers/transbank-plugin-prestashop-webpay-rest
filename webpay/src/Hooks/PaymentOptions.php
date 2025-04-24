@@ -63,9 +63,9 @@ class PaymentOptions extends AbstractHookHandler
         if (!$this->checkCurrency($params['cart'])) {
             $this->logError('La moneda configurada no es válida para el carrito.');
             return $paymentOptions;
-        } else {
-            $this->logInfo('Moneda configurada es válida para el carrito');
         }
+        
+        $this->logInfo('Moneda configurada es válida para el carrito');
 
         $this->logInfo('Comprobando configuración de WebPay');
 
