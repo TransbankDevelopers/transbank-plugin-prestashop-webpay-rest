@@ -7,7 +7,7 @@ use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 abstract class AbstractHookHandler implements HookHandlerInterface
 {
     /**
-     * @var PluginLogger Instance of the logger.
+     * @var \Transbank\Plugin\Helpers\PluginLogger Instance of the logger.
      */
     protected $logger;
 
