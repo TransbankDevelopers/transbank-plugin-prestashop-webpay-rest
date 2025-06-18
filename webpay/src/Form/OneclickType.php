@@ -50,7 +50,7 @@ class OneclickType extends TranslatorAwareType
             ->add('form_oneclick_environment', SwitchType::class, [
                 'label' => $this->trans('Producción', 'Modules.WebpayPlus.Admin'),
                 'choices' => [
-                    $this->trans('No', 'Modules.WebpayPlus.Admin') => Options::DEFAULT_INTEGRATION_TYPE,
+                    $this->trans('No', 'Modules.WebpayPlus.Admin') => Options::ENVIRONMENT_INTEGRATION,
                     $this->trans('Si', 'Modules.WebpayPlus.Admin') => Options::ENVIRONMENT_PRODUCTION,
                 ],
                 'help' => $this->trans('Cuando no está activado el modo producción, se utilizarán las claves predeterminadas del entorno de pruebas.', 'Modules.WebpayPlus.Admin'),
