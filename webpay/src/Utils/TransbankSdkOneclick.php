@@ -42,7 +42,6 @@ class TransbankSdkOneclick
         );
         $environment = isset($config['ENVIRONMENT']) ? $config['ENVIRONMENT'] : null;
         if (isset($config) && $environment == Options::ENVIRONMENT_PRODUCTION){
-            $this->options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY_SECRET']);
             $this->options = new Options(
                 $config['API_KEY_SECRET'],
                 $config['COMMERCE_CODE'],
