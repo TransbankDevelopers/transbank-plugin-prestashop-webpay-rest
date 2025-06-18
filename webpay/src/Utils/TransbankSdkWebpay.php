@@ -33,9 +33,9 @@ class TransbankSdkWebpay
     public function __construct($config)
     {
         $this->log = TbkFactory::createLogger();
-        $this->options = new Options(   
-            WebpayPlus::INTEGRATION_API_KEY,    
-            WebpayPlus::INTEGRATION_COMMERCE_CODE,  
+        $this->options = new Options(
+            WebpayPlus::INTEGRATION_API_KEY,
+            WebpayPlus::INTEGRATION_COMMERCE_CODE,
             Options::ENVIRONMENT_INTEGRATION
         );
         $environment = isset($config['ENVIRONMENT']) ? $config['ENVIRONMENT'] : null;
