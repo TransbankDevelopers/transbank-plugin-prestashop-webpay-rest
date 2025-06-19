@@ -35,11 +35,20 @@ class TransbankSdkOneclick
     public function __construct($config)
     {
         $this->log = TbkFactory::createLogger();
-        $this->options = new Options(
-            $config['API_KEY_SECRET'],
-            $config['COMMERCE_CODE'],
-            $config['ENVIRONMENT']
-        );
+
+        if($config['ENVIRONMENT'] == Options::ENVIRONMENT_PRODUCTION) {
+            $this->options = new Options(
+                $config['API_KEY_SECRET'],
+                $config['COMMERCE_CODE'],
+                $config['ENVIRONMENT']
+            );
+        } else {
+            $this->options = new Options(
+                Oneclick::INTEGRATION_API_KEY,
+                Oneclick::INTEGRATION_COMMERCE_CODE,
+                $config['ENVIRONMENT']
+            );
+        }
 
         $this->inscription = new MallInscription($this->options);
         $this->transaction = new MallTransaction($this->options);

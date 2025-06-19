@@ -11,6 +11,7 @@ use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCreateException;
+use WebPay;
 
 /**
  * Class TransbankSdkWebpayRest.
@@ -33,11 +34,20 @@ class TransbankSdkWebpay
     public function __construct($config)
     {
         $this->log = TbkFactory::createLogger();
-        $this->options = new Options(
-            $config['API_KEY_SECRET'],
-            $config['COMMERCE_CODE'],
-            $config['ENVIRONMENT']
-        );
+
+        if($config['ENVIRONMENT'] == Options::ENVIRONMENT_PRODUCTION) {
+            $this->options = new Options(
+                $config['API_KEY_SECRET'],
+                $config['COMMERCE_CODE'],
+                $config['ENVIRONMENT']
+            );
+        } else {
+            $this->options = new Options(
+                WebpayPlus::INTEGRATION_API_KEY,
+                WebpayPlus::INTEGRATION_COMMERCE_CODE,
+                $config['ENVIRONMENT']
+            );
+        }
 
         $this->transaction = new Transaction($this->options);
     }
