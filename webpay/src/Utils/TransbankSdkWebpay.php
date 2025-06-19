@@ -33,13 +33,13 @@ class TransbankSdkWebpay
     public function __construct($config)
     {
         $this->log = TbkFactory::createLogger();
-        $environment = $config['ENVIRONMENT'] ?? null;
+        $this->options = new Options(
+            $config['API_KEY_SECRET'],
+            $config['COMMERCE_CODE'],
+            $config['ENVIRONMENT']
+        );
 
-        $this->transaction = ($environment == Options::ENVIRONMENT_PRODUCTION)
-            ? Transaction::buildForProduction($config['API_KEY_SECRET'], $config['COMMERCE_CODE'])
-            : Transaction::buildForIntegration(WebpayPlus::INTEGRATION_API_KEY, WebpayPlus::INTEGRATION_COMMERCE_CODE);
-        
-        $this->options = $this->transaction->getOptions();
+        $this->transaction = new Transaction($this->options);
     }
 
     public function getCommerceCode()
