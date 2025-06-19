@@ -6,10 +6,12 @@ use GuzzleHttp\Exception\GuzzleException;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\Options;
+use Transbank\Webpay\WebpayPlus;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCreateException;
+use WebPay;
 
 /**
  * Class TransbankSdkWebpayRest.
@@ -32,11 +34,21 @@ class TransbankSdkWebpay
     public function __construct($config)
     {
         $this->log = TbkFactory::createLogger();
-        $this->options = Transaction::getDefaultOptions();
-        $environment = isset($config['ENVIRONMENT']) ? $config['ENVIRONMENT'] : null;
-        if (isset($config) && $environment == Options::ENVIRONMENT_PRODUCTION) {
-            $this->options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY_SECRET']);
+
+        if($config['ENVIRONMENT'] == Options::ENVIRONMENT_PRODUCTION) {
+            $this->options = new Options(
+                $config['API_KEY_SECRET'],
+                $config['COMMERCE_CODE'],
+                $config['ENVIRONMENT']
+            );
+        } else {
+            $this->options = new Options(
+                WebpayPlus::INTEGRATION_API_KEY,
+                WebpayPlus::INTEGRATION_COMMERCE_CODE,
+                $config['ENVIRONMENT']
+            );
         }
+
         $this->transaction = new Transaction($this->options);
     }
 

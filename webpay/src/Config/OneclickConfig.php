@@ -93,10 +93,10 @@ class OneclickConfig extends AbstractModuleConfig
     public static function loadDefaultConfig(): void
     {
         self::setPaymentActive(TbkConstants::ACTIVE_MODULE);
-        self::setEnvironment(Options::DEFAULT_INTEGRATION_TYPE);
-        self::setCommerceCode(Oneclick::DEFAULT_COMMERCE_CODE);
-        self::setChildCommerceCode(Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1);
-        self::setApiKey(Oneclick::DEFAULT_API_KEY);
+        self::setEnvironment(Options::ENVIRONMENT_INTEGRATION);
+        self::setCommerceCode(Oneclick::INTEGRATION_COMMERCE_CODE);
+        self::setChildCommerceCode(Oneclick::INTEGRATION_CHILD_COMMERCE_CODE_1);
+        self::setApiKey(Oneclick::INTEGRATION_API_KEY);
         self::setOrderStateIdAfterPayment(Configuration::get('PS_OS_PREPARATION'));
     }
 
