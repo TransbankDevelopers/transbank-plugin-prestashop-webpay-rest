@@ -2,7 +2,6 @@
     "require": {
         "transbank/transbank-sdk": "~5.0",
         "monolog/monolog": "^2.0",
-        "guzzlehttp/guzzle": "^7",
         "ext-json": "*",
         "php": ">=8.2"
     },
