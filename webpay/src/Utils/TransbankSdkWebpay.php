@@ -11,7 +11,6 @@ use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCreateException;
-use WebPay;
 
 /**
  * Class TransbankSdkWebpayRest.
