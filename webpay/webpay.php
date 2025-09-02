@@ -70,7 +70,6 @@ class WebPay extends PaymentModule
         $this->logError("installOneclickTable => {$resultInstallOneclickTable}");
         $this->installTab();
 
-        /* Si algo falla aqui se muestran los errores */
         return $result && $this->registerHook(self::MODULE_HOOKS);
     }
 
@@ -92,12 +91,14 @@ class WebPay extends PaymentModule
             $displayAdminOrderSide = new DisplayAdminOrderSide();
             return $displayAdminOrderSide->execute($params);
         } catch (Throwable $e) {
-            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
+            $this->logError("Error el ejecutar el hook DisplayAdminOrderSide: {$e->getMessage()}");
+            return "";
         }
     }
 
     public function hookDisplayBackOfficeHeader(): void
     {
+        $this->logInfo('Ejecutando hook DisplayBackOfficeHeader');
         if ($this->context->controller->controller_name === 'AdminOrders') {
             $this->context->controller->addCSS('modules/' . $this->name . '/views/css/admin.css');
         }
@@ -105,8 +106,9 @@ class WebPay extends PaymentModule
 
     public function hookDisplayHeader(): void
     {
+        $this->logInfo('Ejecutando hook DisplayHeader');
         if ($this->context->controller->php_self === 'order-confirmation') {
-            $this->context->controller->addCSS('modules/' . $this->name . '/views/css/front.css');
+            $this->context->controller->registerStylesheet('tbk-front', 'modules/' . $this->name . '/views/css/front.css');
         }
     }
 
@@ -116,7 +118,8 @@ class WebPay extends PaymentModule
             $displayPaymentReturn = new DisplayPaymentReturn();
             return $displayPaymentReturn->execute($params);
         } catch (Throwable $e) {
-            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
+            $this->logError("Error el ejecutar el hook DisplayPaymentReturn: {$e->getMessage()}");
+            return "";
         }
     }
 
@@ -131,7 +134,7 @@ class WebPay extends PaymentModule
             $paymentOptions = new PaymentOptions($moduleCurrencies);
             return $paymentOptions->execute($params);
         } catch (Throwable $e) {
-            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
+            $this->logError("Error el ejecutar el hook PaymentOptions: {$e->getMessage()}");
             return null;
         }
     }
