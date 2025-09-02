@@ -129,7 +129,6 @@ class WebPay extends PaymentModule
     public function hookPaymentOptions($params): ?array
     {
         try {
-            $this->logInfo('Ejecutando hook PaymentOptions');
             $cart = $params['cart'];
             $moduleCurrencies = $this->getCurrency($cart->id_currency);
             $paymentOptions = new PaymentOptions($moduleCurrencies);
