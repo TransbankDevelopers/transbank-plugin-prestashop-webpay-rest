@@ -92,6 +92,7 @@ class WebPay extends PaymentModule
             return $displayAdminOrderSide->execute($params);
         } catch (Throwable $e) {
             $this->logError("Error el ejecutar el hook DisplayAdminOrderSide: {$e->getMessage()}");
+            return "";
         }
     }
 
@@ -118,6 +119,7 @@ class WebPay extends PaymentModule
             return $displayPaymentReturn->execute($params);
         } catch (Throwable $e) {
             $this->logError("Error el ejecutar el hook DisplayPaymentReturn: {$e->getMessage()}");
+            return "";
         }
     }
 
