@@ -108,7 +108,7 @@ class WebPay extends PaymentModule
     {
         $this->logInfo('Ejecutando hook DisplayHeader');
         if ($this->context->controller->php_self === 'order-confirmation') {
-            $this->context->controller->addCSS('modules/' . $this->name . '/views/css/front.css');
+            $this->context->controller->registerStylesheet('tbk-front', 'modules/' . $this->name . '/views/css/front.css');
         }
     }
 
