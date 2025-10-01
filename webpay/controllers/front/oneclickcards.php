@@ -148,11 +148,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
             throw new EcommerceException('Inscripción no encontrada.');
         }
 
-        $result = $this->oneclickService->delete($inscription['tbk_token'], $inscription['username']);
-
-        if (!$result) {
-            throw new EcommerceException('Error al eliminar la tarjeta en Transbank.');
-        }
+        $this->oneclickService->delete($inscription['tbk_token'], $inscription['username']);
 
         $deleted = $this->repository->deleteInscriptionByUserAndId($customerId, $cardId);
         if (!$deleted) {
