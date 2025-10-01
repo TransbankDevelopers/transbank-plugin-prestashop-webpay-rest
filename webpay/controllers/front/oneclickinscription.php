@@ -35,7 +35,7 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         $ins->pay_after_inscription = false;
         $ins->from = 'checkout';
         $ins->status = TransbankInscriptions::STATUS_INITIALIZED;
-        $ins->environment = $webpay->getEnviroment();
+        $ins->environment = $webpay->getEnvironment();
         $ins->commerce_code = $webpay->getCommerceCode();
         $ins->order_id = $this->module->currentOrder;//importante para recuperar la orden en curso y el carro en curso
         $saved = $ins->save();

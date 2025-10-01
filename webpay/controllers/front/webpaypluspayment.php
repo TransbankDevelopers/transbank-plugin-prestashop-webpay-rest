@@ -108,7 +108,7 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
         $transaction->currency_id = $currencyId;
 
         $transaction->commerce_code = $webpay->getCommerceCode();
-        $transaction->environment = $webpay->getEnviroment();
+        $transaction->environment = $webpay->getEnvironment();
         $transaction->product = TransbankWebpayRestTransaction::PRODUCT_WEBPAY_PLUS;
 
         $this->logInfo("Creando registro en la tabla webpay_transactions [Datos]:");

@@ -56,7 +56,7 @@ class TransbankSdkWebpay
         return $this->options->getCommerceCode();
     }
 
-    public function getEnviroment()
+    public function getEnvironment()
     {
         return $this->options->getIntegrationType();
     }
