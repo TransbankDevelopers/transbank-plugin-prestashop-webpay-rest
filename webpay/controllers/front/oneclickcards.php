@@ -45,6 +45,10 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     public function postProcess(): void
     {
         try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                return;
+            }
+
             $this->validatePostRequest();
 
             $idCard = (int) Tools::getValue('id_card');
