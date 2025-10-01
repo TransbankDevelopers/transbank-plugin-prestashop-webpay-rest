@@ -42,11 +42,28 @@ class InscriptionRepository
      *
      * @return array Inscriptions data.
      */
-    public function getCardsByUserId($userId): array
+    public function getCardsByUserId(string $userId): array
     {
         return $this->getInscriptionsByConditions([
             'user_id' => $userId,
             'status' => TransbankInscriptions::STATUS_COMPLETED,
         ]);
+    }
+
+    /**
+     * Get a single inscription by user ID and inscription ID.
+     *
+     * @param string $userId
+     * @param string $inscriptionId
+     */
+    public function getOneByUserIdAndInscriptionId(string $userId, string $inscriptionId): ?array
+    {
+        $results = $this->getInscriptionsByConditions([
+            'user_id' => $userId,
+            'id' => $inscriptionId,
+            'status' => TransbankInscriptions::STATUS_COMPLETED,
+        ]);
+
+        return !empty($results) ? $results[0] : null;
     }
 }
