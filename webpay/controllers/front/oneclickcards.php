@@ -189,9 +189,10 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     {
         $cardTypePrefix = $this->environment === Options::ENVIRONMENT_INTEGRATION ? '[TEST]' : '';
         return array_values(array_map(function ($card) use ($cardTypePrefix) {
+            $lastDigitsLength = 4;
             $cardNumber = $card['card_number'] ?? null;
-            if ($cardNumber && strlen($cardNumber) > 4) {
-                $cardNumber = substr($cardNumber, -4);
+            if ($cardNumber && strlen($cardNumber) > $lastDigitsLength) {
+                $cardNumber = substr($cardNumber, -$lastDigitsLength);
             }
             return [
                 'id_card' => $card['id'] ?? null,
