@@ -87,8 +87,6 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
             'strings' => [
                 'title' => $this->trans('Tarjetas Oneclick Inscritas', [], 'Modules.WebPay.Shop'),
                 'delete' => $this->trans('Eliminar', [], 'Modules.WebPay.Shop'),
-                'make_default' => $this->trans('Hacer predeterminada', [], 'Modules.WebPay.Shop'),
-                'default' => $this->trans('Predeterminada', [], 'Modules.WebPay.Shop'),
                 'no_cards' => $this->trans('Aún no tienes tarjetas inscritas.', [], 'Modules.WebPay.Shop'),
                 'back' => $this->trans('Volver a mi cuenta', [], 'Modules.WebPay.Shop'),
             ],
