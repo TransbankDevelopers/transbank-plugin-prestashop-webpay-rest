@@ -39,7 +39,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /**
      * Processes POST requests for card deletion operations.
      * Validates the request, authenticates the user, and handles card deletion workflow.
-     * 
+     *
      * @return void
      */
     public function postProcess(): void
@@ -65,7 +65,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /**
      * Initializes the content for the Oneclick cards management page.
      * Retrieves user cards, generates CSRF token, and assigns template variables.
-     * 
+     *
      * @return void
      */
     public function initContent()
@@ -100,7 +100,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /**
      * Generates breadcrumb navigation links for the page.
      * Adds navigation path from home -> account -> oneclick cards.
-     * 
+     *
      * @return array Breadcrumb structure with navigation links
      */
     public function getBreadcrumbLinks(): array
@@ -122,7 +122,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
 
     /**
      * Customizes page template variables, particularly the meta title.
-     * 
+     *
      * @return array Page template variables including meta information
      */
     public function getTemplateVarPage(): array
@@ -135,7 +135,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /**
      * Handles the complete card deletion workflow.
      * Validates card existence, deletes from Transbank, and removes from local database.
-     * 
+     *
      * @param string $cardId The unique identifier of the card to delete
      * @param string $customerId The customer's unique identifier
      * @return void
@@ -168,7 +168,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /**
      * Validates incoming POST request for security and required parameters.
      * Checks for required fields and CSRF token validity.
-     * 
+     *
      * @return void
      * @throws EcommerceException When request is invalid or CSRF token is missing/invalid
      */
@@ -187,7 +187,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /**
      * Formats raw card data for template display.
      * Masks card numbers, adds environment prefixes, and filters by current environment.
-     * 
+     *
      * @param array $cards Raw card data from database
      * @return array Formatted card data ready for template display with masked numbers and environment filtering
      */
@@ -212,7 +212,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
 
     /**
      * Validates CSRF token against PrestaShop's built-in token system.
-     * 
+     *
      * @param mixed $token The CSRF token to validate (expected to be string)
      * @return bool True if token is valid and matches expected value, false otherwise
      */
