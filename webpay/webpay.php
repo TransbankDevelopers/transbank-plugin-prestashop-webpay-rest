@@ -5,6 +5,7 @@ use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Hooks\DisplayAdminOrderSide;
+use PrestaShop\Module\WebpayPlus\Hooks\DisplayCustomerAccount;
 use PrestaShop\Module\WebpayPlus\Hooks\PaymentOptions;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
@@ -27,7 +28,8 @@ class WebPay extends PaymentModule
         'displayBackOfficeHeader',
         'displayHeader',
         'displayPaymentReturn',
-        'displayAdminOrderSide'
+        'displayAdminOrderSide',
+        'displayCustomerAccount'
     ];
 
     public function __construct()
@@ -136,6 +138,21 @@ class WebPay extends PaymentModule
         } catch (Throwable $e) {
             $this->logError("Error el ejecutar el hook PaymentOptions: {$e->getMessage()}");
             return null;
+        }
+    }
+
+    public function hookDisplayCustomerAccount(): string
+    {
+        try {
+            $displayCustomerAccount = new DisplayCustomerAccount();
+            return $displayCustomerAccount->execute([
+                'module' => $this,
+                'context' => $this->context,
+
+            ]);
+        } catch (Throwable $e) {
+            $this->logError("Error al ejecutar el hook DisplayCustomerAccount: {$e->getMessage()}");
+            return '';
         }
     }
 

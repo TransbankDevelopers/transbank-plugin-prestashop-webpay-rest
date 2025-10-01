@@ -5,6 +5,7 @@ namespace PrestaShop\Module\WebpayPlus\Utils;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\Oneclick;
+use Transbank\Webpay\Oneclick\Exceptions\InscriptionDeleteException;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\Oneclick\MallInscription;
 use Transbank\Webpay\Oneclick\MallTransaction;
@@ -59,7 +60,8 @@ class TransbankSdkOneclick
         return $this->options->getCommerceCode();
     }
 
-    public function getEnviroment(){
+    public function getEnvironment()
+    {
         return $this->options->getIntegrationType();
     }
 
@@ -132,6 +134,32 @@ class TransbankSdkOneclick
             throw new EcommerceException($errorMessage, $e);
         }
         return $result;
+    }
+
+    /**
+     * @param $userName
+     * @param $tbkUser
+     *
+     * @throws EcommerceException
+     *
+     * @return bool
+     */
+    public function delete(string $tbkUser, string $userName): bool
+    {
+        try {
+            $txDate = date('d-m-Y');
+            $txTime = date('H:i:s');
+            $this->log->logInfo('delete => userName: ' . $userName . ', tbkUser: ' . $tbkUser .
+                ', txDate: ' . $txDate . ', txTime: ' . $txTime);
+            $resp = $this->inscription->delete($tbkUser, $userName);
+            $this->log->logInfo('delete - resp: ' . json_encode($resp));
+            return $resp;
+        } catch (InscriptionDeleteException $e) {
+            $errorMessage = "Error al eliminar la inscripción para =>
+                userName: {$userName}, tbkUser: {$tbkUser}, error: {$e->getMessage()}";
+            $this->log->logError($errorMessage);
+            throw new EcommerceException($errorMessage, $e);
+        }
     }
 
     /**
