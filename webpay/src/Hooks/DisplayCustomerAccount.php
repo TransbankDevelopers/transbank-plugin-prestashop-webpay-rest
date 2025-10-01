@@ -18,15 +18,6 @@ use PrestaShop\Module\WebpayPlus\Hooks\AbstractHookHandler;
 class DisplayCustomerAccount extends AbstractHookHandler
 {
     /**
-     * Constructor.
-     * Initializes the class.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Executes the hook logic to display customer account information.
      *
      * @param array $params The parameters passed to the hook.
