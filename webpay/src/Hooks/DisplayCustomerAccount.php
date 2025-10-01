@@ -5,7 +5,7 @@ namespace PrestaShop\Module\WebpayPlus\Hooks;
 use Module;
 use Context;
 use Transbank\Plugin\Helpers\TbkConstants;
-use PrestaShop\Module\WebpayPlus\Utils\Template;
+use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
 use PrestaShop\Module\WebpayPlus\Hooks\AbstractHookHandler;
 
 /**
@@ -35,6 +35,10 @@ class DisplayCustomerAccount extends AbstractHookHandler
     public function execute(array $params): ?string
     {
         $this->logInfo('Ejecutando hook DisplayCustomerAccount');
+
+        if (!OneclickConfig::isPaymentMethodActive()) {
+            return '';
+        }
 
         $module = $params['module'] ?? Module::getInstanceByName('webpay');
         $context = $params['context'] ?? Context::getContext();
