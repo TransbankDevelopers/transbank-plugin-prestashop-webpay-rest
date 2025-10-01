@@ -51,10 +51,10 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
 
             $this->validatePostRequest();
 
-            $idCard = (int) Tools::getValue('id_card');
-            $idCustomer = (int) $this->context->customer->id;
+            $idCard = Tools::getValue('id_card');
+            $idCustomer = $this->context->customer->id;
 
-            $this->handleDeleteCard((string) $idCard, (string) $idCustomer);
+            $this->handleDeleteCard($idCard, $idCustomer);
         } catch (Exception $e) {
             $this->errors[] = "No se pudo eliminar la tarjeta, por favor intente nuevamente. En caso de persistir el error, contacte al comercio.";
             $this->log->logError($e->getMessage());
