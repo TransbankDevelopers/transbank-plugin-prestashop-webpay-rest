@@ -51,6 +51,22 @@ class InscriptionRepository
     }
 
     /**
+     * Get a single inscription by its token.
+     *
+     * @param string $token The inscription token.
+     *
+     * @return array|null The inscription data or null if not found.
+     */
+    public function getInscriptionByToken(string $token): ?array
+    {
+        $results = $this->getInscriptionsByConditions([
+            'token' => $token,
+        ]);
+
+        return !empty($results) ? $results[0] : null;
+    }
+
+    /**
      * Get a single inscription by user ID and inscription ID.
      *
      * @param string $userId
