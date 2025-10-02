@@ -145,17 +145,7 @@ class InscriptionRepository
         ];
 
         $inscription = new TransbankInscriptions();
-        foreach ($fillable as $key) {
-            if (array_key_exists($key, $data)) {
-                $value = $data[$key];
-                if (in_array($key, ['user_id', 'pay_after_inscription', 'finished'], true)) {
-                    $value = ($value === null || $value === '') ? null : (int) $value;
-                } else {
-                    $value = ($value === null) ? null : (string) $value;
-                }
-                $inscription->{$key} = $value;
-            }
-        }
+        $inscription = $this->fillInscriptionFields($inscription, $data);
 
         return $inscription->add() ? (int) $inscription->id : 0;
     }
@@ -170,33 +160,13 @@ class InscriptionRepository
      */
     public function updateById(int $id, array $fields): bool
     {
-        $obj = $this->findById($id);
-        if (!$obj) {
+        $inscription = $this->findById($id);
+        if (!$inscription) {
             return false;
         }
-        $fillable = [
-            'tbk_token',
-            'pay_after_inscription',
-            'finished',
-            'response_code',
-            'authorization_code',
-            'card_type',
-            'card_number',
-            'status',
-            'transbank_response'
-        ];
-        foreach ($fillable as $key) {
-            if (array_key_exists($key, $fields)) {
-                $value = $fields[$key];
-                if (in_array($key, ['pay_after_inscription', 'finished'], true)) {
-                    $value = ($value === null || $value === '') ? null : (int) $value;
-                } else {
-                    $value = ($value === null) ? null : (string) $value;
-                }
-                $obj->{$key} = $value;
-            }
-        }
-        return $obj->update();
+
+        $inscription = $this->fillInscriptionFields($inscription, $fields);
+        return $inscription->update();
     }
 
     /**
@@ -210,5 +180,48 @@ class InscriptionRepository
     {
         $obj = new TransbankInscriptions($id);
         return (Validate::isLoadedObject($obj)) ? $obj : null;
+    }
+
+    /**
+     * Fill the inscription object with provided data.
+     *
+     * @param TransbankInscriptions $inscription The inscription object to fill.
+     * @param array $data Key-value pairs of data to fill.
+     */
+    private function fillInscriptionFields(TransbankInscriptions $inscription, array $data): TransbankInscriptions
+    {
+        $fillable = [
+            'token',
+            'username',
+            'email',
+            'user_id',
+            'tbk_token',
+            'order_id',
+            'pay_after_inscription',
+            'finished',
+            'response_code',
+            'authorization_code',
+            'card_type',
+            'card_number',
+            'from',
+            'status',
+            'environment',
+            'commerce_code',
+            'transbank_response'
+        ];
+
+        foreach ($fillable as $key) {
+            if (array_key_exists($key, $data)) {
+                $value = $data[$key];
+                if (in_array($key, ['user_id', 'pay_after_inscription', 'finished'], true)) {
+                    $value = ($value === null || $value === '') ? null : (int) $value;
+                } else {
+                    $value = ($value === null) ? null : (string) $value;
+                }
+                $inscription->{$key} = $value;
+            }
+        }
+
+        return $inscription;
     }
 }
