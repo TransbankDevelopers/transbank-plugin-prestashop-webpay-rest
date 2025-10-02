@@ -158,4 +158,16 @@ class InscriptionRepository
 
         return $inscription->add() ? (int) $inscription->id : 0;
     }
+    /**
+     * Find an inscription by its ID.
+     *
+     * @param int $id The ID of the inscription.
+     *
+     * @return TransbankInscriptions|null The inscription object or null if not found.
+     */
+    public function findById(int $id): ?TransbankInscriptions
+    {
+        $obj = new TransbankInscriptions($id);
+        return (Validate::isLoadedObject($obj)) ? $obj : null;
+    }
 }
