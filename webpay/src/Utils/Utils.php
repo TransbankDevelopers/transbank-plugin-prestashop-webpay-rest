@@ -28,4 +28,16 @@ class Utils
     {
         return version_compare(_PS_VERSION_, '1.7.1', '>=');
     }
+
+    /**
+     * Generate a random string to be used as identifier
+     *
+     * @param int $length Length of the random string to generate
+     *
+     * @return string Randomly generated string
+     */
+    public function generateSecureId($length = 32)
+    {
+        return bin2hex(random_bytes((int) ceil($length / 2)));
+    }
 }

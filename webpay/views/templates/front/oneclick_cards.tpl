@@ -15,8 +15,20 @@
     <ul class="alert alert-success" role="alert">
       {foreach from=$success item=s}<li>{$s|escape:'html':'UTF-8'}</li>{/foreach}
     </ul>
-{/if}
-    <img src="{$oneclick_image_url|escape:'html':'UTF-8'}" alt="Oneclick" class="mb-2" height="50" />
+  {/if}
+    <div class="row mb-2">
+      <div class="col-xs-12 col-sm-6 hidden-xs-down">
+        <img src="{$oneclick_image_url|escape:'html':'UTF-8'}" alt="Oneclick" height="50" />
+      </div>
+
+      <div class="col-xs-12 col-sm-6 text-sm-right">
+        <form method="post" action="{$cards_controller_url|escape:'html':'UTF-8'}" class="m-0">
+          <input type="hidden" name="action" value="start_inscription">
+          <input type="hidden" name="csrf_token" value="{$csrf_token|escape:'html':'UTF-8'}">
+          <input type="submit" class="btn btn-primary btn-sm" value="{$strings.enroll|escape:'html':'UTF-8'}">
+        </form>
+      </div>
+    </div>
   {if !$cards|@count}
     <p>{$strings.no_cards|escape:'html':'UTF-8'}</p>
   {else}
@@ -37,8 +49,9 @@
             <td>{$card.card_number|escape:'html':'UTF-8'}</td>
             <td>{$card.created_at|escape:'html':'UTF-8'}</td>
             <td>
-              <form method="post" action="{$list_url|escape:'html':'UTF-8'}" style="display:inline" onsubmit="return confirm('{l s='¿Eliminar esta tarjeta?' mod='webpay'}');">
+              <form method="post" action="{$cards_controller_url|escape:'html':'UTF-8'}" style="display:inline" onsubmit="return confirm('{l s='¿Eliminar esta tarjeta?' mod='webpay'}');">
                 <input type="hidden" name="id_card" value="{$card.id_card|intval}">
+                <input type="hidden" name="action" value="delete_inscription">
                 <input type="hidden" name="csrf_token" value="{$csrf_token|escape:'html':'UTF-8'}">
                 <input type="submit" class="btn btn-outline-danger btn-sm" value="{$strings.delete|escape:'html':'UTF-8'}">
               </form>
