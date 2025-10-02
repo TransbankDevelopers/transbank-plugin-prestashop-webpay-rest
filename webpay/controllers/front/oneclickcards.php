@@ -1,13 +1,21 @@
 <?php
 
 use Transbank\Webpay\Options;
+use PrestaShop\Module\WebpayPlus\Utils\Utils;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
+use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 use PrestaShop\Module\WebpayPlus\Repository\InscriptionRepository;
 
 class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
 {
+    const CARD_INSCRIPTION_FLOW = 'start_inscription';
+    const CARD_DELETION_FLOW = 'delete_inscription';
+    const CARD_INSCRIPTION_RETURN_FLOW = 'inscription_return';
+    const CARD_INSCRIPTION_RETURN_NORMAL_FLOW = 'normal';
+    const CARD_INSCRIPTION_RETURN_ABORTED_FLOW = 'aborted';
+    const CARD_INSCRIPTION_RETURN_INVALID_FLOW = 'invalid';
     public $auth = true;
     public $ssl = true;
 
@@ -23,6 +31,9 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /** @var string */
     private $environment;
 
+    /** @var PrestaShop\Module\WebpayPlus\Utils\OrderUtils */
+    private $moduleUtils;
+
     /**
      * Initializes the controller with required dependencies for handling Oneclick card operations.
      * Sets up repository, logger, service, and environment configuration.
@@ -34,6 +45,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
         $this->log = TbkFactory::createLogger();
         $this->oneclickService = OneclickFactory::create();
         $this->environment = $this->oneclickService->getEnvironment();
+        $this->moduleUtils = new Utils();
     }
 
     /**
@@ -45,18 +57,21 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     public function postProcess(): void
     {
         try {
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $requestMethod = $_SERVER['REQUEST_METHOD'];
+            $requestPayload = json_encode(Tools::getAllValues());
+            $this->log->logInfo('Procesando petición en OneclickCardsModuleFrontController');
+            $this->log->logInfo("Request method: {$requestMethod}");
+            $this->log->logInfo("Request payload: {$requestPayload}");
+            $this->validateRequest();
+
+            if ($requestMethod === 'GET' && !Tools::getValue('action')) {
                 return;
             }
 
-            $this->validatePostRequest();
+            $this->handleCardRequest();
 
-            $idCard = Tools::getValue('id_card');
-            $idCustomer = $this->context->customer->id;
-
-            $this->handleDeleteCard($idCard, $idCustomer);
         } catch (Exception $e) {
-            $this->errors[] = "No se pudo eliminar la tarjeta, por favor intente nuevamente. En caso de persistir el error, contacte al comercio.";
+            $this->errors[] = "La operación no se pudo completar, por favor reintente. En caso de persistir el problema, contacte al comercio.";
             $this->log->logError($e->getMessage());
             return;
         }
@@ -76,23 +91,28 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
         $cards = $this->repository->getCardsByUserId($idCustomer);
         $cards = $this->formatCardData($cards);
 
-        $this->context->smarty->assign([
-            'cards' => $cards,
-            'csrf_token' => Tools::getToken(true),
-            'list_url' => $this->context->link->getModuleLink($this->module->name, 'oneclickcards'),
-            'back_to_account_url' => $this->context->link->getPageLink('my-account', true),
-            'oneclick_image_url' => $this->context->link->getMediaLink(
-                $this->module->getPathUri() . '/views/img/oneclick.png'
-            ),
-            'strings' => [
-                'title' => $this->trans('Tarjetas Oneclick Inscritas', [], 'Modules.WebPay.Shop'),
-                'delete' => $this->trans('Eliminar', [], 'Modules.WebPay.Shop'),
-                'no_cards' => $this->trans('Aún no tienes tarjetas inscritas.', [], 'Modules.WebPay.Shop'),
-                'back' => $this->trans('Volver a mi cuenta', [], 'Modules.WebPay.Shop'),
-            ],
-        ]);
+        $action = Tools::getValue('action');
+        if ($action !== self::CARD_INSCRIPTION_FLOW) {
 
-        $this->setTemplate("module:{$this->module->name}/views/templates/front/oneclick_cards.tpl");
+            $this->context->smarty->assign([
+                'cards' => $cards,
+                'csrf_token' => Tools::getToken(true),
+                'cards_controller_url' => $this->context->link->getModuleLink($this->module->name, 'oneclickcards'),
+                'back_to_account_url' => $this->context->link->getPageLink('my-account', true),
+                'oneclick_image_url' => $this->context->link->getMediaLink(
+                    $this->module->getPathUri() . '/views/img/oneclick.png'
+                ),
+                'strings' => [
+                    'title' => $this->trans('Tarjetas Oneclick Inscritas', [], 'Modules.WebPay.Shop'),
+                    'delete' => $this->trans('Eliminar', [], 'Modules.WebPay.Shop'),
+                    'enroll' => $this->trans('Inscribir tarjeta', [], 'Modules.WebPay.Shop'),
+                    'no_cards' => $this->trans('Aún no tienes tarjetas inscritas.', [], 'Modules.WebPay.Shop'),
+                    'back' => $this->trans('Volver a mi cuenta', [], 'Modules.WebPay.Shop'),
+                ],
+            ]);
+
+            $this->setTemplate("module:{$this->module->name}/views/templates/front/oneclick_cards.tpl");
+        }
     }
 
     /**
@@ -130,17 +150,168 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
         return $page;
     }
 
+    private function handleCardRequest(): void
+    {
+        $action = Tools::getValue('action');
+        $this->log->logInfo("Acción recibida: {$action}");
+
+        switch ($action) {
+            case self::CARD_INSCRIPTION_FLOW:
+                $this->handleInscriptionFlow();
+                break;
+            case self::CARD_INSCRIPTION_RETURN_FLOW:
+                $this->handleInscriptionReturnFlow();
+                break;
+            case self::CARD_DELETION_FLOW:
+                $this->handleDeletionFlow();
+                break;
+            default:
+                throw new EcommerceException('Acción no reconocida.');
+        }
+    }
+
+    private function handleInscriptionFlow(): void
+    {
+        $this->log->logInfo('Iniciando flujo de inscripción de tarjeta');
+
+        $userId = $this->context->customer->id;
+        $username = $this->generateOneclickUsername($userId);
+        $email = $this->context->customer->email;
+        $returnUrl = $this->context->link->getModuleLink(
+            $this->module->name,
+            'oneclickcards',
+            ['action' => self::CARD_INSCRIPTION_RETURN_FLOW],
+            true
+        );
+
+        $this->log->logInfo("Datos para inscripción => username: {$username}, email: {$email}, returnUrl: {$returnUrl}");
+        $inscriptionResponse = $this->oneclickService->startInscription($username, $email, $returnUrl);
+
+        $this->repository->createInscription([
+            'token' => $inscriptionResponse['token'],
+            'username' => $username,
+            'email' => $email,
+            'user_id' => (int) $userId,
+            'pay_after_inscription' => false,
+            'from' => 'account',
+            'status' => TransbankInscriptions::STATUS_INITIALIZED,
+            'environment' => $this->environment,
+            'commerce_code' => $this->oneclickService->getCommerceCode(),
+        ]);
+
+        $this->log->logInfo('Redireccionando a formulario de Webpay');
+        $this->redirectToWebpayForm($inscriptionResponse);
+    }
+
+    private function handleInscriptionReturnFlow(): void
+    {
+        $this->log->logInfo('Iniciando flujo de retorno de inscripción de tarjeta');
+
+        $redirectionFlow = $this->getOneclickReturnFlow();
+
+        if ($redirectionFlow === self::CARD_INSCRIPTION_RETURN_INVALID_FLOW) {
+            throw new EcommerceException('Flujo de retorno inválido.');
+        }
+
+        if ($redirectionFlow === self::CARD_INSCRIPTION_RETURN_ABORTED_FLOW) {
+            $this->handleInscriptionReturnAbortedFlow();
+        }
+
+        if ($redirectionFlow === self::CARD_INSCRIPTION_RETURN_NORMAL_FLOW) {
+            $this->handleInscriptionReturnNormalFlow();
+        }
+    }
+
+    private function getOneclickReturnFlow(): string
+    {
+        $tbkToken = Tools::getValue('TBK_TOKEN') ?? null;
+        $tbkOrdenCompra = Tools::getValue('TBK_ORDEN_COMPRA') ?? null;
+        $returnFlow = self::CARD_INSCRIPTION_RETURN_INVALID_FLOW;
+
+        if ($tbkToken && $tbkOrdenCompra) {
+            $returnFlow = self::CARD_INSCRIPTION_RETURN_ABORTED_FLOW;
+        }
+
+        if ($tbkToken && !$tbkOrdenCompra) {
+            $returnFlow = self::CARD_INSCRIPTION_RETURN_NORMAL_FLOW;
+        }
+
+        return $returnFlow;
+    }
+
+    private function handleInscriptionReturnNormalFlow(): void
+    {
+        $tbkToken = Tools::getValue('TBK_TOKEN');
+        $this->log->logInfo("Procesando retorno normal de inscripción => TBK_TOKEN: {$tbkToken}");
+
+        $inscription = $this->repository->getInscriptionByToken($tbkToken);
+        if (!$inscription) {
+            throw new EcommerceException('Inscripción no encontrada para el token proporcionado.');
+        }
+
+        $response = $this->oneclickService->finish(
+            $tbkToken,
+            $inscription['username'],
+            $inscription['email']
+        );
+
+        $inscriptionApproved = $response->isApproved();
+
+        $this->repository->updateById((int) $inscription['id'], [
+            'finished' => true,
+            'authorization_code' => $response->authorizationCode,
+            'tbk_token' => $response->tbkUser,
+            'card_type' => $response->cardType,
+            'card_number' => $response->cardNumber,
+            'transbank_response' => json_encode($response),
+            'status' => $inscriptionApproved
+                ? TransbankInscriptions::STATUS_COMPLETED : TransbankInscriptions::STATUS_FAILED,
+        ]);
+
+        if (!$inscriptionApproved) {
+            $this->log->logInfo("Inscripción de tarjeta rechazada => token: {$tbkToken}.");
+            $this->errors[] = $this->trans(
+                'La inscripción de tarjeta ha sido rechazada, por favor intenta con otro medio de pago.',
+                [],
+                'Modules.WebPay.Shop'
+            );
+        } else {
+            $this->log->logInfo("Tarjeta inscrita correctamente => token: {$tbkToken}.");
+            $this->success[] = $this->trans('Tarjeta inscrita correctamente.', [], 'Modules.WebPay.Shop');
+        }
+    }
+
+    private function handleInscriptionReturnAbortedFlow(): void
+    {
+        $tbkToken = Tools::getValue('TBK_TOKEN');
+        $this->log->logInfo("Procesando retorno normal de inscripción => TBK_TOKEN: {$tbkToken}");
+
+        $inscription = $this->repository->getInscriptionByToken($tbkToken);
+
+        if (!$inscription) {
+            throw new EcommerceException('Inscripción no encontrada para el token proporcionado.');
+        }
+
+        $this->repository->updateById((int) $inscription['id'], [
+            'status' => TransbankInscriptions::STATUS_FAILED,
+        ]);
+
+        $this->errors[] = $this->trans('Operación cancelada por el usuario.', [], 'Modules.WebPay.Shop');
+    }
+
+
     /**
      * Handles the complete card deletion workflow.
      * Validates card existence, deletes from Transbank, and removes from local database.
      *
-     * @param string $cardId The unique identifier of the card to delete
-     * @param string $customerId The customer's unique identifier
      * @return void
      * @throws EcommerceException When card is not found, Transbank deletion fails, or database deletion fails
      */
-    private function handleDeleteCard(string $cardId, string $customerId): void
+    private function handleDeletionFlow(): void
     {
+        $cardId = Tools::getValue('id_card');
+        $customerId = $this->context->customer->id;
+
         $this->log->logInfo("Iniciando eliminación de tarjeta => cardId: {$cardId}, customerId: {$customerId}");
         $inscription = $this->repository->getOneByUserIdAndInscriptionId($customerId, $cardId);
 
@@ -166,15 +337,21 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
      * @return void
      * @throws EcommerceException When request is invalid or CSRF token is missing/invalid
      */
-    private function validatePostRequest(): void
+    private function validateRequest(): void
     {
-        if (!Tools::isSubmit('id_card')) {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            return;
+        }
+
+        if (!Tools::isSubmit('action')) {
             throw new EcommerceException('Petición inválida.');
         }
 
-        $token = Tools::getValue('csrf_token');
-        if (!$this->isValidCsrf($token)) {
-            throw new EcommerceException('Token CSRF inválido.');
+        if (Tools::getValue('action') !== self::CARD_INSCRIPTION_RETURN_FLOW) {
+            $token = Tools::getValue(key: 'csrf_token');
+            if (!$this->isValidCsrf($token)) {
+                throw new EcommerceException(message: 'Token CSRF inválido.');
+            }
         }
     }
 
@@ -205,6 +382,15 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
         })));
     }
 
+    private function redirectToWebpayForm(array $inscriptionResponse): void
+    {
+        $this->context->smarty->assign([
+            'url' => $inscriptionResponse['url'] ?? '',
+            'token_ws' => $inscriptionResponse['token'] ?? '',
+        ]);
+        $this->setTemplate('module:webpay/views/templates/front/oneclick_inscription_execution.tpl');
+    }
+
     /**
      * Validates CSRF token against PrestaShop's built-in token system.
      *
@@ -214,5 +400,11 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     private function isValidCsrf($token)
     {
         return is_string($token) && hash_equals(Tools::getToken(true), $token);
+    }
+
+    public function generateOneclickUsername($userId)
+    {
+        $idLength = 10;
+        return 'ps:' . $this->moduleUtils->generateSecureId($idLength) . ':' . $userId;
     }
 }
