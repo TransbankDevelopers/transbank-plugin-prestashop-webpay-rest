@@ -170,6 +170,7 @@ class InscriptionRepository
      */
     private function fillInscriptionFields(TransbankInscriptions $inscription, array $data): TransbankInscriptions
     {
+        $intFields = ['user_id', 'pay_after_inscription', 'finished'];
         $fillable = [
             'token',
             'username',
@@ -190,15 +191,14 @@ class InscriptionRepository
             'transbank_response'
         ];
 
-        foreach ($fillable as $key) {
-            if (array_key_exists($key, $data)) {
-                $value = $data[$key];
-                if (in_array($key, ['user_id', 'pay_after_inscription', 'finished'], true)) {
-                    $value = ($value === null || $value === '') ? null : (int) $value;
-                } else {
-                    $value = ($value === null) ? null : (string) $value;
-                }
-                $inscription->{$key} = $value;
+        foreach ($data as $key => $value) {
+            if (!in_array($key, $fillable, true)) {
+                continue;
+            }
+            if (in_array($key, $intFields, true)) {
+                $inscription->{$key} = ($value === null || $value === '') ? null : (int) $value;
+            } else {
+                $inscription->{$key} = ($value === null) ? null : (string) $value;
             }
         }
 
