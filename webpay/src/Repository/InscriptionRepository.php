@@ -124,26 +124,6 @@ class InscriptionRepository
      */
     public function createInscription(array $data): int
     {
-        $fillable = [
-            'token',
-            'username',
-            'email',
-            'user_id',
-            'tbk_token',
-            'order_id',
-            'pay_after_inscription',
-            'finished',
-            'response_code',
-            'authorization_code',
-            'card_type',
-            'card_number',
-            'from',
-            'status',
-            'environment',
-            'commerce_code',
-            'transbank_response'
-        ];
-
         $inscription = new TransbankInscriptions();
         $inscription = $this->fillInscriptionFields($inscription, $data);
 
