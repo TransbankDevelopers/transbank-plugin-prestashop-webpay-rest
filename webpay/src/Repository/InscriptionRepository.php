@@ -113,4 +113,49 @@ class InscriptionRepository
 
         return $result && Db::getInstance()->Affected_Rows() > 0;
     }
+
+    /**
+     * Create a new inscription record.
+     *
+     * @param array $data Key-value pairs of inscription data.
+     *
+     * @return int The ID of the newly created inscription, or 0 on failure.
+     */
+    public function createInscription(array $data): int
+    {
+        $fillable = [
+            'token',
+            'username',
+            'email',
+            'user_id',
+            'tbk_token',
+            'order_id',
+            'pay_after_inscription',
+            'finished',
+            'response_code',
+            'authorization_code',
+            'card_type',
+            'card_number',
+            'from',
+            'status',
+            'environment',
+            'commerce_code',
+            'transbank_response'
+        ];
+
+        $inscription = new TransbankInscriptions();
+        foreach ($fillable as $key) {
+            if (array_key_exists($key, $data)) {
+                $value = $data[$key];
+                if (in_array($key, ['user_id', 'pay_after_inscription', 'finished'], true)) {
+                    $value = ($value === null || $value === '') ? null : (int) $value;
+                } else {
+                    $value = ($value === null) ? null : (string) $value;
+                }
+                $inscription->{$key} = $value;
+            }
+        }
+
+        return $inscription->add() ? (int) $inscription->id : 0;
+    }
 }
