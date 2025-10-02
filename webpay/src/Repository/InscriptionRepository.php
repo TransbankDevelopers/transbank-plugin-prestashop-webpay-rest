@@ -3,6 +3,7 @@
 namespace PrestaShop\Module\WebpayPlus\Repository;
 
 use Db;
+use Validate;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 
 /**
@@ -158,6 +159,46 @@ class InscriptionRepository
 
         return $inscription->add() ? (int) $inscription->id : 0;
     }
+
+    /**
+     * Update an existing inscription record by ID.
+     *
+     * @param int $id The ID of the inscription to update.
+     * @param array $fields Key-value pairs of fields to update.
+     *
+     * @return bool True on success, false on failure.
+     */
+    public function updateById(int $id, array $fields): bool
+    {
+        $obj = $this->findById($id);
+        if (!$obj) {
+            return false;
+        }
+        $fillable = [
+            'tbk_token',
+            'pay_after_inscription',
+            'finished',
+            'response_code',
+            'authorization_code',
+            'card_type',
+            'card_number',
+            'status',
+            'transbank_response'
+        ];
+        foreach ($fillable as $key) {
+            if (array_key_exists($key, $fields)) {
+                $value = $fields[$key];
+                if (in_array($key, ['pay_after_inscription', 'finished'], true)) {
+                    $value = ($value === null || $value === '') ? null : (int) $value;
+                } else {
+                    $value = ($value === null) ? null : (string) $value;
+                }
+                $obj->{$key} = $value;
+            }
+        }
+        return $obj->update();
+    }
+
     /**
      * Find an inscription by its ID.
      *
