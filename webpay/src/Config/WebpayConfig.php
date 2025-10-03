@@ -75,8 +75,8 @@ class WebpayConfig extends AbstractModuleConfig
     {
         self::setPaymentActive(TbkConstants::ACTIVE_MODULE);
         self::setEnvironment(Options::ENVIRONMENT_INTEGRATION);
-        self::setCommerceCode(WebpayPlus::INTEGRATION_COMMERCE_CODE);
-        self::setApiKey(WebpayPlus::INTEGRATION_API_KEY);
+        self::setCommerceCode(WebpayPlus::DEFAULT_COMMERCE_CODE);
+        self::setApiKey(WebpayPlus::DEFAULT_API_KEY);
         self::setOrderStateIdAfterPayment(Configuration::get('PS_OS_PREPARATION'));
     }
 

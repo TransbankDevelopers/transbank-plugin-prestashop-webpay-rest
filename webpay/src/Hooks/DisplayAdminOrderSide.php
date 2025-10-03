@@ -45,7 +45,7 @@ class DisplayAdminOrderSide extends AbstractHookHandler
     public function execute(array $params): ?string
     {
         $this->logInfo('Ejecutando hook DisplayAdminOrderSide');
-        $this->logDebug('Parámetros recibidos: '. json_encode($params, JSON_UNESCAPED_UNICODE));
+        $this->logDebug('Parámetros recibidos: ' . json_encode($params, JSON_UNESCAPED_UNICODE));
 
         $orderId = $params['id_order'];
         $this->logDebug('ID de la orden: ' . $orderId);
@@ -54,7 +54,7 @@ class DisplayAdminOrderSide extends AbstractHookHandler
         if ($order->module != "webpay") {
             $this->logInfo('Orden no usa el módulo Webpay');
             return null;
-        } 
+        }
 
         $transbankTransaction = $this->getTransactionWebpayApprovedByOrderId($orderId);
         $transbankResponse = $transbankTransaction->transbank_response;

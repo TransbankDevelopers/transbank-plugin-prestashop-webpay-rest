@@ -45,8 +45,8 @@ class TransbankSdkOneclick
             );
         } else {
             $this->options = new Options(
-                Oneclick::INTEGRATION_API_KEY,
-                Oneclick::INTEGRATION_COMMERCE_CODE,
+                Oneclick::DEFAULT_API_KEY,
+                Oneclick::DEFAULT_COMMERCE_CODE,
                 $config['ENVIRONMENT']
             );
         }
