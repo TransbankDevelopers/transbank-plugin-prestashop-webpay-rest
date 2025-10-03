@@ -20,8 +20,6 @@ RUN groupadd -g 1000 vscode || true \
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-ENV APP_ENV=dev
-
 RUN mkdir -p /var/log/php && chown -R www-data:www-data /var/log/php
 
 RUN ln -snf /usr/share/zoneinfo/America/Santiago /etc/localtime \
