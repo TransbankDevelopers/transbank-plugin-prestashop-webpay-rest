@@ -1,4 +1,4 @@
-FROM prestashop/prestashop:8.2.3-8.1-fpm
+FROM prestashop/prestashop:8.2.3-8.1-apache
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -13,14 +13,8 @@ RUN apt-get update && apt-get install -y \
     mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -g 1000 vscode || true \
-    && useradd -m -u 1000 -g 1000 -s /bin/bash vscode \
-    && usermod -aG www-data vscode \
-    && echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN mkdir -p /var/log/php && chown -R www-data:www-data /var/log/php
 
 RUN ln -snf /usr/share/zoneinfo/America/Santiago /etc/localtime \
  && echo "America/Santiago" > /etc/timezone \
@@ -30,15 +24,17 @@ RUN printf '%s\n' \
   'log_errors=On' \
   'error_reporting=E_ALL' \
   'display_errors=Off' \
-  'error_log=/var/log/php/error.log' \
+  'error_log=/var/log/apache2/php-error.log' \
   > /usr/local/etc/php/conf.d/99-logging.ini
 
-RUN mkdir -p /var/www/html/var/log && chown -R www-data:www-data /var/www/html/var/log \
- && printf '%s\n' \
-  '[www]' \
-  'catch_workers_output = yes' \
-  'php_admin_flag[log_errors] = on' \
-  'php_admin_value[error_log] = /var/www/html/var/log/php_runtime.log' \
-  > /usr/local/etc/php-fpm.d/zz-logging.conf
-
 WORKDIR /workspace
+
+COPY ./scripts/setup-module.sh /tmp/pre-install-scripts/
+RUN chmod +x /tmp/pre-install-scripts/*.sh
+
+COPY ./scripts/install-module.sh /tmp/init-scripts/
+RUN chmod +x /tmp/init-scripts/*.sh
+
+CMD ["sh", "-c", "rm -f ./install.lock && /tmp/docker_run.sh"]
+
+RUN git config --global --add safe.directory /workspace

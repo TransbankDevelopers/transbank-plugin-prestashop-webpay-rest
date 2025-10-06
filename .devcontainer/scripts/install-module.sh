@@ -2,10 +2,10 @@
 
 set -eu
 
-echo "* [webpay] Configuring Timezone..."
+echo "* [Prestashop] Configuring Timezone..."
 su -s /bin/bash www-data -c "php /var/www/html/bin/console prestashop:config set --no-interaction PS_TIMEZONE --value=America/Santiago"
 
-echo "* [webpay] Configuring My carrier (free, South America)..."
+echo "* [Prestashop] Configuring My carrier (free, South America)..."
 
 su -s /bin/bash www-data -c "php /var/www/html/bin/console dbal:run-sql \"UPDATE ps_carrier SET active=1, is_free=1 WHERE name='My carrier' AND deleted=0\""
 

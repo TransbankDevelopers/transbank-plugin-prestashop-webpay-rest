@@ -3,11 +3,11 @@
     "dockerComposeFile": "docker-compose.yml",
     "service": "web",
     "workspaceFolder": "/workspace",
-    "remoteUser": "vscode",
-    "postAttachCommand": "/workspace/.devcontainer/scripts/post-attach.sh",
+    "remoteUser": "root",
+    "postAttachCommand": "/workspace/.devcontainer/post-attach.sh",
     "shutdownAction": "stopCompose",
     "mounts": [
-        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+        "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
     ],
     "forwardPorts": [8080, 3306],
     "features": {
