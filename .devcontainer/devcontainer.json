@@ -54,7 +54,7 @@
                     {
                         "name": "PrestaShop MariaDB",
                         "driver": "MySQL",
-                        "server": "localhost",
+                        "server": "db",
                         "port": 3306,
                         "database": "prestashop",
                         "username": "prestashop",
@@ -66,7 +66,7 @@
                     {
                         "name": "MariaDB Root",
                         "driver": "MySQL",
-                        "server": "localhost",
+                        "server": "db",
                         "port": 3306,
                         "database": "",
                         "username": "root",
