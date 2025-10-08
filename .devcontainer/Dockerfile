@@ -27,6 +27,9 @@ RUN printf '%s\n' \
   'error_log=/var/log/apache2/php-error.log' \
   > /usr/local/etc/php/conf.d/99-logging.ini
 
+RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf \
+ && a2enconf servername
+
 WORKDIR /workspace
 
 COPY ./scripts/setup-module.sh /tmp/pre-install-scripts/
