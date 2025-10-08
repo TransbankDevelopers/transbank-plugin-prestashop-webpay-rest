@@ -9,7 +9,6 @@
     "mounts": [
         "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
     ],
-    "forwardPorts": [8080, 3306],
     "features": {
         "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
             "plugins": "git zsh-autosuggestions zsh-syntax-highlighting",
