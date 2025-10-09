@@ -63,5 +63,9 @@ SELECT
 WHERE NOT EXISTS (SELECT 1 FROM ps_address WHERE id_customer = @cid LIMIT 1);
 SQL
 
+echo "* [Prestashop] Configurando Smarty para dev..."
+su -s /bin/bash www-data -c "php /var/www/html/bin/console dbal:run-sql \"UPDATE ps_configuration SET value=0 WHERE name='PS_SMARTY_CACHE'\""
+su -s /bin/bash www-data -c "php /var/www/html/bin/console dbal:run-sql \"UPDATE ps_configuration SET value=1 WHERE name='PS_SMARTY_FORCE_COMPILE'\""
+
 echo "* [webpay] Installing module webpay..."
 su -s /bin/bash www-data -c "php /var/www/html/bin/console prestashop:module --no-interaction install webpay"
