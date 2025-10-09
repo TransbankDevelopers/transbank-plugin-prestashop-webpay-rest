@@ -100,7 +100,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
                 'cards_controller_url' => $this->context->link->getModuleLink($this->module->name, 'oneclickcards'),
                 'back_to_account_url' => $this->context->link->getPageLink('my-account', true),
                 'oneclick_image_url' => $this->context->link->getMediaLink(
-                    $this->module->getPathUri() . '/views/img/oneclick.png'
+                    $this->module->getPathUri() . 'views/img/oneclick.png'
                 ),
                 'strings' => [
                     'title' => $this->trans('Tarjetas Oneclick Inscritas', [], 'Modules.WebPay.Shop'),
