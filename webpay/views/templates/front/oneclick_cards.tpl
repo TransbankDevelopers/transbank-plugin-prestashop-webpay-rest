@@ -5,17 +5,6 @@
 {/block}
 
 {block name='page_content'}
-    {if isset($errors)}
-        <ul class="alert alert-danger" role="alert">
-            {foreach from=$errors item=e}<li>{$e|escape:'html':'UTF-8'}</li>{/foreach}
-        </ul>
-    {/if}
-
-    {if isset($success)}
-        <ul class="alert alert-success" role="alert">
-            {foreach from=$success item=s}<li>{$s|escape:'html':'UTF-8'}</li>{/foreach}
-        </ul>
-    {/if}
     <div class="row mb-2">
         <div class="col-xs-12 col-sm-6 hidden-xs-down">
             <img src="{$oneclick_image_url|escape:'html':'UTF-8'}" alt="Oneclick" height="50" />
