@@ -69,7 +69,6 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
             }
 
             $this->handleCardRequest();
-
         } catch (Exception $e) {
             $this->errors[] = "La operación no se pudo completar, por favor reintente. En caso de persistir el problema, contacte al comercio.";
             $this->log->logError($e->getMessage());
@@ -387,8 +386,9 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
         $this->context->smarty->assign([
             'url' => $inscriptionResponse['url'] ?? '',
             'token_ws' => $inscriptionResponse['token'] ?? '',
+            'redirectType' => 'oneclick-cards',
         ]);
-        $this->setTemplate('module:webpay/views/templates/front/oneclick_inscription_execution.tpl');
+        $this->setTemplate('module:webpay/views/templates/front/redirect_to_payment_form.tpl');
     }
 
     /**
