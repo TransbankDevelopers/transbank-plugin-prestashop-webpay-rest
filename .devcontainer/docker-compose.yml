@@ -1,0 +1,56 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: prestashop-dev-web
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - PS_LANGUAGE=es
+      - PS_INSTALL_AUTO=1
+      - PS_INSTALL_DB=1
+      - PS_ERASE_DB=1
+      - PS_DEV_MODE=1
+      - PS_DOMAIN=localhost:8080
+      - ADMIN_MAIL=admin@admin.com
+      - ADMIN_PASSWD=password
+      - PS_FOLDER_ADMIN=adminop
+      - PS_FOLDER_INSTALL=installop
+      - PS_COUNTRY=cl
+      - DB_SERVER=db
+      - DB_NAME=prestashop
+      - DB_USER=prestashop
+      - DB_PASSWD=prestashop123
+    volumes:
+      - ..:/workspace:cached
+      - ../webpay:/var/www/html/modules/webpay:cached
+      - ./container/logs:/var/www/html/var/logs
+      - ./container/logs/apache:/var/logs/apache2
+    ports:
+      - "8080:80"
+    networks:
+      - net
+  db:
+    image: mariadb:10.11
+    container_name: prestashop-dev-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root123
+      - MYSQL_DATABASE=prestashop
+      - MYSQL_USER=prestashop
+      - MYSQL_PASSWORD=prestashop123
+    command: >
+      --default-time-zone='America/Santiago'
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pprestashop123"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - net
+    ports:
+      - "3306:3306"
+
+networks:
+  net:
