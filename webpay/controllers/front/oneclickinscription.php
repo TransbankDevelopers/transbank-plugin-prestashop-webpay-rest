@@ -55,9 +55,10 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         Context::getContext()->smarty->assign([
             'url'      => isset($result['url']) ? $result['url'] : '',
             'token_ws' => $result['token'],
-            'amount'   => round($amount)
+            'amount'   => round($amount),
+            'redirectType' => 'oneclick-inscription'
         ]);
-        $this->setTemplate('module:webpay/views/templates/front/oneclick_inscription_execution.tpl');
+        $this->setTemplate('module:webpay/views/templates/front/redirect_to_payment_form.tpl');
     }
 
     private function generateUsername($userId){

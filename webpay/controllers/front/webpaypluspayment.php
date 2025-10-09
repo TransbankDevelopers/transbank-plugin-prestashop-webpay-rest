@@ -134,7 +134,8 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
             'url' => isset($result['url']) ? $result['url'] : '',
             'token_ws' => $result['token_ws'],
             'amount' => $amount,
+            'redirectType' => 'webpayplus'
         ]);
-        $this->setTemplate('module:webpay/views/templates/front/payment_execution.tpl');
+        $this->setTemplate('module:webpay/views/templates/front/redirect_to_payment_form.tpl');
     }
 }
