@@ -153,7 +153,7 @@ class TransbankSdkOneclick
                 ', txDate: ' . $txDate . ', txTime: ' . $txTime);
             $resp = $this->inscription->delete($tbkUser, $userName);
             $this->log->logInfo('delete - resp: ' . json_encode($resp));
-            return $resp;
+            return $resp->wasSuccessfull();
         } catch (InscriptionDeleteException $e) {
             $errorMessage = "Error al eliminar la inscripción para =>
                 userName: {$userName}, tbkUser: {$tbkUser}, error: {$e->getMessage()}";
