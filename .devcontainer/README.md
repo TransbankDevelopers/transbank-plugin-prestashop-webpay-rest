@@ -14,7 +14,7 @@ Este devcontainer proporciona un entorno completo de desarrollo para el módulo 
 -   **PrestaShop 8.2.0** con PHP 8.1.
 -   **MariaDB 10.11** como base de datos.
 -   **Apache** para servir el contenido.
--   **Extensiones de VS Code** para tabrajar con PHP y PrestaShop
+-   **Extensiones de VS Code** para trabajar con PHP y PrestaShop
 -   **Composer** para gestión de dependencias PHP.
 
 ## 🔗 URLs de acceso
@@ -56,7 +56,7 @@ El módulo Webpay se monta automáticamente en `/var/www/html/modules/webpay/` y
 
 1. Los cambios se reflejan automáticamente en PrestaShop
 2. Los logs se guardan en `.devcontainer/container/logs/`
-3. Se ha incluido la carpeta de Prestashop en Intelephense para tener las referencias de códido de Prestashop.
+3. Se ha incluido la carpeta de Prestashop en Intelephense para tener las referencias de código de Prestashop.
 
 ## 📦 Dependencias
 
@@ -88,7 +88,7 @@ composer require nueva-dependencia
 
 ### PrestaShop no carga
 
-Si el contenedor web no arranca, revisa si tienes el archivo `install.lock`, si existe eliminado y recarga el contenedor.
+Si el contenedor web no arranca, revisa si tienes el archivo `install.lock`, si existe elimínalo y recarga el contenedor.
 
 ### Base de datos no conecta
 
@@ -99,8 +99,8 @@ mysql -h db -u prestashop -pprestashop123 -e "SELECT 1;"
 
 ## Edición devcontainer
 
-En caso de editar el devcontainer, es importante que se recontruya la imagen para que los cambios se reflejen si ya se uso anterioremente.
-En algunas ocaciones detecta los cambios y el editor sugiere reconstruir el contenedor. En caso contrario se debe hacer manaulmente.
+En caso de editar el devcontainer, es importante que se reconstruya la imagen para que los cambios se reflejen si ya se uso anteriormente.
+En algunas ocasiones detecta los cambios y el editor sugiere reconstruir el contenedor. En caso contrario se debe hacer manualmente.
 
 ### Reconstruir el devcontainer
 
