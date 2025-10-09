@@ -5,13 +5,13 @@
 {/block}
 
 {block name='page_content'}
-    {if $errors}
+    {if isset($errors)}
         <ul class="alert alert-danger" role="alert">
             {foreach from=$errors item=e}<li>{$e|escape:'html':'UTF-8'}</li>{/foreach}
         </ul>
     {/if}
 
-    {if $success}
+    {if isset($success)}
         <ul class="alert alert-success" role="alert">
             {foreach from=$success item=s}<li>{$s|escape:'html':'UTF-8'}</li>{/foreach}
         </ul>
