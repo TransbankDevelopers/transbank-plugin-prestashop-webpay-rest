@@ -8,6 +8,7 @@ use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
+use PrestaShop\Module\WebpayPlus\Repository\TransactionRepository;
 
 /**
  * This class handles the validation of payment responses from the Webpay Plus payment gateway.
@@ -33,6 +34,9 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
     protected $responseData = [];
 
+    /** @var TransactionRepository */
+    private $repository;
+
     /**
      * Constructor initializes the logger.
      */
@@ -40,6 +44,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     {
         parent::__construct();
         $this->logger = TbkFactory::createLogger();
+        $this->repository = new TransactionRepository();
     }
 
     /**
@@ -149,7 +154,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             return;
         }
 
-        $webpayTransaction = $this->getTransactionWebpayByToken($token);
+        $webpayTransaction = $this->repository->getTransactionWebpayByToken($token);
         $cart = $this->getCart($webpayTransaction->cart_id);
 
         if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
@@ -181,7 +186,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     {
         $this->logInfo("Procesando transacción por flujo timeout => Orden de compra: {$buyOrder}");
 
-        $webpayTransaction = $this->getTransactionWebpayByBuyOrder($buyOrder);
+        $webpayTransaction = $this->repository->getTransactionWebpayByBuyOrder($buyOrder);
 
         if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
             $this->handleTransactionAlreadyProcessed($webpayTransaction->token);
@@ -205,7 +210,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     {
         $this->logInfo("Procesando transacción por flujo de pago abortado => Token: {$token}");
 
-        $webpayTransaction = $this->getTransactionWebpayByToken($token);
+        $webpayTransaction = $this->repository->getTransactionWebpayByToken($token);
 
         if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
             $this->handleTransactionAlreadyProcessed($token);
@@ -231,7 +236,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             "Procesando transacción por flujo de error en formulario de pago => Token: {$token}"
         );
 
-        $webpayTransaction = $this->getTransactionWebpayByToken($token);
+        $webpayTransaction = $this->repository->getTransactionWebpayByToken($token);
 
         if ($this->checkTransactionIsAlreadyProcessed($token)) {
             $this->handleTransactionAlreadyProcessed($token);
@@ -263,17 +268,12 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $token = $webpayTransaction->token;
         $this->logInfo("Transacción autorizada por Transbank, procesando orden con token: {$token}");
 
-        $webpayTransaction->transbank_response = json_encode($commitResponse);
-        $webpayTransaction->status = TransbankWebpayRestTransaction::STATUS_APPROVED;
-        $webpayTransaction->response_code = $commitResponse->getResponseCode();
-        $webpayTransaction->card_number = $commitResponse->getCardNumber();
-        $webpayTransaction->vci = $commitResponse->getVci();
-        $saved = $webpayTransaction->save();
-
-        if (!$saved) {
-            $message = "No se pudo actualizar la transacción en la tabla webpay_transactions con token: {$token}";
-            throw new EcommerceException($message);
-        }
+        $this->updateTransaction($webpayTransaction->id, [
+            'status' => TransbankWebpayRestTransaction::STATUS_APPROVED,
+            'card_number' => $commitResponse->getCardNumber(),
+            'vci' => $commitResponse->getVci(),
+            'transbank_response' => json_encode($commitResponse)
+        ]);
 
         $customer = $this->getCustomer($cart->id_customer);
         $currency = Context::getContext()->currency;
@@ -290,13 +290,14 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $customer->secure_key
         );
 
-        $idOrder = Order::getIdByCartId($cart->id);
-        $order = new Order($idOrder);
+        $orderId = Order::getIdByCartId($cart->id);
+        $order = new Order($orderId);
 
-        $this->logInfo("Orden creada. Order ID: {$order->id} Cart ID: {$cart->id} Token: {$token}");
+        $this->logInfo("Orden creada. Order ID: {$orderId} Cart ID: {$cart->id} Token: {$token}");
 
-        $webpayTransaction->order_id = $order->id;
-        $webpayTransaction->save();
+        $this->updateTransaction($webpayTransaction->id, [
+            'order_id' => $orderId
+        ]);
 
         $this->saveOrderPayment($order, $cart, $commitResponse->getCardNumber());
 
@@ -320,16 +321,12 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         $token = $webpayTransaction->token;
         $this->logInfo("Transacción rechazada por Transbank con token: {$token}");
 
-        $webpayTransaction->transbank_response = json_encode($commitResponse);
-        $webpayTransaction->response_code = $commitResponse->getResponseCode();
-        $webpayTransaction->card_number = $commitResponse->getCardNumber();
-        $webpayTransaction->vci = $commitResponse->getVci();
-        $saved = $webpayTransaction->save();
-
-        if (!$saved) {
-            $message = "No se pudo actualizar la transacción en la tabla webpay_transactions con token: {$token}";
-            throw new EcommerceException($message);
-        }
+        $this->updateTransaction($webpayTransaction->id, [
+            'response_code' => $commitResponse->getResponseCode(),
+            'card_number' => $commitResponse->getCardNumber(),
+            'vci' => $commitResponse->getVci(),
+            'transbank_response' => json_encode($commitResponse),
+        ]);
 
         $this->handleAbortedTransaction(
             $webpayTransaction,
@@ -357,8 +354,9 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         );
         $this->logInfo("Detalle: {$message}");
 
-        $webpayTransaction->status = $status;
-        $webpayTransaction->save();
+        $this->updateTransaction($webpayTransaction->id, [
+            'status' => $status
+        ]);
 
         $this->setPaymentErrorPage($message);
     }
@@ -374,7 +372,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     {
         $this->logInfo("Transacción ya se encontraba procesada. Token: {$token}");
 
-        $webpayTransaction = $this->getTransactionWebpayByToken($token);
+        $webpayTransaction = $this->repository->getTransactionWebpayByToken($token);
         $status = $webpayTransaction->status;
         $message = self::WEBPAY_EXCEPTION_FLOW_MESSAGE;
 
@@ -444,7 +442,8 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      */
     private function checkTransactionIsAlreadyProcessed(string $token): bool
     {
-        $webpayTransaction = $this->getTransactionWebpayByToken($token);
+        $this->logInfo("Verificando si la transacción ya fue procesada => token: {$token}");
+        $webpayTransaction = $this->repository->getTransactionWebpayByToken($token);
 
         if (is_null($webpayTransaction)) {
             return false;
@@ -463,5 +462,24 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     private function checkTransactionIsAlreadyProcessedByStatus(string $status): bool
     {
         return $status != TransbankWebpayRestTransaction::STATUS_INITIALIZED;
+    }
+
+    /**
+     * Updates a transaction in the database.
+     *
+     * @param int $id The transaction ID.
+     * @param array $data The data to update.
+     *
+     * @throws \Transbank\Plugin\Exceptions\EcommerceException
+     * @return void
+     */
+    private function updateTransaction(int $id, array $data): void
+    {
+        $updated = $this->repository->updateById($id, $data);
+
+        if (!$updated) {
+            $message = "No se pudo actualizar la transacción en la tabla webpay_transactions con ID: {$id}";
+            throw new EcommerceException($message);
+        }
     }
 }
