@@ -86,57 +86,6 @@ class WebPayWebpayplusPaymentModuleFrontController extends BaseModuleFrontContro
     }
 
     /**
-     * Saves the Webpay Plus transaction details in the database.
-     *
-     * @param TransbankSdkWebpay $webpay The Webpay SDK instance.
-     * @param string $sessionId The unique session ID for the transaction.
-     * @param int $cartId The cart ID associated with the transaction.
-     * @param int $currencyId The currency ID for the transaction.
-     * @param string $token The token received from Webpay Plus.
-     * @param string $buyOrder The unique buy order identifier.
-     * @param float $amount The transaction amount.
-     *
-     * @return TransbankWebpayRestTransaction The saved transaction record.
-     *
-     * @throws EcommerceException If the transaction cannot be saved in the database.
-     */
-    private function createTransbankTransactionRecord(
-        TransbankSdkWebpay $webpay,
-        string $sessionId,
-        int $cartId,
-        int $currencyId,
-        string $token,
-        string $buyOrder,
-        float $amount
-    ): void {
-
-        $transaction = new TransbankWebpayRestTransaction();
-        $transaction->amount = $amount;
-        $transaction->cart_id = $cartId;
-        $transaction->buy_order = $buyOrder;
-        $transaction->session_id = $sessionId;
-        $transaction->token = $token;
-        $transaction->status = TransbankWebpayRestTransaction::STATUS_INITIALIZED;
-        $transaction->created_at = date('Y-m-d H:i:s');
-        $transaction->shop_id = (int) Context::getContext()->shop->id;
-        $transaction->currency_id = $currencyId;
-
-        $transaction->commerce_code = $webpay->getCommerceCode();
-        $transaction->environment = $webpay->getEnvironment();
-        $transaction->product = TransbankWebpayRestTransaction::PRODUCT_WEBPAY_PLUS;
-
-        $this->logInfo("Creando registro en la tabla webpay_transactions [Datos]:");
-        $this->logInfo(json_encode($transaction));
-
-        $saved = $transaction->add();
-        if (!$saved) {
-            $message = "No se pudo crear la transacción en la tabla webpay_transactions";
-            $this->logError($message);
-            throw new EcommerceException($message);
-        }
-    }
-
-    /**
      * Prepares the redirection template for the payment page.
      *
      * @param array $result The response from the Webpay Plus transaction creation.
