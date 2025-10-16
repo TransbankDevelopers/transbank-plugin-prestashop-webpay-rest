@@ -4,18 +4,21 @@ namespace PrestaShop\Module\WebpayPlus\Hooks;
 
 use PrestaShop\Module\WebpayPlus\Utils\Template;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkResponseUtil;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\Module\WebpayPlus\Hooks\AbstractHookHandler;
+use PrestaShop\Module\WebpayPlus\Repository\TransactionRepository;
 
 class DisplayPaymentReturn extends AbstractHookHandler
 {
-    use InteractsWithWebpayDb;
-
     /**
      * @var Template Instance of the Template utility to render Twig templates.
      */
     private $template;
+
+    /**
+     * @var TransactionRepository
+     */
+    private $repository;
 
     /**
      * Constructor.
@@ -25,6 +28,7 @@ class DisplayPaymentReturn extends AbstractHookHandler
     {
         parent::__construct();
         $this->template = new Template();
+        $this->repository = new TransactionRepository();
     }
 
     /**
@@ -36,7 +40,7 @@ class DisplayPaymentReturn extends AbstractHookHandler
     public function execute(array $params): ?string
     {
         $this->logInfo('Ejecutando hook DisplayPaymentReturn');
-        $this->logDebug('Parámetros recibidos: '. json_encode($params, JSON_UNESCAPED_UNICODE));
+        $this->logDebug('Parámetros recibidos: ' . json_encode($params, JSON_UNESCAPED_UNICODE));
 
         $order = $params['order'];
         $this->logDebug('ID de la orden: ' . $order->id);
@@ -45,8 +49,8 @@ class DisplayPaymentReturn extends AbstractHookHandler
             $this->logInfo('Orden no usa el módulo Webpay');
             return null;
         }
-        
-        $transbankTransaction = $this->getTransactionWebpayApprovedByOrderId($order->id);
+
+        $transbankTransaction = $this->repository->getTransactionWebpayApprovedByOrderId($order->id);
         $transbankResponse = $transbankTransaction->transbank_response;
 
         $product = $transbankTransaction->product;

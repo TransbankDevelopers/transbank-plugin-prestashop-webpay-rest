@@ -5,10 +5,10 @@ namespace PrestaShop\Module\WebpayPlus\Hooks;
 use Order;
 use PrestaShop\Module\WebpayPlus\Utils\Template;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkResponseUtil;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use Transbank\Plugin\Helpers\TbkConstants;
 use PrestaShop\Module\WebpayPlus\Hooks\AbstractHookHandler;
+use PrestaShop\Module\WebpayPlus\Repository\TransactionRepository;
 
 /**
  * Class DisplayAdminOrderSide
@@ -19,12 +19,15 @@ use PrestaShop\Module\WebpayPlus\Hooks\AbstractHookHandler;
  */
 class DisplayAdminOrderSide extends AbstractHookHandler
 {
-    use InteractsWithWebpayDb;
-
     /**
      * @var Template Instance of the Template utility to render Twig templates.
      */
     private $template;
+
+    /**
+     * @var TransactionRepository
+     */
+    private $repository;
 
     /**
      * Constructor.
@@ -34,6 +37,7 @@ class DisplayAdminOrderSide extends AbstractHookHandler
     {
         parent::__construct();
         $this->template = new Template();
+        $this->repository = new TransactionRepository();
     }
 
     /**
@@ -56,7 +60,7 @@ class DisplayAdminOrderSide extends AbstractHookHandler
             return null;
         }
 
-        $transbankTransaction = $this->getTransactionWebpayApprovedByOrderId($orderId);
+        $transbankTransaction = $this->repository->getTransactionWebpayApprovedByOrderId($orderId);
         $transbankResponse = $transbankTransaction->transbank_response;
 
         if (!isset($transbankResponse)) {
