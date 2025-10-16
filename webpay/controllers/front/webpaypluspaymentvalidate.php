@@ -5,7 +5,6 @@ use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use PrestaShop\Module\WebpayPlus\Repository\TransactionRepository;
@@ -17,8 +16,6 @@ use PrestaShop\Module\WebpayPlus\Repository\TransactionRepository;
  */
 class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModuleFrontController
 {
-    use InteractsWithWebpayDb;
-
     const WEBPAY_NORMAL_FLOW = 'normal';
     const WEBPAY_TIMEOUT_FLOW = 'timeout';
     const WEBPAY_ABORTED_FLOW = 'aborted';

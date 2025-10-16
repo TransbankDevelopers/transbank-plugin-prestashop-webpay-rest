@@ -16,7 +16,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
-    use InteractsWithWebpayDb;
     use InteractsWithTabs;
 
     protected $_errors = array();
@@ -160,7 +159,6 @@ class WebPay extends PaymentModule
     {
         $route = SymfonyContainer::getInstance()->get('router')->generate('ps_controller_webpay_configure');
         Tools::redirectAdmin($route);
-
     }
 
     private function pluginValidation()
