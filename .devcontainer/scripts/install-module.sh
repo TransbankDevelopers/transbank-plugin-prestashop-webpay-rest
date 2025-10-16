@@ -19,7 +19,7 @@ TEST_LASTNAME="User"
 TEST_PASSWORD_PLAIN="Password123!"
 TEST_ADDRESS1="Av. Demo 123"
 TEST_CITY="Santiago"
-TEST_POSTCODE="7500000"
+TEST_POSTCODE="750-0000"
 TEST_PHONE="12345678"
 
 TEST_PASS_HASH="$(php -r 'echo password_hash(getenv("P") ?: "Password123!", PASSWORD_BCRYPT);' P="$TEST_PASSWORD_PLAIN")"
@@ -54,11 +54,11 @@ SET @id_country := IFNULL(@id_country, 1);
 
 -- Crear dirección si el cliente no tiene alguna
 INSERT INTO ps_address (
-  id_customer, id_country, alias, firstname, lastname,
+  id_customer, id_country, alias, company, firstname, lastname,
   address1, city, postcode, phone, active, date_add, date_upd
 )
 SELECT
-  @cid, @id_country, 'Home', '$TEST_FIRSTNAME', '$TEST_LASTNAME',
+  @cid, @id_country, 'Home', '', '$TEST_FIRSTNAME', '$TEST_LASTNAME',
   '$TEST_ADDRESS1', '$TEST_CITY', '$TEST_POSTCODE', '$TEST_PHONE', 1, NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM ps_address WHERE id_customer = @cid LIMIT 1);
 SQL
