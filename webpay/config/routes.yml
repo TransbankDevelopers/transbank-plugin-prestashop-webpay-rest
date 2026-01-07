@@ -66,3 +66,33 @@ ps_controller_webpay_transaction_list_search:
     redirectRoute: ps_controller_webpay_transaction_list
     _legacy_controller: WebpayPlusConfigure
     _legacy_link: WebpayPlusConfigure:searchTransactionList
+
+ps_controller_webpay_oneclick_cards_list:
+  path: /webpay/oneclick-cards-list
+  methods: [GET]
+  defaults:
+    _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\OneclickCardsController::oneclickCardsListAction'
+
+ps_controller_webpay_oneclick_cards_list_search:
+  path: /webpay/oneclick-cards-list
+  methods: [POST]
+  defaults:
+    _controller: PrestaShopBundle:Admin\Common:searchGrid
+    gridDefinitionFactoryServiceId: webpay.grid.definition.factory.oneclick_card_grid_definition_factory
+    redirectRoute: ps_controller_webpay_oneclick_cards_list
+    _legacy_controller: WebpayPlusConfigure
+    _legacy_link: WebpayPlusConfigure:searchOneclickCards
+
+ps_controller_webpay_oneclick_card_delete:
+  path: /webpay/oneclick-cards/{customerId}/{cardId}/delete
+  methods: [POST]
+  defaults:
+    _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\OneclickCardsController::deleteOneclickCardAction'
+    _disable_module_prefix: true
+
+ps_controller_webpay_oneclick_card_force_delete:
+  path: /webpay/oneclick-cards/{customerId}/{cardId}/force-delete
+  methods: [POST]
+  defaults:
+    _controller: 'PrestaShop\Module\WebpayPlus\Controller\Admin\OneclickCardsController::forceDeleteOneclickCardAction'
+    _disable_module_prefix: true
