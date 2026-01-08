@@ -79,7 +79,7 @@ class OneclickCardsController extends FrameworkBundleAdminController
                 }
 
                 $logger->logInfo("Tarjeta eliminada correctamente. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
-                $this->addFlash('success', 'Tarjeta eliminada correctamente. ID Usuario: ' . $customerId . ', ID Inscripción: ' . $cardId);
+                $this->addFlash('success', 'Tarjeta eliminada correctamente.');
             } catch (EcommerceException $e) {
                 $logger->logError("Error al eliminar la tarjeta en Transbank. ID Usuario:" . $customerId . ", ID Inscripción: " . $cardId . ", Error: " . $e->getMessage());
                 $forceDeleteUrl = $this->generateUrl('ps_controller_webpay_oneclick_card_force_delete', [
@@ -94,14 +94,13 @@ class OneclickCardsController extends FrameworkBundleAdminController
                 $this->addFlash('delete_failed', json_encode([
                     'cardId' => $cardId,
                     'customerId' => $customerId,
-                    'error' => $e->getMessage(),
                     'forceDeleteUrl' => $forceDeleteUrl,
                     'csrfToken' => $csrfToken
                 ]));
             }
         } catch (\Throwable $e) {
             $logger->logError("Error inesperado al eliminar la tarjeta. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId . ", Error: " . $e->getMessage());
-            $this->addFlash('error', 'Error inesperado: ' . $e->getMessage());
+            $this->addFlash('error', 'Ocurrió un error al eliminar la inscripción.');
         }
 
         return $this->redirectToRoute('ps_controller_webpay_oneclick_cards_list');
@@ -131,7 +130,7 @@ class OneclickCardsController extends FrameworkBundleAdminController
             }
         } catch (\Throwable $e) {
             $logger->logError("Error inesperado durante la eliminación forzada. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId . ", Error: " . $e->getMessage());
-            $this->addFlash('error', 'Error al eliminar: ' . $e->getMessage());
+            $this->addFlash('error', 'Ocurrió un error al eliminar la inscripción.');
         }
 
         return $this->redirectToRoute('ps_controller_webpay_oneclick_cards_list');
