@@ -15,7 +15,6 @@ $(document).ready(function () {
                 ? JSON.parse(window.webpayDeleteFailedData)
                 : window.webpayDeleteFailedData;
 
-        $("#modalErrorMessage").text(deleteData.error);
         $("#forceDeleteForm").attr("action", deleteData.forceDeleteUrl);
         $("#forceDeleteToken").val(deleteData.csrfToken);
 
