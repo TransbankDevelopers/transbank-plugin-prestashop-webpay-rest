@@ -5,42 +5,50 @@
     {% include '@Modules/webpay/views/templates/admin/tabs.html.twig' with {'tabActive': 6} %}
     {% include '@PrestaShop/Admin/Common/Grid/grid_panel.html.twig' with {'grid': cardsGrid} %}
 
-    <div class="modal fade" id="forceDeleteModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Error al eliminar tarjeta</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <p><strong>No se pudo eliminar la tarjeta del servicio Webpay</strong></p>
-                    </div>
-                    <p>¿Desea eliminar la tarjeta solo de la base de datos local?</p>
-                    <div class="alert alert-info">
-                        <strong>Advertencia:</strong> La inscripción podría seguir activa en el servicio de Webpay.
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <form id="forceDeleteForm" method="POST" style="display: inline;">
-                        <input type="hidden" name="_token" id="forceDeleteToken">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="material-icons">delete</i>
-                            Sí, eliminar solo de BD
+    {% set deleteData = app.flashes('delete_failed')|first %}
+
+    {% if deleteData %}
+        <div class="modal fade show d-block" id="forceDeleteModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Error al eliminar tarjeta</h5>
+                        <button type="button" class="close"
+                                onclick="window.location='{{ path('ps_controller_webpay_oneclick_cards_list') }}'">
+                            <span>&times;</span>
                         </button>
-                    </form>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <p><strong>No se pudo eliminar la tarjeta del servicio Webpay</strong></p>
+                        </div>
+                        <p>¿Desea eliminar la tarjeta solo de la base de datos local?</p>
+                        <div class="alert alert-info">
+                            <strong>Advertencia:</strong> La inscripción podría seguir activa en Webpay.
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <a class="btn btn-secondary"
+                        href="{{ path('ps_controller_webpay_oneclick_cards_list') }}">
+                            Cancelar
+                        </a>
+
+                        <form method="POST" action="{{ deleteData.forceDeleteUrl }}" style="display:inline;">
+                            <input type="hidden" name="_token" value="{{ deleteData.csrfToken }}">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="material-icons">delete</i> Sí, eliminar solo de BD
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
         </div>
-    </div>
-    {% set deleteFailedMessage = app.flashes('delete_failed')|first %}
-    {% if deleteFailedMessage %}
-        <script>
-            window.webpayDeleteFailedData = {{ deleteFailedMessage|raw }};
-        </script>
+        <div class="modal-backdrop fade show"></div>
+
     {% endif %}
 {% endblock %}
 

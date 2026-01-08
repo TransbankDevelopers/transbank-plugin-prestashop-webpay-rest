@@ -91,12 +91,12 @@ class OneclickCardsController extends FrameworkBundleAdminController
                     ->getToken('force_delete_' . $cardId)
                     ->getValue();
 
-                $this->addFlash('delete_failed', json_encode([
+                $this->addFlash('delete_failed', [
                     'cardId' => $cardId,
                     'customerId' => $customerId,
                     'forceDeleteUrl' => $forceDeleteUrl,
                     'csrfToken' => $csrfToken
-                ]));
+                ]);
             }
         } catch (\Throwable $e) {
             $logger->logError("Error inesperado al eliminar la tarjeta. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId . ", Error: " . $e->getMessage());
