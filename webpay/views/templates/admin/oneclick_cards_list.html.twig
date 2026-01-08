@@ -36,11 +36,12 @@
             </div>
         </div>
     </div>
-    {% for message in app.flashes('delete_failed') %}
+    {% set deleteFailedMessage = app.flashes('delete_failed')|first %}
+    {% if deleteFailedMessage %}
         <script>
-            window.webpayDeleteFailedData = {{ message|raw }};
+            window.webpayDeleteFailedData = {{ deleteFailedMessage|raw }};
         </script>
-    {% endfor %}
+    {% endif %}
 {% endblock %}
 
 {% block javascripts %}
