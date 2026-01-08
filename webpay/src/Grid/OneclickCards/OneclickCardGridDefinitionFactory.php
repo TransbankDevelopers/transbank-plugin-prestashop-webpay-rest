@@ -36,91 +36,50 @@ final class OneclickCardGridDefinitionFactory extends AbstractFilterableGridDefi
     {
         $columns = new ColumnCollection();
 
-        $columns
-            ->add(
-                (new LinkColumn('id_customer'))
-                    ->setName($this->trans('ID Usuario', [], 'Modules.WebpayPlus.Admin'))
-                    ->setOptions([
-                        'field' => 'id_customer',
-                        'route' => 'admin_customers_view',
-                        'route_param_name' => 'customerId',
-                        'route_param_field' => 'id_customer',
-                    ])
-            )
-            ->add(
-                (new DataColumn('id_oneclick_card'))
-                    ->setName($this->trans('ID Inscripción', [], 'Modules.WebpayPlus.Admin'))
-                    ->setOptions([
-                        'field' => 'id_oneclick_card',
-                        'sortable' => true
-                    ])
-            )
-            ->add(
-                (new DataColumn('email'))
-                    ->setName($this->trans('Email', [], 'Modules.WebpayPlus.Admin'))
-                    ->setOptions([
-                        'field' => 'email',
-                        'sortable' => true
-                    ])
-            )
-            ->add(
-                (new DataColumn('customer_name'))
-                    ->setName($this->trans('Nombre', [], 'Modules.WebpayPlus.Admin'))
-                    ->setOptions([
-                        'field' => 'customer_name',
-                        'sortable' => true
-                    ])
-            )
-            ->add(
-                (new DataColumn('card_type'))
-                    ->setName($this->trans('Tipo de tarjeta', [], 'Modules.WebpayPlus.Admin'))
-                    ->setOptions([
-                        'field' => 'card_type',
-                        'sortable' => true
-                    ])
-            )
-            ->add(
-                (new DataColumn('card_number'))
-                    ->setName($this->trans('Número de tarjeta', [], 'Modules.WebpayPlus.Admin'))
-                    ->setOptions([
-                        'field' => 'card_number',
-                        'sortable' => true
-                    ])
-            )
-            ->add(
-                (new DataColumn('environment'))
-                    ->setName($this->trans('Ambiente', [], 'Modules.WebpayPlus.Admin'))
-                    ->setOptions([
-                        'field' => 'environment',
-                        'sortable' => true
-                    ])
-            )
-            ->add(
-                (new ActionColumn('actions'))
-                    ->setName($this->trans('Acciones', [], 'Modules.WebpayPlus.Admin'))
-                    ->setOptions([
-                        'actions' => (new RowActionCollection())
-                            ->add(
-                                (new SubmitRowAction('delete'))
-                                    ->setName($this->trans('Eliminar', [], 'Modules.WebpayPlus.Admin'))
-                                    ->setIcon('delete')
-                                    ->setOptions([
-                                        'method' => 'POST',
-                                        'route' => 'ps_controller_webpay_oneclick_card_delete',
-                                        'route_param_name' => 'cardId',
-                                        'route_param_field' => 'id_oneclick_card',
-                                        'extra_route_params' => [
-                                            'customerId' => 'id_customer',
-                                        ],
-                                        'confirm_message' => $this->trans(
-                                            '¿Está seguro/a que deseas eliminar esta inscripción?',
-                                            [],
-                                            'Modules.WebpayPlus.Admin'
-                                        ),
-                                    ])
-                            )
-                    ])
-            );
+        $columns->add(
+            (new LinkColumn('id_customer'))
+                ->setName($this->trans('ID Usuario', [], 'Modules.WebpayPlus.Admin'))
+                ->setOptions([
+                    'field' => 'id_customer',
+                    'route' => 'admin_customers_view',
+                    'route_param_name' => 'customerId',
+                    'route_param_field' => 'id_customer',
+                ])
+        );
+
+        $this->addDataColumn($columns, 'id_oneclick_card', 'ID Inscripción');
+        $this->addDataColumn($columns, 'email', 'Email');
+        $this->addDataColumn($columns, 'customer_name', 'Nombre');
+        $this->addDataColumn($columns, 'card_type', 'Tipo de tarjeta');
+        $this->addDataColumn($columns, 'card_number', 'Número de tarjeta');
+        $this->addDataColumn($columns, 'environment', 'Ambiente');
+
+        $columns->add(
+            (new ActionColumn('actions'))
+                ->setName($this->trans('Acciones', [], 'Modules.WebpayPlus.Admin'))
+                ->setOptions([
+                    'actions' => (new RowActionCollection())
+                        ->add(
+                            (new SubmitRowAction('delete'))
+                                ->setName($this->trans('Eliminar', [], 'Modules.WebpayPlus.Admin'))
+                                ->setIcon('delete')
+                                ->setOptions([
+                                    'method' => 'POST',
+                                    'route' => 'ps_controller_webpay_oneclick_card_delete',
+                                    'route_param_name' => 'cardId',
+                                    'route_param_field' => 'id_oneclick_card',
+                                    'extra_route_params' => [
+                                        'customerId' => 'id_customer',
+                                    ],
+                                    'confirm_message' => $this->trans(
+                                        '¿Está seguro/a que deseas eliminar esta inscripción?',
+                                        [],
+                                        'Modules.WebpayPlus.Admin'
+                                    ),
+                                ])
+                        )
+                ])
+        );
 
         return $columns;
     }
@@ -129,41 +88,12 @@ final class OneclickCardGridDefinitionFactory extends AbstractFilterableGridDefi
     {
         $filters = new FilterCollection();
 
-        $filters->add(
-            (new Filter('id_customer', TextType::class))
-                ->setAssociatedColumn('id_customer')
-                ->setTypeOptions(['required' => false])
-        );
-
-        $filters->add(
-            (new Filter('id_oneclick_card', TextType::class))
-                ->setAssociatedColumn('id_oneclick_card')
-                ->setTypeOptions(['required' => false])
-        );
-
-        $filters->add(
-            (new Filter('email', TextType::class))
-                ->setAssociatedColumn('email')
-                ->setTypeOptions(['required' => false])
-        );
-
-        $filters->add(
-            (new Filter('customer_name', TextType::class))
-                ->setAssociatedColumn('customer_name')
-                ->setTypeOptions(['required' => false])
-        );
-
-        $filters->add(
-            (new Filter('card_type', TextType::class))
-                ->setAssociatedColumn('card_type')
-                ->setTypeOptions(['required' => false])
-        );
-
-        $filters->add(
-            (new Filter('card_number', TextType::class))
-                ->setAssociatedColumn('card_number')
-                ->setTypeOptions(['required' => false])
-        );
+        $this->addTextFilter($filters, 'id_customer');
+        $this->addTextFilter($filters, 'id_oneclick_card');
+        $this->addTextFilter($filters, 'email');
+        $this->addTextFilter($filters, 'customer_name');
+        $this->addTextFilter($filters, 'card_type');
+        $this->addTextFilter($filters, 'card_number');
 
         $filters->add(
             (new Filter('actions', SearchAndResetType::class))
@@ -178,5 +108,26 @@ final class OneclickCardGridDefinitionFactory extends AbstractFilterableGridDefi
         );
 
         return $filters;
+    }
+
+    private function addDataColumn(ColumnCollection $columns, string $field, string $label, bool $isSortable = true): void
+    {
+        $columns->add(
+            (new DataColumn($field))
+                ->setName($this->trans($label, [], 'Modules.WebpayPlus.Admin'))
+                ->setOptions([
+                    'field' => $field,
+                    'sortable' => $isSortable,
+                ])
+        );
+    }
+
+    private function addTextFilter(FilterCollection $filters, string $field, bool $required = false): void
+    {
+        $filters->add(
+            (new Filter($field, TextType::class))
+                ->setAssociatedColumn($field)
+                ->setTypeOptions(['required' => $required])
+        );
     }
 }
