@@ -1,7 +1,7 @@
 $(document).ready(function () {
     const gridId = "oneclick_card_list";
-    const Grid = window.prestashop.component.Grid;
-    const GridExtensions = window.prestashop.component.GridExtensions;
+    const Grid = globalThis.prestashop.component.Grid;
+    const GridExtensions = globalThis.prestashop.component.GridExtensions;
 
     const cardsGrid = new Grid(gridId);
     cardsGrid.addExtension(new GridExtensions.FiltersResetExtension());
