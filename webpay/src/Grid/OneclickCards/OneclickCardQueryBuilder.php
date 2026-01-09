@@ -130,6 +130,8 @@ final class OneclickCardQueryBuilder extends AbstractDoctrineQueryBuilder
                         ->andWhere('ins.environment = :environment')
                         ->setParameter('environment', $value);
                     break;
+                default:
+                    break;
             }
         }
     }
