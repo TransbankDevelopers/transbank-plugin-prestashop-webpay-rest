@@ -2,19 +2,12 @@
 
 namespace PrestaShop\Module\WebpayPlus\Grid\OneclickCards;
 
-use Doctrine\DBAL\Connection;
 use PrestaShop\PrestaShop\Core\Grid\Query\AbstractDoctrineQueryBuilder;
 use PrestaShop\PrestaShop\Core\Grid\Search\SearchCriteriaInterface;
 use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
 
 final class OneclickCardQueryBuilder extends AbstractDoctrineQueryBuilder
 {
-    public function __construct(
-        Connection $connection,
-        string $dbPrefix
-    ) {
-        parent::__construct($connection, $dbPrefix);
-    }
 
     public function getSearchQueryBuilder(SearchCriteriaInterface $searchCriteria)
     {
