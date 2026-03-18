@@ -61,7 +61,7 @@ ps_controller_webpay_transaction_list_search:
   path: /webpay/transaction-list
   methods: [POST]
   defaults:
-    _controller: PrestaShopBundle:Admin\Common:searchGrid
+    _controller: 'PrestaShopBundle\Controller\Admin\CommonController::searchGridAction'
     gridDefinitionFactoryServiceId: webpay.grid.definition.factory.transactions_grid_definition_factory
     redirectRoute: ps_controller_webpay_transaction_list
     _legacy_controller: WebpayPlusConfigure
@@ -77,7 +77,7 @@ ps_controller_webpay_oneclick_cards_list_search:
   path: /webpay/oneclick-cards-list
   methods: [POST]
   defaults:
-    _controller: PrestaShopBundle:Admin\Common:searchGrid
+    _controller: 'PrestaShopBundle\Controller\Admin\CommonController::searchGridAction'
     gridDefinitionFactoryServiceId: webpay.grid.definition.factory.oneclick_card_grid_definition_factory
     redirectRoute: ps_controller_webpay_oneclick_cards_list
     _legacy_controller: WebpayPlusConfigure

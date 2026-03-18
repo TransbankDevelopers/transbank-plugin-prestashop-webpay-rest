@@ -31,7 +31,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /** @var string */
     private $environment;
 
-    /** @var PrestaShop\Module\WebpayPlus\Utils\OrderUtils */
+    /** @var PrestaShop\Module\WebpayPlus\Utils\Utils */
     private $moduleUtils;
 
     /**

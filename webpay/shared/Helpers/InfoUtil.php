@@ -12,8 +12,8 @@ class InfoUtil
     public static function getValidatephp()
     {
         if (
-            version_compare(phpversion(), '7.4.33', '<=') &&
-            version_compare(phpversion(), '7.0.0', '>=')
+            version_compare(phpversion(), '8.3', '<') &&
+            version_compare(phpversion(), '8.2.0', '>=')
         ) {
             return [
                 'status' => 'OK',

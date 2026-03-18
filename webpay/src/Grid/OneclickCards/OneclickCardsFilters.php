@@ -22,4 +22,16 @@ final class OneclickCardsFilters extends Filters
             'filters' => [],
         ];
     }
+
+    public function getOffset(): int
+    {
+        $defaults = self::getDefaults();
+        return $this->getInt('offset') ?? $defaults['offset'];
+    }
+
+    public function getLimit(): int
+    {
+        $defaults = self::getDefaults();
+        return $this->getInt('limit') ?? $defaults['limit'];
+    }
 }
