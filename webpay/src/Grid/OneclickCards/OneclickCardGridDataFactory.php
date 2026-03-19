@@ -22,8 +22,8 @@ final class OneclickCardGridDataFactory implements GridDataFactoryInterface
         $searchQueryBuilder = $this->queryBuilder->getSearchQueryBuilder($searchCriteria);
         $countQueryBuilder  = $this->queryBuilder->getCountQueryBuilder($searchCriteria);
 
-        $records = $searchQueryBuilder->execute()->fetchAllAssociative();
-        $recordsTotal = (int) $countQueryBuilder->execute()->fetchOne();
+        $records = $searchQueryBuilder->executeQuery()->fetchAllAssociative();
+        $recordsTotal = (int) $countQueryBuilder->executeQuery()->fetchOne();
 
         return new GridData(
             new RecordCollection($records),
