@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   run:
@@ -13,10 +13,10 @@ jobs:
     name: PHP 8.2
     steps:
       - uses: actions/checkout@v3
-      - name: 1. Install dependencies 
+      - name: 1. Install dependencies
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: "8.2"
       - run: |
           cd webpay
           composer update --no-dev
@@ -30,13 +30,13 @@ jobs:
       - name: 3. Archive Release
         uses: thedoctor0/zip-release@0.7.1
         with:
-          type: 'zip'
-          filename: 'plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip'
-          path: './webpay'    
+          type: "zip"
+          filename: "plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip"
+          path: "./webpay"
       - name: 4. Upload binaries to release
         uses: svenstaro/upload-release-action@2.5.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: './plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip'
+          file: "./plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip"
           tag: ${{ github.ref }}
           overwrite: true
