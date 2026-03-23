@@ -21,6 +21,8 @@ use PrestaShop\PrestaShop\Core\Grid\GridFactoryInterface;
 class ConfigureController extends PrestaShopAdminController
 {
     const TAB_CLASS_NAME = 'WebpayPlusConfigure';
+    const LAYOUT_TITLE = 'Configuración Webpay';
+    const SUCCESSFUL_UPDATE = 'Successful update.';
 
     /** @Route("/webpay/configure", name="webpayplus") */
     public function webpayplusAction(
@@ -32,7 +34,7 @@ class ConfigureController extends PrestaShopAdminController
         return $this->render('@Modules/webpay/views/templates/admin/webpay_configure.html.twig', [
             'webpayPlusForm' => $webpayPlusForm->createView(),
             'enableSidebar' => true,
-            'layoutTitle' => $this->trans('Configuración Webpay', [], 'Modules.WebpayPlus.Admin')
+            'layoutTitle' => $this->trans(self::LAYOUT_TITLE, [], 'Modules.WebpayPlus.Admin')
         ]);
     }
 
@@ -62,7 +64,7 @@ class ConfigureController extends PrestaShopAdminController
         return $this->render('@Modules/webpay/views/templates/admin/oneclick_configure.html.twig', [
             'oneclickForm' => $oneclickForm->createView(),
             'enableSidebar' => true,
-            'layoutTitle' => $this->trans('Configuración Webpay', [], 'Modules.WebpayPlus.Admin')
+            'layoutTitle' => $this->trans(self::LAYOUT_TITLE, [], 'Modules.WebpayPlus.Admin')
         ]);
     }
 
@@ -73,7 +75,7 @@ class ConfigureController extends PrestaShopAdminController
         $eSummary = PrestashopInfoUtil::getSummary();
         return $this->render('@Modules/webpay/views/templates/admin/diagnosis_configure.html.twig', [
             'enableSidebar' => true,
-            'layoutTitle' => $this->trans('Configuración Webpay', [], 'Modules.WebpayPlus.Admin'),
+            'layoutTitle' => $this->trans(self::LAYOUT_TITLE, [], 'Modules.WebpayPlus.Admin'),
             'summary' => $summary,
             'eSummary' => $eSummary
         ]);
@@ -87,7 +89,7 @@ class ConfigureController extends PrestaShopAdminController
         $lastLog = $logger->getLogDetail(basename($resume['last']));
         return $this->render('@Modules/webpay/views/templates/admin/logs_configure.html.twig', [
             'enableSidebar' => true,
-            'layoutTitle' => $this->trans('Configuración Webpay', [], 'Modules.WebpayPlus.Admin'),
+            'layoutTitle' => $this->trans(self::LAYOUT_TITLE, [], 'Modules.WebpayPlus.Admin'),
             'resume' => $resume,
             'lastLog' => $lastLog
         ]);
@@ -105,7 +107,7 @@ class ConfigureController extends PrestaShopAdminController
         if ($form->isSubmitted()) {
             if ($form->getClickedButton() === $form->get('webpay_plus_form_reset_button')) {
                 WebpayConfig::loadDefaultConfig();
-                $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
+                $this->addFlash('success', $this->trans(self::SUCCESSFUL_UPDATE, [], 'Admin.Notifications.Success'));
             } elseif (!$form->isValid()) {
                 foreach ($form->getErrors() as $error) {
                     $errors[] = $error->getMessage();
@@ -114,7 +116,7 @@ class ConfigureController extends PrestaShopAdminController
             } elseif ($form->getClickedButton() === $form->get('webpay_plus_form_save_button')) {
                 $errors = $formDataHandler->save($form->getData());
                 if (empty($errors)) {
-                    $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
+                    $this->addFlash('success', $this->trans(self::SUCCESSFUL_UPDATE, [], 'Admin.Notifications.Success'));
                 } else {
                     $this->addFlashErrors($errors);
                 }
@@ -136,7 +138,7 @@ class ConfigureController extends PrestaShopAdminController
         if ($form->isSubmitted()) {
             if ($form->getClickedButton() === $form->get('oneclick_form_reset_button')) {
                 OneclickConfig::loadDefaultConfig();
-                $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
+                $this->addFlash('success', $this->trans(self::SUCCESSFUL_UPDATE, [], 'Admin.Notifications.Success'));
             } elseif (!$form->isValid()) {
                 foreach ($form->getErrors() as $error) {
                     $errors[] = $error->getMessage();
@@ -145,7 +147,7 @@ class ConfigureController extends PrestaShopAdminController
             } elseif ($form->getClickedButton() === $form->get('oneclick_form_save_button')) {
                 $errors = $formDataHandler->save($form->getData());
                 if (empty($errors)) {
-                    $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
+                    $this->addFlash('success', $this->trans(self::SUCCESSFUL_UPDATE, [], 'Admin.Notifications.Success'));
                 } else {
                     $this->addFlashErrors($errors);
                 }

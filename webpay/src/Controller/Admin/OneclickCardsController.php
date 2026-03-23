@@ -17,6 +17,7 @@ use PrestaShop\PrestaShop\Core\Grid\GridFactoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Transbank\Plugin\Helpers\PluginLogger;
 
 class OneclickCardsController extends PrestaShopAdminController
 {
@@ -56,55 +57,89 @@ class OneclickCardsController extends PrestaShopAdminController
     ): RedirectResponse {
         $logger = TbkFactory::createLogger();
         try {
-            $logger->logInfo("Iniciando eliminación de tarjeta Oneclick. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
-            $repository = new InscriptionRepository();
-            $inscription = $repository->getOneByUserIdAndInscriptionId($customerId, $cardId);
+            $logger->logInfo("Iniciando eliminación de tarjeta Oneclick. ID Usuario: $customerId, ID Inscripción: $cardId");
+            $inscription = $this->findInscription($cardId, $customerId, $logger);
 
             if (!$inscription) {
-                $this->addFlash('error', 'Inscripción no encontrada.');
-                $logger->logError("Inscripción no encontrada. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
                 return $this->redirectToRoute('ps_controller_webpay_oneclick_cards_list');
             }
 
-            $oneclickService = OneclickFactory::create();
+            $this->processOneclickDeletion($cardId, $customerId, $inscription, $csrfTokenManager, $logger);
 
-            try {
-                $oneclickService->delete($inscription['tbk_token'], $inscription['username']);
-                $logger->logInfo("Eliminación en Transbank exitosa. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
-                $deleted = $repository->deleteInscriptionByUserAndId($customerId, $cardId);
-
-                if (!$deleted) {
-                    $logger->logError("No se pudo eliminar la inscripción de la base de datos. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
-                    $this->addFlash('error', 'No se pudo eliminar la inscripción de la base de datos.');
-                    return $this->redirectToRoute('ps_controller_webpay_oneclick_cards_list');
-                }
-
-                $logger->logInfo("Tarjeta eliminada correctamente. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
-                $this->addFlash('success', 'Tarjeta eliminada correctamente.');
-            } catch (EcommerceException $e) {
-                $logger->logError("Error al eliminar la tarjeta en Transbank. ID Usuario:" . $customerId . ", ID Inscripción: " . $cardId . ", Error: " . $e->getMessage());
-                $forceDeleteUrl = $this->generateUrl('ps_controller_webpay_oneclick_card_force_delete', [
-                    'cardId' => $cardId,
-                    'customerId' => $customerId
-                ]);
-
-                $csrfToken = $csrfTokenManager->getToken('force_delete_' . $cardId)->getValue();
-
-                $this->addFlash('delete_failed', [
-                    'cardId' => $cardId,
-                    'customerId' => $customerId,
-                    'forceDeleteUrl' => $forceDeleteUrl,
-                    'csrfToken' => $csrfToken
-                ]);
-            }
         } catch (\Throwable $e) {
-            $logger->logError("Error inesperado al eliminar la tarjeta. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId . ", Error: " . $e->getMessage());
+            $logger->logError("Error inesperado al eliminar la tarjeta. ID Usuario: $customerId, ID Inscripción: $cardId, Error: " . $e->getMessage());
             $this->addFlash('error', 'Ocurrió un error al eliminar la inscripción.');
         }
 
         return $this->redirectToRoute('ps_controller_webpay_oneclick_cards_list');
     }
 
+    private function findInscription(string $cardId, string $customerId, PluginLogger $logger): ?array
+    {
+        $repository = new InscriptionRepository();
+        $inscription = $repository->getOneByUserIdAndInscriptionId($customerId, $cardId);
+
+        if (!$inscription) {
+            $this->addFlash('error', 'Inscripción no encontrada.');
+            $logger->logError("Inscripción no encontrada. ID Usuario: $customerId, ID Inscripción: $cardId");
+        }
+
+        return $inscription ?: null;
+    }
+
+    private function processOneclickDeletion(
+        string $cardId,
+        string $customerId,
+        array $inscription,
+        CsrfTokenManagerInterface $csrfTokenManager,
+        PluginLogger $logger
+    ): void {
+        $oneclickService = OneclickFactory::create();
+        $repository = new InscriptionRepository();
+
+        try {
+            $oneclickService->delete($inscription['tbk_token'], $inscription['username']);
+            $logger->logInfo("Eliminación en Transbank exitosa. ID Usuario: $customerId, ID Inscripción: $cardId");
+
+            $deleted = $repository->deleteInscriptionByUserAndId($customerId, $cardId);
+
+            if (!$deleted) {
+                $logger->logError("No se pudo eliminar la inscripción de la base de datos. ID Usuario: $customerId, ID Inscripción: $cardId");
+                $this->addFlash('error', 'No se pudo eliminar la inscripción de la base de datos.');
+                return;
+            }
+
+            $logger->logInfo("Tarjeta eliminada correctamente. ID Usuario: $customerId, ID Inscripción: $cardId");
+            $this->addFlash('success', 'Tarjeta eliminada correctamente.');
+
+        } catch (EcommerceException $e) {
+            $this->handleEcommerceException($cardId, $customerId, $csrfTokenManager, $logger, $e);
+        }
+    }
+
+    private function handleEcommerceException(
+        string $cardId,
+        string $customerId,
+        CsrfTokenManagerInterface $csrfTokenManager,
+        PluginLogger $logger,
+        EcommerceException $e
+    ): void {
+        $logger->logError("Error al eliminar la tarjeta en Transbank. ID Usuario: $customerId, ID Inscripción: $cardId, Error: " . $e->getMessage());
+
+        $forceDeleteUrl = $this->generateUrl('ps_controller_webpay_oneclick_card_force_delete', [
+            'cardId' => $cardId,
+            'customerId' => $customerId
+        ]);
+
+        $csrfToken = $csrfTokenManager->getToken('force_delete_' . $cardId)->getValue();
+
+        $this->addFlash('delete_failed', [
+            'cardId' => $cardId,
+            'customerId' => $customerId,
+            'forceDeleteUrl' => $forceDeleteUrl,
+            'csrfToken' => $csrfToken
+        ]);
+    }
 
     #[AdminSecurity(
         "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_DELETE')",
