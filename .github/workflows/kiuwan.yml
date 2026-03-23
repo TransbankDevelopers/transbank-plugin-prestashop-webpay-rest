@@ -10,6 +10,7 @@ jobs:
     with:
       project_name: td-webpay-plugin-prestashop
       source_path: .
+      fail_on_audit: true
     secrets:
       VPN_CONFIG_B64: ${{ secrets.VPN_CONFIG_B64 }}
       VPN_USER: ${{ secrets.VPN_USER }}
