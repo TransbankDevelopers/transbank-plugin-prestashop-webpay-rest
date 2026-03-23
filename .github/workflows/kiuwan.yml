@@ -6,7 +6,7 @@ on:
 
 jobs:
   scan:
-    uses: TransbankDevelopers/transbank-github-actions-templates/.github/workflows/kiuwan-pr-scan.yml@main
+    uses: TransbankDevelopers/transbank-github-actions-templates/.github/workflows/kiuwan-pr-scan.yml@b853e0ad1650c5d13357a915a9ad4ddc43803ae0
     with:
       project_name: td-webpay-plugin-prestashop
       source_path: .
