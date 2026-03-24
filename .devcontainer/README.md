@@ -11,7 +11,7 @@ Este devcontainer proporciona un entorno completo de desarrollo para el módulo 
 
 ## 📋 Servicios incluidos
 
--   **PrestaShop 9.0.0** con PHP 8.2.
+-   **PrestaShop 9.0.3** con PHP 8.2.
 -   **MariaDB 10.11** como base de datos.
 -   **Apache** para servir el contenido.
 -   **Extensiones de VS Code** para trabajar con PHP y PrestaShop
@@ -22,7 +22,7 @@ Este devcontainer proporciona un entorno completo de desarrollo para el módulo 
 | Servicio      | Acceso                          | Credenciales                         |
 | ------------- | ------------------------------- | ------------------------------------ |
 | PrestaShop    | http://localhost:8080           | -                                    |
-| Admin Panel   | http://localhost:8080/adminop   | admin@admin.com / password           |
+| Admin Panel   | http://localhost:8080/admin-dev | admin@admin.com / password           |
 | User Panel    | http://localhost:8080/mi-cuenta | test.user@example.com / Password123! |
 | Base de datos | VS Code SQLTools/MySQL Client   | prestashop / prestashop123           |
 
