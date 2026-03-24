@@ -16,7 +16,7 @@ use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use PrestaShop\PrestaShop\Core\Grid\GridFactoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Transbank\Plugin\Helpers\PluginLogger;
 
 class OneclickCardsController extends PrestaShopAdminController
@@ -26,7 +26,9 @@ class OneclickCardsController extends PrestaShopAdminController
         return ConfigureController::TAB_CLASS_NAME;
     }
 
-    #[Route("/webpay/oneclick-cards-list", name: "oneclick-cards-list")]
+    /**
+     * @Route("/webpay/oneclick-cards-list", name="oneclick-cards-list")
+     */
     #[AdminSecurity(
         "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_READ')",
         redirectRoute: "admin_login"
@@ -44,6 +46,13 @@ class OneclickCardsController extends PrestaShopAdminController
         ]);
     }
 
+    /**
+     * @Route(
+     *     "/webpay/oneclick-cards/{customerId}/{cardId}/delete",
+     *     name="ps_controller_webpay_oneclick_card_delete",
+     *     methods={"POST"}
+     * )
+     */
     #[AdminSecurity(
         "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_DELETE')",
         message: "No tienes permisos para eliminar tarjetas.",
@@ -65,7 +74,6 @@ class OneclickCardsController extends PrestaShopAdminController
             }
 
             $this->processOneclickDeletion($cardId, $customerId, $inscription, $csrfTokenManager, $logger);
-
         } catch (\Throwable $e) {
             $logger->logError("Error inesperado al eliminar la tarjeta. ID Usuario: $customerId, ID Inscripción: $cardId, Error: " . $e->getMessage());
             $this->addFlash('error', 'Ocurrió un error al eliminar la inscripción.');
@@ -111,7 +119,6 @@ class OneclickCardsController extends PrestaShopAdminController
 
             $logger->logInfo("Tarjeta eliminada correctamente. ID Usuario: $customerId, ID Inscripción: $cardId");
             $this->addFlash('success', 'Tarjeta eliminada correctamente.');
-
         } catch (EcommerceException $e) {
             $this->handleEcommerceException($cardId, $customerId, $csrfTokenManager, $logger, $e);
         }
@@ -141,6 +148,13 @@ class OneclickCardsController extends PrestaShopAdminController
         ]);
     }
 
+    /**
+     * @Route(
+     *     "/webpay/oneclick-cards/{customerId}/{cardId}/force-delete",
+     *     name="ps_controller_webpay_oneclick_card_force_delete",
+     *     methods={"POST"}
+     * )
+     */
     #[AdminSecurity(
         "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_DELETE')",
         redirectRoute: "ps_controller_webpay_oneclick_cards_list"

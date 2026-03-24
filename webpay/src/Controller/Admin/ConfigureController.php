@@ -101,27 +101,13 @@ class ConfigureController extends PrestaShopAdminController
         #[Autowire(service: 'webpay.form.webpay_plus_form_data_handler')]
         FormHandlerInterface $formDataHandler,
     ): Response {
-        $form = $formDataHandler->getForm();
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted()) {
-            if ($form->getClickedButton() === $form->get('webpay_plus_form_reset_button')) {
-                WebpayConfig::loadDefaultConfig();
-                $this->addFlash('success', $this->trans(self::SUCCESSFUL_UPDATE, [], 'Admin.Notifications.Success'));
-            } elseif (!$form->isValid()) {
-                foreach ($form->getErrors() as $error) {
-                    $errors[] = $error->getMessage();
-                }
-                $this->addFlashErrors($errors);
-            } elseif ($form->getClickedButton() === $form->get('webpay_plus_form_save_button')) {
-                $errors = $formDataHandler->save($form->getData());
-                if (empty($errors)) {
-                    $this->addFlash('success', $this->trans(self::SUCCESSFUL_UPDATE, [], 'Admin.Notifications.Success'));
-                } else {
-                    $this->addFlashErrors($errors);
-                }
-            }
-        }
+        $this->handleFormSubmission(
+            $request,
+            $formDataHandler,
+            'webpay_plus_form_reset_button',
+            'webpay_plus_form_save_button',
+            fn() => WebpayConfig::loadDefaultConfig()
+        );
 
         return $this->redirectToRoute('ps_controller_webpay_configure_webpayplus');
     }
@@ -132,28 +118,54 @@ class ConfigureController extends PrestaShopAdminController
         #[Autowire(service: 'webpay.form.oneclick_form_data_handler')]
         FormHandlerInterface $formDataHandler,
     ): Response {
+        $this->handleFormSubmission(
+            $request,
+            $formDataHandler,
+            'oneclick_form_reset_button',
+            'oneclick_form_save_button',
+            fn() => OneclickConfig::loadDefaultConfig()
+        );
+
+        return $this->redirectToRoute('ps_controller_webpay_configure_oneclick');
+    }
+
+    private function handleFormSubmission(
+        Request $request,
+        FormHandlerInterface $formDataHandler,
+        string $resetButtonName,
+        string $saveButtonName,
+        callable $onReset
+    ): void {
         $form = $formDataHandler->getForm();
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            if ($form->getClickedButton() === $form->get('oneclick_form_reset_button')) {
-                OneclickConfig::loadDefaultConfig();
-                $this->addFlash('success', $this->trans(self::SUCCESSFUL_UPDATE, [], 'Admin.Notifications.Success'));
-            } elseif (!$form->isValid()) {
-                foreach ($form->getErrors() as $error) {
-                    $errors[] = $error->getMessage();
-                }
-                $this->addFlashErrors($errors);
-            } elseif ($form->getClickedButton() === $form->get('oneclick_form_save_button')) {
-                $errors = $formDataHandler->save($form->getData());
-                if (empty($errors)) {
-                    $this->addFlash('success', $this->trans(self::SUCCESSFUL_UPDATE, [], 'Admin.Notifications.Success'));
-                } else {
-                    $this->addFlashErrors($errors);
-                }
-            }
+        if (!$form->isSubmitted()) {
+            return;
         }
 
-        return $this->redirectToRoute('ps_controller_webpay_configure_oneclick');
+        if ($form->getClickedButton() === $form->get($resetButtonName)) {
+            $onReset();
+            $this->addFlash('success', $this->trans(self::SUCCESSFUL_UPDATE, [], 'Admin.Notifications.Success'));
+            return;
+        }
+
+        if (!$form->isValid()) {
+            $errors = [];
+            foreach ($form->getErrors() as $error) {
+                $errors[] = $error->getMessage();
+            }
+
+            $this->addFlashErrors($errors);
+            return;
+        }
+
+        if ($form->getClickedButton() === $form->get($saveButtonName)) {
+            $errors = $formDataHandler->save($form->getData());
+            if (empty($errors)) {
+                $this->addFlash('success', $this->trans(self::SUCCESSFUL_UPDATE, [], 'Admin.Notifications.Success'));
+            } else {
+                $this->addFlashErrors($errors);
+            }
+        }
     }
 }
