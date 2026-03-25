@@ -2,6 +2,13 @@ services:
   _defaults:
     public: true
 
+  # Shared services for Webpay and Oneclick forms
+  webpay.form.common_webpay_fields:
+    class: 'PrestaShop\Module\WebpayPlus\Form\CommonWebpayFields'
+    arguments:
+      - "@translator"
+      - "@prestashop.adapter.legacy.configuration"
+
   # webpayplus Form services
 
   webpay.form.type.webpay_plus:
@@ -9,7 +16,7 @@ services:
     arguments:
       - "@translator"
       - "@=service('prestashop.adapter.legacy.context').getLanguages()"
-      - "@prestashop.adapter.legacy.configuration"
+      - "@webpay.form.common_webpay_fields"
     public: true
     tags:
       - { name: form.type }
@@ -39,7 +46,7 @@ services:
     arguments:
       - "@translator"
       - "@=service('prestashop.adapter.legacy.context').getLanguages()"
-      - "@prestashop.adapter.legacy.configuration"
+      - "@webpay.form.common_webpay_fields"
     public: true
     tags:
       - { name: form.type }
