@@ -47,20 +47,25 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         Tools::redirect('index.php?controller=order');
     }
 
-    private function finishInscription($ins, $token){
+    private function finishInscription($ins, $token)
+    {
         $webpay = OneclickFactory::create();
         try {
-            $resp = $webpay->finish($token, $ins->username, $ins->email);
+            $resp = $webpay->finish($token, $ins['username'], $ins['email']);
         } catch (\Exception $e) {
             $this->setPaymentErrorPage($e->getMessage());
         }
-        $ins->finished = true;
-        $ins->authorization_code = $resp->getAuthorizationCode();
-        $ins->tbk_token = $resp->getTbkUser();
-        $ins->card_type = $resp->getCardType();
-        $ins->card_number = $resp->getCardNumber();
-        $ins->transbank_response = json_encode($resp);
-        $ins->status = $resp->isApproved() ? TransbankInscriptions::STATUS_COMPLETED : TransbankInscriptions::STATUS_FAILED;
-        $ins->save();
+
+        $this->inscriptionRepository->updateById($ins['id'], [
+            'finished'           => true,
+            'authorization_code' => $resp->getAuthorizationCode(),
+            'tbk_token'          => $resp->getTbkUser(),
+            'card_type'          => $resp->getCardType(),
+            'card_number'        => $resp->getCardNumber(),
+            'transbank_response' => json_encode($resp),
+            'status'             => $resp->isApproved()
+                ? TransbankInscriptions::STATUS_COMPLETED
+                : TransbankInscriptions::STATUS_FAILED,
+        ]);
     }
 }

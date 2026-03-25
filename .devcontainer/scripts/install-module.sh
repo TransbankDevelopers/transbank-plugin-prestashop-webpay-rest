@@ -18,9 +18,11 @@ TEST_FIRSTNAME="Test"
 TEST_LASTNAME="User"
 TEST_PASSWORD_PLAIN="Password123!"
 TEST_ADDRESS1="Av. Demo 123"
+TEST_ADDRESS2="Demo Adress 2"
 TEST_CITY="Santiago"
 TEST_POSTCODE="750-0000"
 TEST_PHONE="12345678"
+TEST_PHONE_MOBILE="12345678"
 
 TEST_PASS_HASH="$(php -r 'echo password_hash(getenv("P") ?: "Password123!", PASSWORD_BCRYPT);' P="$TEST_PASSWORD_PLAIN")"
 
@@ -54,18 +56,23 @@ SET @id_country := IFNULL(@id_country, 1);
 
 -- Crear dirección si el cliente no tiene alguna
 INSERT INTO ps_address (
-  id_customer, id_country, alias, company, firstname, lastname,
-  address1, city, postcode, phone, active, date_add, date_upd
+  id_customer, id_country, id_state, id_manufacturer, id_supplier, id_warehouse,
+  alias, company, firstname, lastname, address1, address2, city, postcode,
+  phone, phone_mobile, vat_number, dni, other, active, deleted, date_add, date_upd
 )
 SELECT
-  @cid, @id_country, 'Home', '', '$TEST_FIRSTNAME', '$TEST_LASTNAME',
-  '$TEST_ADDRESS1', '$TEST_CITY', '$TEST_POSTCODE', '$TEST_PHONE', 1, NOW(), NOW()
+  @cid, @id_country, NULL, 0, 0, 0,
+  'Home', '', '$TEST_FIRSTNAME', '$TEST_LASTNAME', '$TEST_ADDRESS1', '$TEST_ADDRESS2', '$TEST_CITY', '$TEST_POSTCODE',
+  '$TEST_PHONE', '$TEST_PHONE_MOBILE', NULL, NULL, NULL, 1, 0, NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM ps_address WHERE id_customer = @cid LIMIT 1);
 SQL
 
 echo "* [Prestashop] Configurando Smarty para dev..."
 su -s /bin/bash www-data -c "php /var/www/html/bin/console dbal:run-sql \"UPDATE ps_configuration SET value=0 WHERE name='PS_SMARTY_CACHE'\""
 su -s /bin/bash www-data -c "php /var/www/html/bin/console dbal:run-sql \"UPDATE ps_configuration SET value=1 WHERE name='PS_SMARTY_FORCE_COMPILE'\""
+
+echo "* [webpay] Corrigiendo permisos de vendor..."
+chown -R www-data:www-data /var/www/html/modules/webpay/vendor
 
 echo "* [webpay] Installing module webpay..."
 su -s /bin/bash www-data -c "php /var/www/html/bin/console prestashop:module --no-interaction install webpay"

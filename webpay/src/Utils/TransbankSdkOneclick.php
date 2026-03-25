@@ -45,8 +45,8 @@ class TransbankSdkOneclick
             );
         } else {
             $this->options = new Options(
-                Oneclick::DEFAULT_API_KEY,
-                Oneclick::DEFAULT_COMMERCE_CODE,
+                Oneclick::INTEGRATION_API_KEY,
+                Oneclick::INTEGRATION_COMMERCE_CODE,
                 $config['ENVIRONMENT']
             );
         }
@@ -153,7 +153,7 @@ class TransbankSdkOneclick
                 ', txDate: ' . $txDate . ', txTime: ' . $txTime);
             $resp = $this->inscription->delete($tbkUser, $userName);
             $this->log->logInfo('delete - resp: ' . json_encode($resp));
-            return $resp->wasSuccessfull();
+            return $resp;
         } catch (InscriptionDeleteException $e) {
             $errorMessage = "Error al eliminar la inscripción para =>
                 userName: {$userName}, tbkUser: {$tbkUser}, error: {$e->getMessage()}";

@@ -31,7 +31,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /** @var string */
     private $environment;
 
-    /** @var PrestaShop\Module\WebpayPlus\Utils\OrderUtils */
+    /** @var PrestaShop\Module\WebpayPlus\Utils\Utils */
     private $moduleUtils;
 
     /**
@@ -69,7 +69,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
             }
 
             $this->handleCardRequest();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->errors[] = "La operación no se pudo completar, por favor reintente. En caso de persistir el problema, contacte al comercio.";
             $this->log->logError($e->getMessage());
             return;

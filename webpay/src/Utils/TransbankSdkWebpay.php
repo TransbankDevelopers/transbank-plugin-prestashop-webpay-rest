@@ -42,8 +42,8 @@ class TransbankSdkWebpay
             );
         } else {
             $this->options = new Options(
-                WebpayPlus::DEFAULT_API_KEY,
-                WebpayPlus::DEFAULT_COMMERCE_CODE,
+                WebpayPlus::INTEGRATION_API_KEY,
+                WebpayPlus::INTEGRATION_COMMERCE_CODE,
                 $config['ENVIRONMENT']
             );
         }

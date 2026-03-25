@@ -5,18 +5,21 @@ declare(strict_types=1);
 namespace PrestaShop\Module\WebpayPlus\Controller\Admin;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
-use PrestaShopBundle\Security\Annotation\AdminSecurity;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use PrestaShop\Module\WebpayPlus\Grid\OneclickCards\OneclickCardsFilters;
 use PrestaShop\Module\WebpayPlus\Repository\InscriptionRepository;
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
+use PrestaShopBundle\Controller\Admin\PrestaShopAdminController;
+use PrestaShopBundle\Security\Attribute\AdminSecurity;
+use PrestaShop\PrestaShop\Core\Grid\GridFactoryInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Transbank\Plugin\Helpers\PluginLogger;
 
-
-class OneclickCardsController extends FrameworkBundleAdminController
+class OneclickCardsController extends PrestaShopAdminController
 {
     protected function getTabClassName(): string
     {
@@ -25,93 +28,137 @@ class OneclickCardsController extends FrameworkBundleAdminController
 
     /**
      * @Route("/webpay/oneclick-cards-list", name="oneclick-cards-list")
-     * @AdminSecurity(
-     *     "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_READ')",
-     *     redirectRoute="admin_login"
-     * )
      */
-    public function oneclickCardsListAction(OneclickCardsFilters $filters): Response
-    {
-        $gridFactory = $this->get('webpay.grid.oneclick_card_grid_factory');
-
+    #[AdminSecurity(
+        "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_READ')",
+        redirectRoute: "admin_login"
+    )]
+    public function oneclickCardsListAction(
+        OneclickCardsFilters $filters,
+        #[Autowire(service: 'webpay.grid.oneclick_card_grid_factory')]
+        GridFactoryInterface $gridFactory,
+    ): Response {
         $cardsGrid = $gridFactory->getGrid($filters);
         return $this->render('@Modules/webpay/views/templates/admin/oneclick_cards_list.html.twig', [
             'cardsGrid' => $this->presentGrid($cardsGrid),
             'enableSidebar' => true,
-            'layoutTitle' => $this->trans('Tarjetas Oneclick', 'Modules.WebpayPlus.Admin')
+            'layoutTitle' => $this->trans('Tarjetas Oneclick', [], 'Modules.WebpayPlus.Admin')
         ]);
     }
 
     /**
-     * @AdminSecurity(
-     *     "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_DELETE')",
-     *     message="No tienes permisos para eliminar tarjetas.",
-     *     redirectRoute="ps_controller_webpay_oneclick_cards_list"
+     * @Route(
+     *     "/webpay/oneclick-cards/{customerId}/{cardId}/delete",
+     *     name="ps_controller_webpay_oneclick_card_delete",
+     *     methods={"POST"}
      * )
      */
+    #[AdminSecurity(
+        "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_DELETE')",
+        message: "No tienes permisos para eliminar tarjetas.",
+        redirectRoute: "ps_controller_webpay_oneclick_cards_list"
+    )]
     public function deleteOneclickCardAction(
         string $cardId,
         string $customerId,
+        #[Autowire(service: 'security.csrf.token_manager')]
+        CsrfTokenManagerInterface $csrfTokenManager,
     ): RedirectResponse {
         $logger = TbkFactory::createLogger();
         try {
-            $logger->logInfo("Iniciando eliminación de tarjeta Oneclick. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
-            $repository = new InscriptionRepository();
-            $inscription = $repository->getOneByUserIdAndInscriptionId($customerId, $cardId);
+            $logger->logInfo("Iniciando eliminación de tarjeta Oneclick. ID Usuario: $customerId, ID Inscripción: $cardId");
+            $inscription = $this->findInscription($cardId, $customerId, $logger);
 
             if (!$inscription) {
-                $this->addFlash('error', 'Inscripción no encontrada.');
-                $logger->logError("Inscripción no encontrada. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
                 return $this->redirectToRoute('ps_controller_webpay_oneclick_cards_list');
             }
 
-            $oneclickService = OneclickFactory::create();
-
-            try {
-                $oneclickService->delete($inscription['tbk_token'], $inscription['username']);
-                $logger->logInfo("Eliminación en Transbank exitosa. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
-                $deleted = $repository->deleteInscriptionByUserAndId($customerId, $cardId);
-
-                if (!$deleted) {
-                    $logger->logError("No se pudo eliminar la inscripción de la base de datos. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
-                    $this->addFlash('error', 'No se pudo eliminar la inscripción de la base de datos.');
-                    return $this->redirectToRoute('ps_controller_webpay_oneclick_cards_list');
-                }
-
-                $logger->logInfo("Tarjeta eliminada correctamente. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
-                $this->addFlash('success', 'Tarjeta eliminada correctamente.');
-            } catch (EcommerceException $e) {
-                $logger->logError("Error al eliminar la tarjeta en Transbank. ID Usuario:" . $customerId . ", ID Inscripción: " . $cardId . ", Error: " . $e->getMessage());
-                $forceDeleteUrl = $this->generateUrl('ps_controller_webpay_oneclick_card_force_delete', [
-                    'cardId' => $cardId,
-                    'customerId' => $customerId
-                ]);
-
-                $csrfToken = $this->container->get('security.csrf.token_manager')
-                    ->getToken('force_delete_' . $cardId)
-                    ->getValue();
-
-                $this->addFlash('delete_failed', [
-                    'cardId' => $cardId,
-                    'customerId' => $customerId,
-                    'forceDeleteUrl' => $forceDeleteUrl,
-                    'csrfToken' => $csrfToken
-                ]);
-            }
+            $this->processOneclickDeletion($cardId, $customerId, $inscription, $csrfTokenManager, $logger);
         } catch (\Throwable $e) {
-            $logger->logError("Error inesperado al eliminar la tarjeta. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId . ", Error: " . $e->getMessage());
+            $logger->logError("Error inesperado al eliminar la tarjeta. ID Usuario: $customerId, ID Inscripción: $cardId, Error: " . $e->getMessage());
             $this->addFlash('error', 'Ocurrió un error al eliminar la inscripción.');
         }
 
         return $this->redirectToRoute('ps_controller_webpay_oneclick_cards_list');
     }
 
+    private function findInscription(string $cardId, string $customerId, PluginLogger $logger): ?array
+    {
+        $repository = new InscriptionRepository();
+        $inscription = $repository->getOneByUserIdAndInscriptionId($customerId, $cardId);
+
+        if (!$inscription) {
+            $this->addFlash('error', 'Inscripción no encontrada.');
+            $logger->logError("Inscripción no encontrada. ID Usuario: $customerId, ID Inscripción: $cardId");
+        }
+
+        return $inscription ?: null;
+    }
+
+    private function processOneclickDeletion(
+        string $cardId,
+        string $customerId,
+        array $inscription,
+        CsrfTokenManagerInterface $csrfTokenManager,
+        PluginLogger $logger
+    ): void {
+        $oneclickService = OneclickFactory::create();
+        $repository = new InscriptionRepository();
+
+        try {
+            $oneclickService->delete($inscription['tbk_token'], $inscription['username']);
+            $logger->logInfo("Eliminación en Transbank exitosa. ID Usuario: $customerId, ID Inscripción: $cardId");
+
+            $deleted = $repository->deleteInscriptionByUserAndId($customerId, $cardId);
+
+            if (!$deleted) {
+                $logger->logError("No se pudo eliminar la inscripción de la base de datos. ID Usuario: $customerId, ID Inscripción: $cardId");
+                $this->addFlash('error', 'No se pudo eliminar la inscripción de la base de datos.');
+                return;
+            }
+
+            $logger->logInfo("Tarjeta eliminada correctamente. ID Usuario: $customerId, ID Inscripción: $cardId");
+            $this->addFlash('success', 'Tarjeta eliminada correctamente.');
+        } catch (EcommerceException $e) {
+            $this->handleEcommerceException($cardId, $customerId, $csrfTokenManager, $logger, $e);
+        }
+    }
+
+    private function handleEcommerceException(
+        string $cardId,
+        string $customerId,
+        CsrfTokenManagerInterface $csrfTokenManager,
+        PluginLogger $logger,
+        EcommerceException $e
+    ): void {
+        $logger->logError("Error al eliminar la tarjeta en Transbank. ID Usuario: $customerId, ID Inscripción: $cardId, Error: " . $e->getMessage());
+
+        $forceDeleteUrl = $this->generateUrl('ps_controller_webpay_oneclick_card_force_delete', [
+            'cardId' => $cardId,
+            'customerId' => $customerId
+        ]);
+
+        $csrfToken = $csrfTokenManager->getToken('force_delete_' . $cardId)->getValue();
+
+        $this->addFlash('delete_failed', [
+            'cardId' => $cardId,
+            'customerId' => $customerId,
+            'forceDeleteUrl' => $forceDeleteUrl,
+            'csrfToken' => $csrfToken
+        ]);
+    }
+
     /**
-     * @AdminSecurity(
-     *     "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_DELETE')",
-     *     redirectRoute="ps_controller_webpay_oneclick_cards_list"
+     * @Route(
+     *     "/webpay/oneclick-cards/{customerId}/{cardId}/force-delete",
+     *     name="ps_controller_webpay_oneclick_card_force_delete",
+     *     methods={"POST"}
      * )
      */
+    #[AdminSecurity(
+        "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_DELETE')",
+        redirectRoute: "ps_controller_webpay_oneclick_cards_list"
+    )]
     public function forceDeleteOneclickCardAction(
         string $cardId,
         string $customerId,

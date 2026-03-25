@@ -1,4 +1,4 @@
-FROM prestashop/prestashop:8.2.3-8.1-apache
+FROM prestashop/prestashop:9.0.3-8.2
 
 RUN apt-get update && apt-get install -y \
     git \

@@ -68,6 +68,8 @@ services:
     class: 'PrestaShop\Module\WebpayPlus\Grid\TransactionsGridDefinitionFactory'
     parent: "prestashop.core.grid.definition.factory.abstract_grid_definition"
     public: true
+    tags:
+      - { name: core.grid_definition_factory }
 
   webpay.grid.query.transactions_query_builder:
     class: 'PrestaShop\Module\WebpayPlus\Grid\TransactionsQueryBuilder'
@@ -99,6 +101,8 @@ services:
     class: 'PrestaShop\Module\WebpayPlus\Grid\OneclickCards\OneclickCardGridDefinitionFactory'
     parent: "prestashop.core.grid.definition.factory.abstract_grid_definition"
     public: true
+    tags:
+      - { name: core.grid_definition_factory }
 
   webpay.grid.query.oneclick_card_query_builder:
     class: 'PrestaShop\Module\WebpayPlus\Grid\OneclickCards\OneclickCardQueryBuilder'
@@ -123,3 +127,10 @@ services:
       - "@webpay.grid.data.factory.oneclick_card_data_factory"
       - "@prestashop.core.grid.filter.form_factory"
       - "@prestashop.core.hook.dispatcher"
+
+  # Admin Controllers
+  PrestaShop\Module\WebpayPlus\Controller\Admin\:
+    resource: "../src/Controller/Admin/"
+    autowire: true
+    autoconfigure: true
+    public: true

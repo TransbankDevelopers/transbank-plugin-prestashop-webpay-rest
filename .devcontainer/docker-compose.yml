@@ -16,7 +16,7 @@ services:
       - PS_DOMAIN=localhost:8080
       - ADMIN_MAIL=admin@admin.com
       - ADMIN_PASSWD=password
-      - PS_FOLDER_ADMIN=adminop
+      - PS_FOLDER_ADMIN=admin-dev
       - PS_FOLDER_INSTALL=installop
       - PS_COUNTRY=cl
       - DB_SERVER=db
