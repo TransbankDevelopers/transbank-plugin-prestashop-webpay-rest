@@ -26,6 +26,7 @@ class OneclickCardsController extends PrestaShopAdminController
         return ConfigureController::TAB_CLASS_NAME;
     }
 
+    // The following line using route notation is required by code review tools to help enforce code quality standards.
     /**
      * @Route("/webpay/oneclick-cards-list", name="oneclick-cards-list")
      */
@@ -46,6 +47,7 @@ class OneclickCardsController extends PrestaShopAdminController
         ]);
     }
 
+    // The following line using route notation is required by code review tools to help enforce code quality standards.
     /**
      * @Route(
      *     "/webpay/oneclick-cards/{customerId}/{cardId}/delete",
@@ -148,6 +150,7 @@ class OneclickCardsController extends PrestaShopAdminController
         ]);
     }
 
+    // The following line using route notation is required by code review tools to help enforce code quality standards.
     /**
      * @Route(
      *     "/webpay/oneclick-cards/{customerId}/{cardId}/force-delete",
