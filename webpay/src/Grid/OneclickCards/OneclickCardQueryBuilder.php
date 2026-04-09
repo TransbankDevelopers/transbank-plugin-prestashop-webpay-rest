@@ -5,6 +5,7 @@ namespace PrestaShop\Module\WebpayPlus\Grid\OneclickCards;
 use PrestaShop\PrestaShop\Core\Grid\Query\AbstractDoctrineQueryBuilder;
 use PrestaShop\PrestaShop\Core\Grid\Search\SearchCriteriaInterface;
 use PrestaShop\Module\WebpayPlus\Config\OneclickConfig;
+use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 
 final class OneclickCardQueryBuilder extends AbstractDoctrineQueryBuilder
 {
@@ -25,9 +26,10 @@ final class OneclickCardQueryBuilder extends AbstractDoctrineQueryBuilder
                 'ins.environment',
             ])
             ->from($this->dbPrefix . 'transbank_inscriptions', 'ins')
-            ->where('ins.finished = 1')
-            ->andWhere('ins.environment = :current_environment')
+            ->where('ins.environment = :current_environment')
             ->setParameter('current_environment', $currentEnvironment)
+            ->andWhere('ins.status = :status')
+            ->setParameter('status', TransbankInscriptions::STATUS_COMPLETED)
             ->leftJoin('ins', $this->dbPrefix . 'customer', 'c', 'c.id_customer = ins.user_id');
 
         $this->applyFilters($qb, $searchCriteria);
