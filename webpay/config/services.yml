@@ -3,12 +3,7 @@ services:
     public: true
 
   # Repository Services
-  webpay.repository.tab_repository:
-    class: PrestaShopBundle\Entity\Repository\TabRepository
-    factory: ["@doctrine.orm.entity_manager", "getRepository"]
-    arguments:
-      - 'PrestaShopBundle\Entity\Tab'
-    public: true
+  webpay.repository.tab_repository: '@PrestaShopBundle\Entity\Repository\TabRepository'
 
   # Shared services for Webpay and Oneclick forms
   webpay.form.common_webpay_fields:

@@ -37,7 +37,7 @@ class TabsHelper
     {
         $container = SymfonyContainer::getInstance();
 
-        if ($container !== null) {
+        if ($container !== null && $container->has('webpay.repository.tab_repository')) {
             $tabRepository = $container->get('webpay.repository.tab_repository');
             return (int) $tabRepository->findOneIdByClassName($className);
         }
