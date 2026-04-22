@@ -44,7 +44,7 @@ class WebPay extends PaymentModule
         $this->displayName = 'Webpay Plus';
         $this->description = 'Recibe pagos en línea con tarjetas de crédito y Redcompra en tu Prestashop a través de Webpay Plus y Oneclick';
         $this->confirmUninstall = '¿Estás seguro/a que deseas desinstalar este módulo de pago?';
-        $this->ps_versions_compliancy = array('min' => '1.7.6.0', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '9.0.0', 'max' => _PS_VERSION_);
         $this->pluginValidation();
         $this->log = TbkFactory::createLogger();
     }

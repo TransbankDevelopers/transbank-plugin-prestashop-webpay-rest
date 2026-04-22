@@ -2,6 +2,9 @@ services:
   _defaults:
     public: true
 
+  # Repository Services
+  webpay.repository.tab_repository: '@PrestaShopBundle\Entity\Repository\TabRepository'
+
   # Shared services for Webpay and Oneclick forms
   webpay.form.common_webpay_fields:
     class: 'PrestaShop\Module\WebpayPlus\Form\CommonWebpayFields'
