@@ -48,7 +48,7 @@ jobs:
           rm -f webpay/*.bak
 
       - name: 6. Archive Release
-        uses: thedoctor0/zip-release@0.7.6
+        uses: thedoctor0/zip-release@b57d897cb5d60cb78b51a507f63fa184cfe35554
         with:
           type: "zip"
           filename: "plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip"
@@ -61,7 +61,7 @@ jobs:
           echo "ZIP contains vendor directory"
 
       - name: 8. Upload binaries to release
-        uses: svenstaro/upload-release-action@2.11.5
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: "./plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip"
