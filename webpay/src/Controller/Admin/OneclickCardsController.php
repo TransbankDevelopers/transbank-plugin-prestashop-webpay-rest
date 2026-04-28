@@ -21,6 +21,9 @@ use Transbank\Plugin\Helpers\PluginLogger;
 
 class OneclickCardsController extends PrestaShopAdminController
 {
+    private const LOG_CONTEXT = 'ID Usuario: %s, ID Inscripción: %s';
+    private const LOG_CONTEXT_WITH_ERROR = 'ID Usuario: %s, ID Inscripción: %s, Error: %s';
+
     protected function getTabClassName(): string
     {
         return ConfigureController::TAB_CLASS_NAME;
@@ -68,7 +71,12 @@ class OneclickCardsController extends PrestaShopAdminController
     ): RedirectResponse {
         $logger = TbkFactory::createLogger();
         try {
-            $logger->logInfo("Iniciando eliminación de tarjeta Oneclick. ID Usuario: $customerId, ID Inscripción: $cardId");
+            $logger->logInfo(sprintf(
+                'Iniciando eliminación de tarjeta Oneclick. ' . self::LOG_CONTEXT,
+                $customerId,
+                $cardId
+            ));
+
             $inscription = $this->findInscription($cardId, $customerId, $logger);
 
             if (!$inscription) {
@@ -77,7 +85,12 @@ class OneclickCardsController extends PrestaShopAdminController
 
             $this->processOneclickDeletion($cardId, $customerId, $inscription, $csrfTokenManager, $logger);
         } catch (\Throwable $e) {
-            $logger->logError("Error inesperado al eliminar la tarjeta. ID Usuario: $customerId, ID Inscripción: $cardId, Error: " . $e->getMessage());
+            $logger->logError(sprintf(
+                'Error inesperado al eliminar la tarjeta. ' . self::LOG_CONTEXT_WITH_ERROR,
+                $customerId,
+                $cardId,
+                $e->getMessage()
+            ));
             $this->addFlash('error', 'Ocurrió un error al eliminar la inscripción.');
         }
 
@@ -91,7 +104,11 @@ class OneclickCardsController extends PrestaShopAdminController
 
         if (!$inscription) {
             $this->addFlash('error', 'Inscripción no encontrada.');
-            $logger->logError("Inscripción no encontrada. ID Usuario: $customerId, ID Inscripción: $cardId");
+            $logger->logError(sprintf(
+                'Inscripción no encontrada. ' . self::LOG_CONTEXT,
+                $customerId,
+                $cardId
+            ));
         }
 
         return $inscription ?: null;
@@ -109,17 +126,29 @@ class OneclickCardsController extends PrestaShopAdminController
 
         try {
             $oneclickService->delete($inscription['tbk_token'], $inscription['username']);
-            $logger->logInfo("Eliminación en Transbank exitosa. ID Usuario: $customerId, ID Inscripción: $cardId");
+            $logger->logInfo(sprintf(
+                'Eliminación en Transbank exitosa. ' . self::LOG_CONTEXT,
+                $customerId,
+                $cardId
+            ));
 
             $deleted = $repository->deleteInscriptionByUserAndId($customerId, $cardId);
 
             if (!$deleted) {
-                $logger->logError("No se pudo eliminar la inscripción de la base de datos. ID Usuario: $customerId, ID Inscripción: $cardId");
+                $logger->logError(sprintf(
+                    'No se pudo eliminar la inscripción de la base de datos. ' . self::LOG_CONTEXT,
+                    $customerId,
+                    $cardId
+                ));
                 $this->addFlash('error', 'No se pudo eliminar la inscripción de la base de datos.');
                 return;
             }
 
-            $logger->logInfo("Tarjeta eliminada correctamente. ID Usuario: $customerId, ID Inscripción: $cardId");
+            $logger->logInfo(sprintf(
+                'Tarjeta eliminada correctamente. ' . self::LOG_CONTEXT,
+                $customerId,
+                $cardId
+            ));
             $this->addFlash('success', 'Tarjeta eliminada correctamente.');
         } catch (EcommerceException $e) {
             $this->handleEcommerceException($cardId, $customerId, $csrfTokenManager, $logger, $e);
@@ -133,7 +162,12 @@ class OneclickCardsController extends PrestaShopAdminController
         PluginLogger $logger,
         EcommerceException $e
     ): void {
-        $logger->logError("Error al eliminar la tarjeta en Transbank. ID Usuario: $customerId, ID Inscripción: $cardId, Error: " . $e->getMessage());
+        $logger->logError(sprintf(
+            'Error al eliminar la tarjeta en Transbank. ' . self::LOG_CONTEXT_WITH_ERROR,
+            $customerId,
+            $cardId,
+            $e->getMessage()
+        ));
 
         $forceDeleteUrl = $this->generateUrl('ps_controller_webpay_oneclick_card_force_delete', [
             'cardId' => $cardId,
@@ -172,14 +206,27 @@ class OneclickCardsController extends PrestaShopAdminController
             $deleted = $repository->deleteInscriptionByUserAndId($customerId, $cardId);
 
             if ($deleted) {
-                $logger->logInfo("Inscripción eliminada de la base de datos mediante eliminación forzada. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
+                $logger->logInfo(sprintf(
+                    'Inscripción eliminada de la base de datos mediante eliminación forzada. ' . self::LOG_CONTEXT,
+                    $customerId,
+                    $cardId
+                ));
                 $this->addFlash('warning', 'Inscripción eliminada de la base de datos.');
             } else {
-                $logger->logError("No se pudo eliminar la inscripción de la base de datos mediante eliminación forzada. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId);
+                $logger->logError(sprintf(
+                    'No se pudo eliminar la inscripción de la base de datos mediante eliminación forzada. ' . self::LOG_CONTEXT,
+                    $customerId,
+                    $cardId
+                ));
                 $this->addFlash('error', 'No se pudo eliminar la inscripción de la base de datos.');
             }
         } catch (\Throwable $e) {
-            $logger->logError("Error inesperado durante la eliminación forzada. ID Usuario: " . $customerId . ", ID Inscripción: " . $cardId . ", Error: " . $e->getMessage());
+            $logger->logError(sprintf(
+                'Error inesperado durante la eliminación forzada. ' . self::LOG_CONTEXT_WITH_ERROR,
+                $customerId,
+                $cardId,
+                $e->getMessage()
+            ));
             $this->addFlash('error', 'Ocurrió un error al eliminar la inscripción.');
         }
 
