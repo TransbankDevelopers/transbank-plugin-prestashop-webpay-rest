@@ -7,7 +7,8 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: write
     name: Build the plugin with PHP 8.2 and upload binaries
     steps:
       - name: 1. Checkout code
@@ -16,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: 2. Setup php and composer
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f
         with:
           php-version: "8.2"
       
