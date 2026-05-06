@@ -87,15 +87,19 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
         WHEN status = ' . TransbankWebpayRestTransaction::STATUS_FAILED . ' THEN "Fallida"
         WHEN status = ' . TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER . ' THEN "Cancelada por el usuario"
         WHEN status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED . ' THEN "Aprobada"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_ERROR . ' THEN "Error en formulario"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_TIMEOUT . ' THEN "Timeout"
         ELSE status
         END';
 
         $caseColor = '
         CASE
-        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_INITIALIZED . ' THEN "#E9DF00"
-        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_FAILED . ' THEN "#E50B70"
-        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER . ' THEN "#25B9D7"
-        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED . ' THEN "#16C172"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_INITIALIZED . ' THEN "#F4B400"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_FAILED . ' THEN "#D32F2F"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_ABORTED_BY_USER . ' THEN "#F57C00"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_APPROVED . ' THEN "#2E7D32"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_ERROR . ' THEN "#FF1744"
+        WHEN status = ' . TransbankWebpayRestTransaction::STATUS_TIMEOUT . ' THEN "#6D4C41"
         ELSE "#808080"
         END';
 
@@ -114,7 +118,7 @@ final class TransactionsQueryBuilder extends AbstractDoctrineQueryBuilder
         END';
 
 
-        $caseVCI  = "IF(vci IS NULL or vci = '', '--', vci)";
+        $caseVCI = "IF(vci IS NULL or vci = '', '--', vci)";
 
         $queryBuilder->select('order_id, response_code, (' . $caseVCI . ') as vci, amount, iso_code, card_number, token,
          (' . $caseStatus . ') as status, (' . $caseEnvironment . ') as environment,

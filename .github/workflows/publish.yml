@@ -1,50 +1,70 @@
 name: Prestashop upload binaries to release
 
 on:
-  workflow_dispatch:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [created]
 
 jobs:
   run:
     runs-on: ubuntu-latest
-    permissions: write-all
-    strategy:
-      matrix:
-        php-versions: ['7.4', '8.0']
-    name: PHP ${{ matrix.php-versions }}
+    permissions:
+      contents: write
+    name: Build the plugin with PHP 8.2 and upload binaries
     steps:
-      - uses: actions/checkout@v3
-      - name: 1. Install dependencies 
-        uses: shivammathur/setup-php@v2
+      - name: 1. Checkout code
+        uses: actions/checkout@v5
         with:
-          php-version: ${{ matrix.php-versions }}
-      - run: |
+          fetch-depth: 0
+
+      - name: 2. Setup php and composer
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f
+        with:
+          php-version: "8.2"
+      
+      - name: 3. Install dependencies
+        run: |
           cd webpay
-          if [ "${{ matrix.php-versions }}" = "8.0" ]
-          then
-            sed -i.bkp "s/\"php\": \"7.0\"/\"php\": \"8.0\"/g" "composer.json"
-            composer require guzzlehttp/guzzle:^7.0
+          composer install --no-dev --no-interaction --prefer-dist
+
+      - name: 4. Verify vendor directory
+        run: |
+          if [ ! -d "webpay/vendor" ]; then
+            echo "ERROR: vendor directory not created!"
+            exit 1
           fi
-          composer update --no-dev
-          composer install --no-dev
-      - name: 2. Replace versión
+          if [ ! -f "webpay/vendor/autoload.php" ]; then
+            echo "ERROR: autoload.php not found!"
+            exit 1
+          fi
+          echo "Dependencies installed successfully"
+
+      - name: 5. Replace versión
         run: |
           GITHUB_TAG="${{github.ref_name}}"
-          sed -i.bkp "s/$this->version = '1.0.0'/$this->version = '${GITHUB_TAG#"v"}'/g" "webpay/webpay.php"
-          sed -i.bkp "s/\[1.0.0\]/\[${GITHUB_TAG#"v"}\]/g" "webpay/config.xml"
-          sed -i.bkp "s/\[1.0.0\]/\[${GITHUB_TAG#"v"}\]/g" "webpay/config_es.xml"
-      - name: 3. Archive Release
-        uses: thedoctor0/zip-release@0.7.1
+          VERSION="${GITHUB_TAG#v}"
+          sed -i.bkp "s/\$this->version = '1.0.0'/\$this->version = '$VERSION'/g" "webpay/webpay.php"
+          sed -i.bkp "s/\[1.0.0\]/\[$VERSION\]/g" "webpay/config.xml"
+          sed -i.bkp "s/\[1.0.0\]/\[$VERSION\]/g" "webpay/config_es.xml"
+          rm -f webpay/*.bkp
+          rm -f webpay/*.bak
+
+      - name: 6. Archive Release
+        uses: thedoctor0/zip-release@b57d897cb5d60cb78b51a507f63fa184cfe35554
         with:
-          type: 'zip'
-          filename: 'plugin-prestashop${{ matrix.php-versions }}-webpay-rest-${{github.ref_name}}.zip'
-          path: './webpay'    
-      - name: 4. Upload binaries to release
-        uses: svenstaro/upload-release-action@2.5.0
+          type: "zip"
+          filename: "plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip"
+          path: "./webpay"
+          exclusions: '*.bkp *.bak'
+
+      - name: 7. Verify ZIP contents
+        run: |
+          unzip -l "plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip" | grep -q "vendor/" || (echo "vendor not in ZIP!" && exit 1)
+          echo "ZIP contains vendor directory"
+
+      - name: 8. Upload binaries to release
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: './plugin-prestashop${{ matrix.php-versions }}-webpay-rest-${{github.ref_name}}.zip'
+          file: "./plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip"
           tag: ${{ github.ref }}
           overwrite: true

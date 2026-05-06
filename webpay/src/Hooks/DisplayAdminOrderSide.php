@@ -5,9 +5,10 @@ namespace PrestaShop\Module\WebpayPlus\Hooks;
 use Order;
 use PrestaShop\Module\WebpayPlus\Utils\Template;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkResponseUtil;
-use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use Transbank\Plugin\Helpers\TbkConstants;
+use PrestaShop\Module\WebpayPlus\Hooks\AbstractHookHandler;
+use PrestaShop\Module\WebpayPlus\Repository\TransactionRepository;
 
 /**
  * Class DisplayAdminOrderSide
@@ -16,14 +17,17 @@ use Transbank\Plugin\Helpers\TbkConstants;
  * when the payment was processed via the Webpay module. It renders the details of a transaction
  * using a custom Twig template.
  */
-class DisplayAdminOrderSide implements HookHandlerInterface
+class DisplayAdminOrderSide extends AbstractHookHandler
 {
-    use InteractsWithWebpayDb;
-
     /**
      * @var Template Instance of the Template utility to render Twig templates.
      */
     private $template;
+
+    /**
+     * @var TransactionRepository
+     */
+    private $repository;
 
     /**
      * Constructor.
@@ -31,7 +35,9 @@ class DisplayAdminOrderSide implements HookHandlerInterface
      */
     public function __construct()
     {
+        parent::__construct();
         $this->template = new Template();
+        $this->repository = new TransactionRepository();
     }
 
     /**
@@ -42,32 +48,45 @@ class DisplayAdminOrderSide implements HookHandlerInterface
      */
     public function execute(array $params): ?string
     {
+        $this->logInfo('Ejecutando hook DisplayAdminOrderSide');
+        $this->logDebug('Parámetros recibidos: ' . json_encode($params, JSON_UNESCAPED_UNICODE));
+
         $orderId = $params['id_order'];
+        $this->logDebug('ID de la orden: ' . $orderId);
         $order = new Order($orderId);
 
         if ($order->module != "webpay") {
+            $this->logInfo('Orden no usa el módulo Webpay');
             return null;
         }
 
-        $transbankTransaction = $this->getTransactionWebpayApprovedByOrderId($orderId);
+        $transbankTransaction = $this->repository->getTransactionWebpayApprovedByOrderId($orderId);
         $transbankResponse = $transbankTransaction->transbank_response;
 
         if (!isset($transbankResponse)) {
+            $this->logError('No se encontró respuesta de Transbank para la orden');
             return null;
         }
 
         $product = $transbankTransaction->product;
+        $this->logDebug('Producto asociado: ' . $product);
         $objectResponse = json_decode($transbankResponse);
 
         $formattedResponse = [];
         if ($product === TransbankWebpayRestTransaction::PRODUCT_WEBPAY_ONECLICK) {
             $formattedResponse = TbkResponseUtil::getOneclickStatusFormattedResponse($objectResponse);
+            $this->logDebug('Respuesta formateada como transacción Oneclick');
             $status = $objectResponse->details[0]->status;
         } else {
             $formattedResponse = TbkResponseUtil::getWebpayStatusFormattedResponse($objectResponse);
+            $this->logDebug('Respuesta formateada como transacción Webpay');
             $formattedResponse['token'] = $transbankTransaction->token;
             $status = $objectResponse->status;
         }
+
+        $this->logDebug('Respuesta formateada: ' . json_encode($formattedResponse, JSON_UNESCAPED_UNICODE));
+
+        $this->logInfo('El hook DisplayAdminOrderSide se ejecutó correctamente');
 
         return $this->template->render('hook/payment_detail.html.twig', [
             'title' => $this->buildTitleText($product, $status),

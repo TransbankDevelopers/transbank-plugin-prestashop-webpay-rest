@@ -97,7 +97,7 @@ class WebPayOneclickPaymentValidateModuleFrontController extends PaymentModuleFr
         //$transaction->shop_id = (int) Context::getContext()->shop->id;
         $transaction->currency_id = (int) $cart->id_currency;
 
-        $transaction->environment = $webpay->getEnviroment();
+        $transaction->environment = $webpay->getEnvironment();
         $transaction->product = TransbankWebpayRestTransaction::PRODUCT_WEBPAY_ONECLICK;
         $transaction->commerce_code = $webpay->getCommerceCode();
         $transaction->child_commerce_code = $webpay->getChildCommerceCode();

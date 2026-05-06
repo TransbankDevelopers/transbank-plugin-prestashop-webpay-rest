@@ -35,7 +35,7 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         $ins->pay_after_inscription = false;
         $ins->from = 'checkout';
         $ins->status = TransbankInscriptions::STATUS_INITIALIZED;
-        $ins->environment = $webpay->getEnviroment();
+        $ins->environment = $webpay->getEnvironment();
         $ins->commerce_code = $webpay->getCommerceCode();
         $ins->order_id = $this->module->currentOrder;//importante para recuperar la orden en curso y el carro en curso
         $saved = $ins->save();
@@ -55,9 +55,10 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         Context::getContext()->smarty->assign([
             'url'      => isset($result['url']) ? $result['url'] : '',
             'token_ws' => $result['token'],
-            'amount'   => round($amount)
+            'amount'   => round($amount),
+            'redirectType' => 'oneclick-inscription'
         ]);
-        $this->setTemplate('module:webpay/views/templates/front/oneclick_inscription_execution.tpl');
+        $this->setTemplate('module:webpay/views/templates/front/redirect_to_payment_form.tpl');
     }
 
     private function generateUsername($userId){

@@ -2,6 +2,16 @@ services:
   _defaults:
     public: true
 
+  # Repository Services
+  webpay.repository.tab_repository: '@PrestaShopBundle\Entity\Repository\TabRepository'
+
+  # Shared services for Webpay and Oneclick forms
+  webpay.form.common_webpay_fields:
+    class: 'PrestaShop\Module\WebpayPlus\Form\CommonWebpayFields'
+    arguments:
+      - "@translator"
+      - "@prestashop.adapter.legacy.configuration"
+
   # webpayplus Form services
 
   webpay.form.type.webpay_plus:
@@ -9,7 +19,7 @@ services:
     arguments:
       - "@translator"
       - "@=service('prestashop.adapter.legacy.context').getLanguages()"
-      - "@prestashop.adapter.legacy.configuration"
+      - "@webpay.form.common_webpay_fields"
     public: true
     tags:
       - { name: form.type }
@@ -39,7 +49,7 @@ services:
     arguments:
       - "@translator"
       - "@=service('prestashop.adapter.legacy.context').getLanguages()"
-      - "@prestashop.adapter.legacy.configuration"
+      - "@webpay.form.common_webpay_fields"
     public: true
     tags:
       - { name: form.type }
@@ -68,6 +78,8 @@ services:
     class: 'PrestaShop\Module\WebpayPlus\Grid\TransactionsGridDefinitionFactory'
     parent: "prestashop.core.grid.definition.factory.abstract_grid_definition"
     public: true
+    tags:
+      - { name: core.grid_definition_factory }
 
   webpay.grid.query.transactions_query_builder:
     class: 'PrestaShop\Module\WebpayPlus\Grid\TransactionsQueryBuilder'
@@ -92,3 +104,43 @@ services:
       - "@webpay.grid.data.factory.transactions_data_factory"
       - "@prestashop.core.grid.filter.form_factory"
       - "@prestashop.core.hook.dispatcher"
+
+  # Oneclick list cards sevices
+
+  webpay.grid.definition.factory.oneclick_card_grid_definition_factory:
+    class: 'PrestaShop\Module\WebpayPlus\Grid\OneclickCards\OneclickCardGridDefinitionFactory'
+    parent: "prestashop.core.grid.definition.factory.abstract_grid_definition"
+    public: true
+    tags:
+      - { name: core.grid_definition_factory }
+
+  webpay.grid.query.oneclick_card_query_builder:
+    class: 'PrestaShop\Module\WebpayPlus\Grid\OneclickCards\OneclickCardQueryBuilder'
+    parent: "prestashop.core.grid.abstract_query_builder"
+    arguments:
+      - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
+      - "@=service('prestashop.adapter.legacy.context').getContext().shop.id"
+    public: true
+
+  webpay.grid.data.factory.oneclick_card_data_factory:
+    class: 'PrestaShop\PrestaShop\Core\Grid\Data\Factory\DoctrineGridDataFactory'
+    arguments:
+      - "@webpay.grid.query.oneclick_card_query_builder"
+      - "@prestashop.core.hook.dispatcher"
+      - "@prestashop.core.grid.query.doctrine_query_parser"
+      - "webpay_oneclick_cards"
+
+  webpay.grid.oneclick_card_grid_factory:
+    class: 'PrestaShop\PrestaShop\Core\Grid\GridFactory'
+    arguments:
+      - "@webpay.grid.definition.factory.oneclick_card_grid_definition_factory"
+      - "@webpay.grid.data.factory.oneclick_card_data_factory"
+      - "@prestashop.core.grid.filter.form_factory"
+      - "@prestashop.core.hook.dispatcher"
+
+  # Admin Controllers
+  PrestaShop\Module\WebpayPlus\Controller\Admin\:
+    resource: "../src/Controller/Admin/"
+    autowire: true
+    autoconfigure: true
+    public: true

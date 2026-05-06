@@ -5,6 +5,7 @@ use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithWebpayDb;
 use PrestaShop\Module\WebpayPlus\Helpers\InteractsWithTabs;
 use PrestaShop\Module\WebpayPlus\Hooks\DisplayAdminOrderSide;
+use PrestaShop\Module\WebpayPlus\Hooks\DisplayCustomerAccount;
 use PrestaShop\Module\WebpayPlus\Hooks\PaymentOptions;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
@@ -15,7 +16,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 class WebPay extends PaymentModule
 {
-    use InteractsWithWebpayDb;
     use InteractsWithTabs;
 
     protected $_errors = array();
@@ -27,7 +27,8 @@ class WebPay extends PaymentModule
         'displayBackOfficeHeader',
         'displayHeader',
         'displayPaymentReturn',
-        'displayAdminOrderSide'
+        'displayAdminOrderSide',
+        'displayCustomerAccount'
     ];
 
     public function __construct()
@@ -43,7 +44,7 @@ class WebPay extends PaymentModule
         $this->displayName = 'Webpay Plus';
         $this->description = 'Recibe pagos en línea con tarjetas de crédito y Redcompra en tu Prestashop a través de Webpay Plus y Oneclick';
         $this->confirmUninstall = '¿Estás seguro/a que deseas desinstalar este módulo de pago?';
-        $this->ps_versions_compliancy = array('min' => '1.7.6.0', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '9.0.0', 'max' => _PS_VERSION_);
         $this->pluginValidation();
         $this->log = TbkFactory::createLogger();
     }
@@ -70,7 +71,6 @@ class WebPay extends PaymentModule
         $this->logError("installOneclickTable => {$resultInstallOneclickTable}");
         $this->installTab();
 
-        /* Si algo falla aqui se muestran los errores */
         return $result && $this->registerHook(self::MODULE_HOOKS);
     }
 
@@ -89,16 +89,17 @@ class WebPay extends PaymentModule
     public function hookDisplayAdminOrderSide($params): ?string
     {
         try {
-            $this->logInfo("Ejecutando hook displayAdminOrderSide");
             $displayAdminOrderSide = new DisplayAdminOrderSide();
             return $displayAdminOrderSide->execute($params);
         } catch (Throwable $e) {
-            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
+            $this->logError("Error el ejecutar el hook DisplayAdminOrderSide: {$e->getMessage()}");
+            return "";
         }
     }
 
     public function hookDisplayBackOfficeHeader(): void
     {
+        $this->logInfo('Ejecutando hook DisplayBackOfficeHeader');
         if ($this->context->controller->controller_name === 'AdminOrders') {
             $this->context->controller->addCSS('modules/' . $this->name . '/views/css/admin.css');
         }
@@ -106,19 +107,20 @@ class WebPay extends PaymentModule
 
     public function hookDisplayHeader(): void
     {
+        $this->logInfo('Ejecutando hook DisplayHeader');
         if ($this->context->controller->php_self === 'order-confirmation') {
-            $this->context->controller->addCSS('modules/' . $this->name . '/views/css/front.css');
+            $this->context->controller->registerStylesheet('tbk-front', 'modules/' . $this->name . '/views/css/front.css');
         }
     }
 
     public function hookDisplayPaymentReturn($params): ?string
     {
         try {
-            $this->logInfo("Ejecutando hook displayPaymentReturn");
             $displayPaymentReturn = new DisplayPaymentReturn();
             return $displayPaymentReturn->execute($params);
         } catch (Throwable $e) {
-            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
+            $this->logError("Error el ejecutar el hook DisplayPaymentReturn: {$e->getMessage()}");
+            return "";
         }
     }
 
@@ -128,15 +130,28 @@ class WebPay extends PaymentModule
     public function hookPaymentOptions($params): ?array
     {
         try {
-            $this->logInfo("Ejecutando hook hookPaymentOptions");
-
             $cart = $params['cart'];
             $moduleCurrencies = $this->getCurrency($cart->id_currency);
             $paymentOptions = new PaymentOptions($moduleCurrencies);
             return $paymentOptions->execute($params);
         } catch (Throwable $e) {
-            $this->logError("Error el ejecutar el hook: {$e->getMessage()}");
+            $this->logError("Error el ejecutar el hook PaymentOptions: {$e->getMessage()}");
             return null;
+        }
+    }
+
+    public function hookDisplayCustomerAccount(): string
+    {
+        try {
+            $displayCustomerAccount = new DisplayCustomerAccount();
+            return $displayCustomerAccount->execute([
+                'module' => $this,
+                'context' => $this->context,
+
+            ]);
+        } catch (Throwable $e) {
+            $this->logError("Error al ejecutar el hook DisplayCustomerAccount: {$e->getMessage()}");
+            return '';
         }
     }
 
@@ -144,7 +159,6 @@ class WebPay extends PaymentModule
     {
         $route = SymfonyContainer::getInstance()->get('router')->generate('ps_controller_webpay_configure');
         Tools::redirectAdmin($route);
-
     }
 
     private function pluginValidation()
