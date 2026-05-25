@@ -20,7 +20,7 @@ jobs:
         uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f
         with:
           php-version: "8.2"
-      
+
       - name: 3. Install dependencies
         run: |
           cd webpay
@@ -52,19 +52,19 @@ jobs:
         uses: thedoctor0/zip-release@b57d897cb5d60cb78b51a507f63fa184cfe35554
         with:
           type: "zip"
-          filename: "plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip"
+          filename: "plugin-prestashop-webpay-rest-${{github.ref_name}}.zip"
           path: "./webpay"
-          exclusions: '*.bkp *.bak'
+          exclusions: "*.bkp *.bak"
 
       - name: 7. Verify ZIP contents
         run: |
-          unzip -l "plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip" | grep -q "vendor/" || (echo "vendor not in ZIP!" && exit 1)
+          unzip -l "plugin-prestashop-webpay-rest-${{github.ref_name}}.zip" | grep -q "vendor/" || (echo "vendor not in ZIP!" && exit 1)
           echo "ZIP contains vendor directory"
 
       - name: 8. Upload binaries to release
         uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: "./plugin-prestashop8.2-webpay-rest-${{github.ref_name}}.zip"
+          file: "./plugin-prestashop-webpay-rest-${{github.ref_name}}.zip"
           tag: ${{ github.ref }}
           overwrite: true
