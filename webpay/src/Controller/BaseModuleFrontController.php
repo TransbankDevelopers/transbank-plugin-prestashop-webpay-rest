@@ -53,6 +53,11 @@ class BaseModuleFrontController extends ModuleFrontController
         $this->logger->logInfo($msg);
     }
 
+    protected function logWarning(string $msg)
+    {
+        $this->logger->logWarning($msg);
+    }
+
     protected function cartToLog($cart)
     {
         $this->logInfo('-----------------------------------------------------');

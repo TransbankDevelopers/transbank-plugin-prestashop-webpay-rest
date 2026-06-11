@@ -2,12 +2,14 @@
 
 use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
+use PrestaShop\Module\WebpayPlus\Exceptions\MariaDbNamedLockException;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use PrestaShop\Module\WebpayPlus\Repository\TransactionRepository;
+use PrestaShop\Module\WebpayPlus\Infrastructure\Lock\MariaDbNamedLock;
 
 /**
  * This class handles the validation of payment responses from the Webpay Plus payment gateway.
@@ -28,8 +30,10 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     const WEBPAY_ERROR_FLOW_MESSAGE = 'Orden cancelada por un error en el formulario de pago. Por favor, reintente el pago.';
     const WEBPAY_EXCEPTION_FLOW_MESSAGE = 'No se pudo procesar el pago. Si el problema persiste, contacte al comercio.';
     const WEBPAY_CART_MANIPULATED_MESSAGE = "El monto del carro ha cambiado mientras se procesaba el pago, la transacción fue cancelada. Ningún cobro fue realizado.";
+    const WEBPAY_OPERATION_IN_PROGRESS_MESSAGE = 'Ya estamos procesando tu solicitud. Por favor, espera unos momentos antes de volver a intentarlo.';
 
     protected $responseData = [];
+    protected MariaDbNamedLock $webpayReturnLock;
 
     /** @var TransactionRepository */
     private $repository;
@@ -42,6 +46,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         parent::__construct();
         $this->logger = TbkFactory::createLogger();
         $this->repository = new TransactionRepository();
+        $this->webpayReturnLock = new MariaDbNamedLock();
     }
 
     /**
@@ -144,32 +149,85 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      */
     private function handleNormalFlow(string $token): void
     {
+        $lockAcquired = false;
         $this->logInfo("Procesando transacción por flujo Normal => token: {$token}");
 
-        if ($this->checkTransactionIsAlreadyProcessed($token)) {
-            $this->handleTransactionAlreadyProcessed($token);
+        try {
+            $lockAcquired = $this->acquireWebpayReturnLock($token);
+
+            if (!$lockAcquired) {
+                $this->setPaymentErrorPage(self::WEBPAY_OPERATION_IN_PROGRESS_MESSAGE);
+                return;
+            }
+
+            if ($this->checkTransactionIsAlreadyProcessed($token)) {
+                $this->handleTransactionAlreadyProcessed($token);
+                return;
+            }
+
+            $webpayTransaction = $this->repository->getTransactionWebpayByToken($token);
+            $cart = $this->getCart($webpayTransaction->cart_id);
+
+            if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
+                $this->handleCartManipulated($webpayTransaction);
+                return;
+            }
+
+            $transbankSdk = WebpayPlusFactory::create();
+            $commitResponse = $transbankSdk->commitTransaction($token);
+
+            if ($commitResponse->isApproved()) {
+                $this->handleAuthorizedTransaction(
+                    $cart,
+                    $webpayTransaction,
+                    $commitResponse
+                );
+            } else {
+                $this->handleUnauthorizedTransaction($webpayTransaction, $commitResponse);
+            }
+        } finally {
+            $this->releaseWebpayReturnLock($token, $lockAcquired);
+        }
+    }
+
+    /**
+     * Tries to acquire the return lock for a token.
+     *
+     * @param string $token
+     * @return bool True when the lock is acquired, false when another request is already processing.
+     */
+    private function acquireWebpayReturnLock(string $token): bool
+    {
+        $lockAcquired = $this->webpayReturnLock->acquire($token);
+
+        if (!$lockAcquired) {
+            $this->logInfo("Retorno de Webpay ya se encuentra en procesamiento => token: {$token}");
+        }
+
+        return $lockAcquired;
+    }
+
+    /**
+     * Releases the return lock only when it was actually acquired.
+     *
+     * @param string $token
+     * @param bool $lockAcquired
+     * @return void
+     */
+    private function releaseWebpayReturnLock(string $token, bool $lockAcquired): void
+    {
+        if (!$lockAcquired) {
             return;
         }
 
-        $webpayTransaction = $this->repository->getTransactionWebpayByToken($token);
-        $cart = $this->getCart($webpayTransaction->cart_id);
+        try {
+            $released = $this->webpayReturnLock->release($token);
 
-        if ($webpayTransaction->amount != $this->getOrderTotalRound($cart)) {
-            $this->handleCartManipulated($webpayTransaction);
-            return;
-        }
-
-        $transbankSdk = WebpayPlusFactory::create();
-        $commitResponse = $transbankSdk->commitTransaction($token);
-
-        if ($commitResponse->isApproved()) {
-            $this->handleAuthorizedTransaction(
-                $cart,
-                $webpayTransaction,
-                $commitResponse
-            );
-        } else {
-            $this->handleUnauthorizedTransaction($webpayTransaction, $commitResponse);
+            if (!$released) {
+                $this->logWarning("No se pudo liberar el lock de retorno de Webpay token => {$token}");
+            }
+        } catch (MariaDbNamedLockException $e) {
+            $this->logWarning("Error al liberar el lock de retorno de Webpay token => {$token} - Error: {$e->getMessage()}");
         }
     }
 
