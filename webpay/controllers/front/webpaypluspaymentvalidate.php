@@ -4,12 +4,12 @@ use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Exceptions\MariaDbNamedLockException;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
+use PrestaShop\Module\WebpayPlus\Infrastructure\Lock\MariaDbNamedLock;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use PrestaShop\Module\WebpayPlus\Model\TransbankWebpayRestTransaction;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use PrestaShop\Module\WebpayPlus\Repository\TransactionRepository;
-use PrestaShop\Module\WebpayPlus\Infrastructure\Lock\MariaDbNamedLock;
 
 /**
  * This class handles the validation of payment responses from the Webpay Plus payment gateway.
