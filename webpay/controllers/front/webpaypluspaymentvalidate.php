@@ -2,7 +2,6 @@
 
 use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShop\Module\WebpayPlus\Controller\PaymentModuleFrontController;
-use PrestaShop\Module\WebpayPlus\Exceptions\MariaDbNamedLockException;
 use PrestaShop\Module\WebpayPlus\Helpers\WebpayPlusFactory;
 use PrestaShop\Module\WebpayPlus\Infrastructure\Lock\MariaDbNamedLock;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
@@ -198,10 +197,16 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      */
     private function acquireWebpayReturnLock(string $token): bool
     {
-        $lockAcquired = $this->webpayReturnLock->acquire($token);
+        $lockAcquired = false;
 
-        if (!$lockAcquired) {
-            $this->logInfo("Retorno de Webpay ya se encuentra en procesamiento => token: {$token}");
+        try {
+            $lockAcquired = $this->webpayReturnLock->acquire($token);
+
+            if (!$lockAcquired) {
+                $this->logInfo("Retorno de Webpay ya se encuentra en procesamiento => token: {$token}");
+            }
+        } catch (\Throwable $e) {
+            $this->logError("Error al adquirir el lock de retorno de Webpay token => {$token} - Error: {$e->getMessage()}");
         }
 
         return $lockAcquired;
@@ -226,7 +231,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             if (!$released) {
                 $this->logWarning("No se pudo liberar el lock de retorno de Webpay token => {$token}");
             }
-        } catch (MariaDbNamedLockException $e) {
+        } catch (\Throwable $e) {
             $this->logWarning("Error al liberar el lock de retorno de Webpay token => {$token} - Error: {$e->getMessage()}");
         }
     }

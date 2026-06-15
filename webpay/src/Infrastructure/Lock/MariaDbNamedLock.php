@@ -21,7 +21,7 @@ class MariaDbNamedLock
         $query = "SELECT GET_LOCK('$escapedLockName', 0)";
         $result = Db::getInstance()->getValue($query);
 
-        if ($result === null || $result === false) {
+        if ($result === null) {
             throw new MariaDbNamedLockException(
                 'No se pudo adquirir el lock de retorno de Webpay: error al consultar MariaDB.'
             );
@@ -37,7 +37,7 @@ class MariaDbNamedLock
         $query = "SELECT RELEASE_LOCK('$escapedLockName')";
         $result = Db::getInstance()->getValue($query);
 
-        if ($result === null || $result === false) {
+        if ($result === null) {
             throw new MariaDbNamedLockException(
                 'No se pudo liberar el lock de retorno de Webpay: error al consultar MariaDB.'
             );
