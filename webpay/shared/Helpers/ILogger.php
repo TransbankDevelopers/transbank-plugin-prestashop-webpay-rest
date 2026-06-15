@@ -8,4 +8,5 @@ interface ILogger {
     function logDebug($str);
     function getInfo();
     function getLogDetail($filename);
+    function logWarning($str);
 }

@@ -55,6 +55,11 @@ final class PluginLogger implements ILogger {
         $this->logger->error($msg);
     }
 
+    public function logWarning($msg)
+    {
+        $this->logger->warning($msg);
+    }
+
     public function getInfo()
     {
         $files = glob($this->config->getLogDir().'/*.log');
