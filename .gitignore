@@ -36,3 +36,10 @@ docker/docker-prestashop*/log
 *.zip
 
 .devcontainer/container/
+
+# E2E tests (Playwright)
+tests/e2e/node_modules/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+tests/e2e/blob-report/
+tests/e2e/.env
