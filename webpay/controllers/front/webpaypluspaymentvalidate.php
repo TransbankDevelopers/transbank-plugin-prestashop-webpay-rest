@@ -29,7 +29,9 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     const WEBPAY_ERROR_FLOW_MESSAGE = 'Orden cancelada por un error en el formulario de pago. Por favor, reintente el pago.';
     const WEBPAY_EXCEPTION_FLOW_MESSAGE = 'No se pudo procesar el pago. Si el problema persiste, contacte al comercio.';
     const WEBPAY_CART_MANIPULATED_MESSAGE = "El monto del carro ha cambiado mientras se procesaba el pago, la transacción fue cancelada. Ningún cobro fue realizado.";
-    const WEBPAY_OPERATION_IN_PROGRESS_MESSAGE = 'Ya estamos procesando tu solicitud. Por favor, espera unos momentos antes de volver a intentarlo.';
+
+    const WEBPAY_RETURN_LOCK_MAX_RETRIES = 3;
+    const WEBPAY_RETURN_LOCK_RETRY_DELAY_SECONDS = 1;
 
     protected $responseData = [];
     protected MariaDbNamedLock $webpayReturnLock;
@@ -155,7 +157,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
             $lockAcquired = $this->acquireWebpayReturnLock($token);
 
             if (!$lockAcquired) {
-                $this->setPaymentErrorPage(self::WEBPAY_OPERATION_IN_PROGRESS_MESSAGE);
+                $this->retryNormalFlow($token);
                 return;
             }
 
@@ -234,6 +236,34 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
         } catch (\Throwable $e) {
             $this->logWarning("Error al liberar el lock de retorno de Webpay token => {$token} - Error: {$e->getMessage()}");
         }
+    }
+
+    /**
+     * Retries the normal flow by redirecting to the same controller.
+     * Falls back to an error page when the maximum number of retries is exceeded.
+     *
+     * @param string $token The transaction token.
+     * @return void
+     */
+    private function retryNormalFlow(string $token): void
+    {
+        $retryCount = max(0, (int) ($_GET['retryCount'] ?? 0));
+
+        if ($retryCount >= self::WEBPAY_RETURN_LOCK_MAX_RETRIES) {
+            throw new EcommerceException(
+                "No se pudo adquirir el lock de retorno de Webpay después de {$retryCount} reintentos para token: {$token}"
+            );
+        }
+
+        $this->logInfo("Reintentando flujo normal (intento " . ($retryCount + 1) . ") para token: {$token}");
+        sleep(self::WEBPAY_RETURN_LOCK_RETRY_DELAY_SECONDS);
+
+        $redirectUrl = Context::getContext()->link->getModuleLink('webpay', 'webpaypluspaymentvalidate', [
+            'token_ws' => $token,
+            'retryCount' => $retryCount + 1,
+        ], true);
+
+        Tools::redirect($redirectUrl);
     }
 
     /**

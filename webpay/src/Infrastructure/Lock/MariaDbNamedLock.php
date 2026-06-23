@@ -12,13 +12,13 @@ use PrestaShop\Module\WebpayPlus\Exceptions\MariaDbNamedLockException;
  */
 class MariaDbNamedLock
 {
-    private const LOCK_PREFIX = 'transbank_webpay_lock_';
+    private const GET_LOCK_TIMEOUT_SECONDS = 10;
 
     public function acquire(string $key): bool
     {
-        $lockName = $this->buildLockName($key);
-        $escapedLockName = pSQL($lockName);
-        $query = "SELECT GET_LOCK('$escapedLockName', 0)";
+        $escapedKey = pSQL($key);
+        $timeout = self::GET_LOCK_TIMEOUT_SECONDS;
+        $query = "SELECT GET_LOCK('$escapedKey', $timeout)";
         $result = Db::getInstance()->getValue($query);
 
         if ($result === null) {
@@ -32,9 +32,8 @@ class MariaDbNamedLock
 
     public function release(string $key): bool
     {
-        $lockName = $this->buildLockName($key);
-        $escapedLockName = pSQL($lockName);
-        $query = "SELECT RELEASE_LOCK('$escapedLockName')";
+        $escapedKey = pSQL($key);
+        $query = "SELECT RELEASE_LOCK('$escapedKey')";
         $result = Db::getInstance()->getValue($query);
 
         if ($result === null) {
@@ -44,10 +43,5 @@ class MariaDbNamedLock
         }
 
         return $result === 1;
-    }
-
-    private function buildLockName(string $key): string
-    {
-        return self::LOCK_PREFIX . substr(hash('sha256', $key), 0, 40);
     }
 }
