@@ -12,7 +12,7 @@ use PrestaShop\Module\WebpayPlus\Exceptions\MariaDbNamedLockException;
  */
 class MariaDbNamedLock
 {
-    private const GET_LOCK_TIMEOUT_SECONDS = 10;
+    private const GET_LOCK_TIMEOUT_SECONDS = 5;
 
     public function acquire(string $key): bool
     {

@@ -3,12 +3,12 @@ import {
     login,
     addProductToCart,
     goThroughCheckoutWithWebpay,
-} from "../../helpers/checkout.js";
+} from "../../../helpers/checkout.js";
 import {
     fillCardAndAuthenticate,
     continueToCommerce,
-} from "../../helpers/webpay-form.js";
-import { expectOrderConfirmation } from "../../helpers/assertions.js";
+} from "../../../helpers/webpay-form.js";
+import { expectOrderConfirmation } from "../../../helpers/assertions.js";
 
 test.describe("Webpay Plus — Normal payment flow", () => {
     test("Authorized payment shows order confirmation", async ({ page }) => {
@@ -34,6 +34,7 @@ test.describe("Webpay Plus — Normal payment flow", () => {
             await continueToCommerce(page);
             await page.waitForURL(/confirmacion-pedido/, { timeout: 45_000 });
             await expectOrderConfirmation(page);
+            console.log(`[RESULT] Page: url=${page.url()}, confirmation=true`);
         });
 
         console.log("═══ END: Normal payment flow ═══");
