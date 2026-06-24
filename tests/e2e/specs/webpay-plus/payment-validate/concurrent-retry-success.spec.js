@@ -1,11 +1,5 @@
 import { test, expect } from "@playwright/test";
 import {
-    login,
-    addProductToCart,
-    goThroughCheckoutWithWebpay
-} from "../../../helpers/checkout.js";
-import {
-    fillCardAndAuthenticate,
     continueToCommerce,
     extractTokenFromUrl
 } from "../../../helpers/webpay-form.js";
@@ -17,6 +11,11 @@ import {
     closePool
 } from "../../../helpers/database.js";
 import { expectOrderConfirmation } from "../../../helpers/assertions.js";
+import {
+    runCheckoutFlow,
+    holdReturnRequest,
+    hasNavigatedPastValidation
+} from "../../../helpers/concurrent.js";
 
 /* ════════════════════════════════════════════════════════════════════════════
  *  Retry when GET_LOCK times out
@@ -38,6 +37,41 @@ import { expectOrderConfirmation } from "../../../helpers/assertions.js";
  *                   processes transaction
  * ════════════════════════════════════════════════════════════════════════════ */
 
+async function acquireExternalLock(returnHolder) {
+    const returnUrl = returnHolder.getReturnUrl();
+    const token = extractTokenFromUrl(returnUrl);
+    expect(token, "Could not extract token from the return URL").toBeTruthy();
+    console.log(`[INTERCEPTOR] Token captured: ${token}`);
+
+    const externalLock = await holdLock(token);
+    expect(
+        await isLockHeld(token),
+        "External lock must be active before releasing the return"
+    ).toBe(true);
+    console.log("[INTERCEPTOR] External lock acquired, releasing return request...");
+
+    returnHolder.release();
+
+    return externalLock;
+}
+
+async function waitForRetryAndReleaseLock(externalLock, page) {
+    await new Promise((r) => setTimeout(r, 6_000));
+
+    await externalLock.release();
+    console.log(
+        "[INTERCEPTOR] External lock released, the internal retry should acquire the lock now"
+    );
+
+    await expect
+        .poll(() => hasNavigatedPastValidation(page), {
+            timeout: 60_000,
+            intervals: [1_000],
+            message: "Waiting for the retry to finish processing"
+        })
+        .toBe(true);
+}
+
 test.describe("Webpay Plus — Retry when lock is busy", () => {
     test("Internal retry processes the transaction after GET_LOCK times out", async ({
         browser,
@@ -48,144 +82,57 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
             baseURL,
             ignoreHTTPSErrors: true
         });
-
-        // ── Intercept return request with barrier ──
-
-        let releaseReturn;
-        const returnCanContinue = new Promise((resolve) => {
-            releaseReturn = resolve;
-        });
-        let returnUrl = "";
-        let returnIntercepted = false;
-
-        await context.route(
-            (url) => {
-                const s = url.toString();
-                return (
-                    s.includes("webpaypluspaymentvalidate") &&
-                    s.includes("token_ws=")
-                );
-            },
-            async (route) => {
-                returnUrl = route.request().url();
-                returnIntercepted = true;
-                console.log(`[BARRIER] Return intercepted: ${returnUrl}`);
-                await returnCanContinue;
-                await route.continue();
-            }
-        );
-
+        const returnHolder = await holdReturnRequest(context);
         const page = await context.newPage();
         let externalLock;
 
         try {
-            // ── Full checkout up to Transbank ──
-
-            await test.step("Login", async () => {
-                await login(page);
-            });
-
-            await test.step("Add product to cart", async () => {
-                await addProductToCart(page);
-            });
-
-            await test.step("Complete checkout with Webpay Plus", async () => {
-                await goThroughCheckoutWithWebpay(page);
-            });
-
-            await test.step("Complete payment form on Transbank", async () => {
-                await fillCardAndAuthenticate(page);
-            });
-
-            // ── Force lock timeout ──
+            await test.step("Full checkout up to Transbank", async () =>
+                runCheckoutFlow(page));
 
             await test.step("Capture return URL and acquire external lock", async () => {
                 await continueToCommerce(page);
 
                 await expect
-                    .poll(() => returnIntercepted, {
+                    .poll(() => returnHolder.isIntercepted(), {
                         message: "Waiting for intercepted return",
                         timeout: 45_000,
                         intervals: [500]
                     })
                     .toBe(true);
 
-                const token = extractTokenFromUrl(returnUrl);
-                expect(
-                    token,
-                    "Could not extract token from the return URL"
-                ).toBeTruthy();
-                console.log(`[TEST] Token captured: ${token}`);
-
-                externalLock = await holdLock(token);
-
-                expect(
-                    await isLockHeld(token),
-                    "External lock must be active before releasing the return"
-                ).toBe(true);
-                console.log(
-                    "[TEST] External lock confirmed. Releasing return request..."
-                );
-
-                releaseReturn();
+                externalLock = await acquireExternalLock(returnHolder);
             });
-
-            // ── Wait for GET_LOCK timeout, release lock for the internal retry ──
 
             await test.step("Wait for GET_LOCK timeout and release lock for the retry", async () => {
-                // PHP GET_LOCK(5s) timeout before the second attempt starts immediately.
-                // Wait 6s to ensure PHP's first attempt has timed out and the retry has started.
-                await new Promise((r) => setTimeout(r, 6_000));
-
-                await externalLock.release();
+                await waitForRetryAndReleaseLock(externalLock, page);
                 externalLock = null;
-                console.log(
-                    "[TEST] External lock released. The internal retry should acquire the lock now."
-                );
-
-                await expect
-                    .poll(
-                        async () => {
-                            try {
-                                return !page
-                                    .url()
-                                    .includes("webpaypluspaymentvalidate");
-                            } catch {
-                                return false;
-                            }
-                        },
-                        {
-                            timeout: 60_000,
-                            intervals: [1_000],
-                            message:
-                                "Waiting for the retry to finish processing"
-                        }
-                    )
-                    .toBe(true);
             });
-
-            // ── Verification ──
 
             await test.step("Verify the page shows order confirmation", async () => {
                 await page.waitForURL(/confirmacion-pedido/, {
                     timeout: 30_000,
-                    waitUntil: "load"
+                    waitUntil: "load",
                 });
                 await expectOrderConfirmation(page);
-                console.log(`[RESULT] Page: url=${page.url()}, confirmation=true`);
+                console.log(
+                    `[INTERCEPTOR] Confirmation: url=${page.url()}`
+                );
             });
 
             await test.step("Verify exactly 1 order was created in the database", async () => {
-                const token = extractTokenFromUrl(returnUrl);
+                const token = extractTokenFromUrl(returnHolder.getReturnUrl());
                 expect(
                     token,
                     "Could not extract token from the return URL"
                 ).toBeTruthy();
+
                 const orderCount = await getOrderCountByToken(token);
                 const txStatus = await getTransactionStatus(token);
                 console.log(
-                    `[DB] Orders created: ${orderCount}, Transaction status: ${txStatus}`
+                    `[INTERCEPTOR] Orders: ${orderCount}, transaction status: ${txStatus}`
                 );
+
                 expect(
                     orderCount,
                     "There must be exactly 1 order for this token"

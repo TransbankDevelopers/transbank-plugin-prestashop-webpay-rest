@@ -37,11 +37,11 @@ export async function closePool() {
     }
 }
 
-async function queryScalar(sql, params = []) {
+const queryScalar = async (sql, params = []) => {
     const [rows] = await getPool().execute(sql, params);
 
     return rows[0] ? Object.values(rows[0])[0] : null;
-}
+};
 
 /**
  * Acquires a MariaDB named lock on a dedicated connection.

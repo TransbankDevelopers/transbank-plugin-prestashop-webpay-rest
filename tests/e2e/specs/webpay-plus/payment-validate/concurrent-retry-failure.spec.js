@@ -1,11 +1,5 @@
 import { test, expect } from "@playwright/test";
 import {
-    login,
-    addProductToCart,
-    goThroughCheckoutWithWebpay
-} from "../../../helpers/checkout.js";
-import {
-    fillCardAndAuthenticate,
     continueToCommerce,
     extractTokenFromUrl
 } from "../../../helpers/webpay-form.js";
@@ -16,6 +10,11 @@ import {
     closePool
 } from "../../../helpers/database.js";
 import { expectPaymentError } from "../../../helpers/assertions.js";
+import {
+    runCheckoutFlow,
+    holdReturnRequests,
+    hasErrorContent
+} from "../../../helpers/concurrent.js";
 
 /* ════════════════════════════════════════════════════════════════════════════
  *  Duplicate request shows error after max retries exhausted
@@ -30,7 +29,7 @@ import { expectPaymentError } from "../../../helpers/assertions.js";
  *
  *    Request A ──┐             ┌── Request B
  *             ▼                ▼
- *         BARRIER (released simultaneously)
+ *         HOLD (released simultaneously)
  *               ┌─────┴─────┐
  *               ▼           ▼
  *        Both blocked by external lock
@@ -38,8 +37,52 @@ import { expectPaymentError } from "../../../helpers/assertions.js";
  *        No duplicate orders created
  * ════════════════════════════════════════════════════════════════════════════ */
 
+async function captureAndDuplicateWithLock(context, page, returnHolder) {
+    await continueToCommerce(page);
+
+    await expect
+        .poll(() => returnHolder.commerceReturns.length, {
+            message: "Waiting for first intercepted return",
+            timeout: 45_000,
+            intervals: [500]
+        })
+        .toBeGreaterThanOrEqual(1);
+
+    const commerceReturnUrl = returnHolder.commerceReturns[0];
+
+    const duplicatePage = await context.newPage();
+    duplicatePage.goto(commerceReturnUrl, {
+        waitUntil: "commit",
+        timeout: 120_000
+    });
+
+    await expect
+        .poll(() => returnHolder.commerceReturns.length, {
+            message: "Waiting for both returns to be intercepted",
+            timeout: 45_000,
+            intervals: [500]
+        })
+        .toBeGreaterThanOrEqual(2);
+
+    const token = extractTokenFromUrl(commerceReturnUrl);
+    expect(token, "Could not extract token from the return URL").toBeTruthy();
+
+    const externalLock = await holdLock(token);
+    expect(
+        await isLockHeld(token),
+        "External lock must be active before releasing returns"
+    ).toBe(true);
+    console.log(`[INTERCEPTOR] External lock acquired for token: ${token}`);
+
+    console.log(
+        `[INTERCEPTOR] Both returns intercepted (${returnHolder.commerceReturns.length}). Releasing simultaneously...`
+    );
+    returnHolder.release();
+
+    return { duplicatePage, externalLock };
+}
+
 test.describe("Webpay Plus — Max retries exhausted", () => {
-    // GET_LOCK(5s) with up to 3 retries per request = 20s, plus checkout ≈ 15s.
     test(
         "Duplicate request shows error after retries exhaust",
         { timeout: 120_000 },
@@ -49,156 +92,48 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                 baseURL,
                 ignoreHTTPSErrors: true
             });
-
-            // ── Barrier: intercept return requests ──
-
-            let releaseReturns;
-            let returnsReleased = false;
-            const returnsCanContinue = new Promise((resolve) => {
-                releaseReturns = resolve;
-            });
-            const commerceReturns = [];
-
-            await context.route(
-                (url) => {
-                    const s = url.toString();
-
-                    return (
-                        s.includes("webpaypluspaymentvalidate") &&
-                        s.includes("token_ws=")
-                    );
-                },
-                async (route) => {
-                    const requestUrl = route.request().url();
-                    commerceReturns.push(requestUrl);
-                    console.log(
-                        `[BARRIER] Return intercepted #${commerceReturns.length}: ${requestUrl}`
-                    );
-
-                    if (!returnsReleased) {
-                        await returnsCanContinue;
-                    }
-
-                    await route.continue();
-                }
-            );
-
+            const returnHolder = await holdReturnRequests(context);
             const page = await context.newPage();
             let duplicatePage;
             let externalLock;
 
             try {
-                // ── Full checkout up to Transbank ──
-
-                await test.step("Login", async () => {
-                    await login(page);
-                });
-
-                await test.step("Add product to cart", async () => {
-                    await addProductToCart(page);
-                });
-
-                await test.step("Complete checkout with Webpay Plus", async () => {
-                    await goThroughCheckoutWithWebpay(page);
-                });
-
-                await test.step("Complete payment form on Transbank", async () => {
-                    await fillCardAndAuthenticate(page);
-                });
-
-                // ── Capture URL, duplicate request, acquire lock, release both ──
+                await test.step("Full checkout up to Transbank", async () =>
+                    runCheckoutFlow(page));
 
                 await test.step("Capture return URL, duplicate request and acquire external lock", async () => {
-                    await continueToCommerce(page);
-
-                    await expect
-                        .poll(() => commerceReturns.length, {
-                            message: "Waiting for first intercepted return",
-                            timeout: 45_000,
-                            intervals: [500]
-                        })
-                        .toBeGreaterThanOrEqual(1);
-
-                    const commerceReturnUrl = commerceReturns[0];
-                    console.log(
-                        `[TEST] Return URL captured: ${commerceReturnUrl}`
-                    );
-
-                    duplicatePage = await context.newPage();
-                    duplicatePage.goto(commerceReturnUrl, {
-                        waitUntil: "commit",
-                        timeout: 120_000
-                    });
-
-                    await expect
-                        .poll(() => commerceReturns.length, {
-                            message:
-                                "Waiting for both returns to be intercepted",
-                            timeout: 45_000,
-                            intervals: [500]
-                        })
-                        .toBeGreaterThanOrEqual(2);
-
-                    const token = extractTokenFromUrl(commerceReturnUrl);
-                    expect(
-                        token,
-                        "Could not extract token from the return URL"
-                    ).toBeTruthy();
-                    externalLock = await holdLock(token);
-                    expect(
-                        await isLockHeld(token),
-                        "External lock must be active before releasing returns"
-                    ).toBe(true);
-                    console.log(
-                        `[TEST] External lock acquired for token: ${token}`
-                    );
-
-                    console.log(
-                        `[BARRIER] Both returns intercepted (${commerceReturns.length}). Releasing simultaneously...`
-                    );
-                    returnsReleased = true;
-                    releaseReturns();
+                    ({ duplicatePage, externalLock } =
+                        await captureAndDuplicateWithLock(
+                            context,
+                            page,
+                            returnHolder
+                        ));
                 });
-
-                // ── Wait for Request B to exhaust internal retries ──
-                // GET_LOCK(5s) with up to 3 retries = 20s per request.
 
                 await test.step("Wait for Request B retries to exhaust", async () => {
                     await expect
-                        .poll(
-                            async () => {
-                                try {
-                                    const content =
-                                        await duplicatePage.content();
-                                    return (
-                                        content.includes("Reintentar pago") ||
-                                        content.includes("errorMessage")
-                                    );
-                                } catch {
-                                    return false;
-                                }
-                            },
-                            {
-                                timeout: 60_000,
-                                intervals: [1_000],
-                                message:
-                                    "Waiting for Request B error page to render"
-                            }
-                        )
+                        .poll(() => hasErrorContent(duplicatePage), {
+                            timeout: 60_000,
+                            intervals: [1_000],
+                            message:
+                                "Waiting for Request B error page to render"
+                        })
                         .toBe(true);
                 });
 
-                // ── Verification ──
-
                 await test.step("Verify Request B shows a payment error (not a fatal error)", async () => {
                     await expectPaymentError(duplicatePage);
-                    console.log(`[RESULT] Request B (duplicate): url=${duplicatePage.url()}, payment_error=true`);
+                    console.log(
+                        `[INTERCEPTOR] Request B (duplicate): url=${duplicatePage.url()}, payment_error=true`
+                    );
                 });
 
                 await test.step("Verify no duplicate order was created", async () => {
-                    const token = extractTokenFromUrl(commerceReturns[0]);
+                    const token = extractTokenFromUrl(
+                        returnHolder.commerceReturns[0]
+                    );
                     const orderCount = await getOrderCountByToken(token);
-                    console.log(`[DB] Orders for this token: ${orderCount}`);
+                    console.log(`[INTERCEPTOR] Orders for this token: ${orderCount}`);
                     expect(
                         orderCount,
                         "At most 1 order must exist (no duplicate from Request B)"

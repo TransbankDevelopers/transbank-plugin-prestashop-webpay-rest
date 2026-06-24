@@ -34,7 +34,7 @@ test.describe("Webpay Plus — Normal payment flow", () => {
             await continueToCommerce(page);
             await page.waitForURL(/confirmacion-pedido/, { timeout: 45_000 });
             await expectOrderConfirmation(page);
-            console.log(`[RESULT] Page: url=${page.url()}, confirmation=true`);
+            console.log(`[INTERCEPTOR] Confirmation: url=${page.url()}`);
         });
 
         console.log("═══ END: Normal payment flow ═══");
