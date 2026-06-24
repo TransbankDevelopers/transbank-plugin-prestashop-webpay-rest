@@ -6,12 +6,12 @@ Tests end-to-end con Playwright que validan los flujos de pago del plugin Transb
 
 ### Webpay Plus
 
-| Test | Archivo | Descripción |
-|------|---------|-------------|
-| Pago normal | `webpay-plus/webpay-payment.spec.js` | Flujo completo: login → carrito → checkout → pago en Transbank → confirmación de orden |
-| Lock previene duplicados | `webpay-plus/webpay-duplicated-return.spec.js` | Simula dos pestañas retornando con el mismo token simultáneamente. Verifica que no se creen órdenes duplicadas |
-| Retry con lock ocupado | `webpay-plus/webpay-duplicated-return.spec.js` | Fuerza el timeout de `GET_LOCK` adquiriendo el lock externamente. Verifica que el retry procesa la transacción correctamente |
-| Reintentos agotados | `webpay-plus/webpay-duplicated-return.spec.js` | Duplica la pestaña en el retorno. La primera procesa mientras la segunda agota los 3 reintentos. Verifica página de error sin duplicar la orden |
+| Test                     | Archivo                                        | Descripción                                                                                                                                     |
+| ------------------------ | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pago normal              | `webpay-plus/webpay-payment.spec.js`           | Flujo completo: login → carrito → checkout → pago en Transbank → confirmación de orden                                                          |
+| Lock previene duplicados | `webpay-plus/webpay-duplicated-return.spec.js` | Simula dos pestañas retornando con el mismo token simultáneamente. Verifica que no se creen órdenes duplicadas                                  |
+| Retry con lock ocupado   | `webpay-plus/webpay-duplicated-return.spec.js` | Fuerza el timeout de `GET_LOCK` adquiriendo el lock externamente. Verifica que el retry procesa la transacción correctamente                    |
+| Reintentos agotados      | `webpay-plus/webpay-duplicated-return.spec.js` | Duplica la pestaña en el retorno. La primera procesa mientras la segunda agota los 3 reintentos. Verifica página de error sin duplicar la orden |
 
 ## Prerequisitos
 
@@ -36,16 +36,16 @@ cp .env.example .env
 
 ## Variables de entorno
 
-| Variable            | Default                    | Descripción                          |
-|---------------------|----------------------------|--------------------------------------|
-| `BASE_URL`          | `http://localhost:8080`    | URL de la instancia de PrestaShop    |
-| `CUSTOMER_EMAIL`    | `test.user@example.com`   | Email del cliente de prueba          |
-| `CUSTOMER_PASSWORD` | `Password123!`             | Contraseña del cliente de prueba     |
-| `DB_HOST`           | `localhost`                | Host de MariaDB                      |
-| `DB_PORT`           | `3306`                     | Puerto de MariaDB                    |
-| `DB_USER`           | `prestashop`               | Usuario de MariaDB                   |
-| `DB_PASSWORD`       | `prestashop123`            | Contraseña de MariaDB                |
-| `DB_NAME`           | `prestashop`               | Nombre de la base de datos           |
+| Variable            | Default                 | Descripción                       |
+| ------------------- | ----------------------- | --------------------------------- |
+| `BASE_URL`          | `http://localhost:8080` | URL de la instancia de PrestaShop |
+| `CUSTOMER_EMAIL`    | `test.user@example.com` | Email del cliente de prueba       |
+| `CUSTOMER_PASSWORD` | `Password123!`          | Contraseña del cliente de prueba  |
+| `DB_HOST`           | `localhost`             | Host de MariaDB                   |
+| `DB_PORT`           | `3306`                  | Puerto de MariaDB                 |
+| `DB_USER`           | `prestashop`            | Usuario de MariaDB                |
+| `DB_PASSWORD`       | `prestashop123`         | Contraseña de MariaDB             |
+| `DB_NAME`           | `prestashop`            | Nombre de la base de datos        |
 
 ## Ejecución
 
@@ -71,6 +71,7 @@ pnpm report
 ```
 
 Cuando un test falla se guardan automáticamente en `test-results/`:
+
 - **Screenshot** de la página al momento del fallo.
 - **Trace** interactivo (se abre con `pnpm playwright show-trace <archivo.zip>`).
 - **Video** de la ejecución completa del test.

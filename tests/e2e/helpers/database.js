@@ -6,35 +6,41 @@
  * running inside the standard devcontainer.
  */
 
-import mysql from 'mysql2/promise';
+import mysql from "mysql2/promise";
 
 const DB_CONFIG = {
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '3306', 10),
-  user: process.env.DB_USER || 'prestashop',
-  password: process.env.DB_PASSWORD || 'prestashop123',
-  database: process.env.DB_NAME || 'prestashop',
+    host: process.env.DB_HOST || "localhost",
+    port: parseInt(process.env.DB_PORT || "3306", 10),
+    user: process.env.DB_USER || "prestashop",
+    password: process.env.DB_PASSWORD || "prestashop123",
+    database: process.env.DB_NAME || "prestashop",
 };
 
 let pool;
 
 function getPool() {
-  if (!pool) {
-    pool = mysql.createPool({ ...DB_CONFIG, waitForConnections: true, connectionLimit: 5 });
-  }
-  return pool;
+    if (!pool) {
+        pool = mysql.createPool({
+            ...DB_CONFIG,
+            waitForConnections: true,
+            connectionLimit: 5,
+        });
+    }
+
+    return pool;
 }
 
 export async function closePool() {
-  if (pool) {
-    await pool.end();
-    pool = null;
-  }
+    if (pool) {
+        await pool.end();
+        pool = null;
+    }
 }
 
 async function queryScalar(sql, params = []) {
-  const [rows] = await getPool().execute(sql, params);
-  return rows[0] ? Object.values(rows[0])[0] : null;
+    const [rows] = await getPool().execute(sql, params);
+
+    return rows[0] ? Object.values(rows[0])[0] : null;
 }
 
 /**
@@ -46,21 +52,24 @@ async function queryScalar(sql, params = []) {
  * @returns {Promise<{ release: () => Promise<void> }>}
  */
 export async function holdLock(key) {
-  const connection = await mysql.createConnection(DB_CONFIG);
-  const [rows] = await connection.execute('SELECT GET_LOCK(?, 0) AS acquired', [key]);
-  const acquired = rows[0].acquired === 1;
+    const connection = await mysql.createConnection(DB_CONFIG);
+    const [rows] = await connection.execute(
+        "SELECT GET_LOCK(?, 0) AS acquired",
+        [key],
+    );
+    const acquired = rows[0].acquired === 1;
 
-  if (!acquired) {
-    await connection.end();
-    throw new Error(`Could not acquire lock for key: ${key}`);
-  }
+    if (!acquired) {
+        await connection.end();
+        throw new Error(`Could not acquire lock for key: ${key}`);
+    }
 
-  return {
-    release: async () => {
-      await connection.execute('SELECT RELEASE_LOCK(?)', [key]);
-      await connection.end();
-    },
-  };
+    return {
+        release: async () => {
+            await connection.execute("SELECT RELEASE_LOCK(?)", [key]);
+            await connection.end();
+        },
+    };
 }
 
 /**
@@ -68,8 +77,9 @@ export async function holdLock(key) {
  * @returns {Promise<boolean>}
  */
 export async function isLockHeld(key) {
-  const result = await queryScalar('SELECT IS_USED_LOCK(?)', [key]);
-  return result !== null;
+    const result = await queryScalar("SELECT IS_USED_LOCK(?)", [key]);
+
+    return result !== null;
 }
 
 /**
@@ -77,11 +87,12 @@ export async function isLockHeld(key) {
  * @returns {Promise<number>}
  */
 export async function getOrderCountByToken(token) {
-  const result = await queryScalar(
-    'SELECT COUNT(*) FROM ps_orders WHERE id_cart = (SELECT cart_id FROM ps_webpay_rest_transactions WHERE token = ? LIMIT 1)',
-    [token]
-  );
-  return Number(result);
+    const result = await queryScalar(
+        "SELECT COUNT(*) FROM ps_orders WHERE id_cart = (SELECT cart_id FROM ps_webpay_rest_transactions WHERE token = ? LIMIT 1)",
+        [token],
+    );
+
+    return Number(result);
 }
 
 /**
@@ -89,9 +100,10 @@ export async function getOrderCountByToken(token) {
  * @returns {Promise<number>}
  */
 export async function getTransactionStatus(token) {
-  const result = await queryScalar(
-    'SELECT status FROM ps_webpay_rest_transactions WHERE token = ? LIMIT 1',
-    [token]
-  );
-  return Number(result);
+    const result = await queryScalar(
+        "SELECT status FROM ps_webpay_rest_transactions WHERE token = ? LIMIT 1",
+        [token],
+    );
+
+    return Number(result);
 }
