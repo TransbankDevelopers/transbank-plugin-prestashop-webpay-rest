@@ -7,7 +7,7 @@
 
 const CUSTOMER = {
     email: process.env.CUSTOMER_EMAIL,
-    password: process.env.CUSTOMER_PASSWORD,
+    password: process.env.CUSTOMER_PASSWORD
 };
 
 /**
@@ -59,7 +59,7 @@ export async function goThroughCheckoutWithWebpay(page) {
 
     // Shipping step — "My carrier" pre-selected, just confirm
     const deliveryConfirm = page.locator(
-        'button[name="confirmDeliveryOption"]',
+        'button[name="confirmDeliveryOption"]'
     );
     await deliveryConfirm.waitFor({ state: "visible", timeout: 10_000 });
     await deliveryConfirm.click();
@@ -73,7 +73,7 @@ export async function goThroughCheckoutWithWebpay(page) {
 
     // Accept terms and conditions
     const termsCheckbox = page.locator(
-        'input[name="conditions_to_approve[terms-and-conditions]"]',
+        'input[name="conditions_to_approve[terms-and-conditions]"]'
     );
     await termsCheckbox.waitFor({ state: "visible", timeout: 5_000 });
     await termsCheckbox.check();
@@ -81,6 +81,6 @@ export async function goThroughCheckoutWithWebpay(page) {
     // Confirm payment — redirects to Transbank
     await page.locator('#payment-confirmation button[type="submit"]').click();
     await page.waitForURL(/webpay3gint\.transbank\.cl|tbk\.cl/, {
-        timeout: 45_000,
+        timeout: 45_000
     });
 }

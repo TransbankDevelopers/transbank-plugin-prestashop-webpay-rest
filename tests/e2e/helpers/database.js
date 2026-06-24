@@ -13,7 +13,7 @@ const DB_CONFIG = {
     port: Number.parseInt(process.env.DB_PORT, 10),
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    database: process.env.DB_NAME
 };
 
 let pool;
@@ -23,7 +23,7 @@ function getPool() {
         pool = mysql.createPool({
             ...DB_CONFIG,
             waitForConnections: true,
-            connectionLimit: 5,
+            connectionLimit: 5
         });
     }
 
@@ -55,7 +55,7 @@ export async function holdLock(key) {
     const connection = await mysql.createConnection(DB_CONFIG);
     const [rows] = await connection.execute(
         "SELECT GET_LOCK(?, 0) AS acquired",
-        [key],
+        [key]
     );
     const acquired = rows[0].acquired === 1;
 
@@ -68,7 +68,7 @@ export async function holdLock(key) {
         release: async () => {
             await connection.execute("SELECT RELEASE_LOCK(?)", [key]);
             await connection.end();
-        },
+        }
     };
 }
 
@@ -89,7 +89,7 @@ export async function isLockHeld(key) {
 export async function getOrderCountByToken(token) {
     const result = await queryScalar(
         "SELECT COUNT(*) FROM ps_orders WHERE id_cart = (SELECT cart_id FROM ps_webpay_rest_transactions WHERE token = ? LIMIT 1)",
-        [token],
+        [token]
     );
 
     return Number(result);
@@ -102,7 +102,7 @@ export async function getOrderCountByToken(token) {
 export async function getTransactionStatus(token) {
     const result = await queryScalar(
         "SELECT status FROM ps_webpay_rest_transactions WHERE token = ? LIMIT 1",
-        [token],
+        [token]
     );
 
     return Number(result);

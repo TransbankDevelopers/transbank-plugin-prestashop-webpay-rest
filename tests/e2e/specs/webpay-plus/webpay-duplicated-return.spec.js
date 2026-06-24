@@ -2,24 +2,24 @@ import { test, expect } from "@playwright/test";
 import {
     login,
     addProductToCart,
-    goThroughCheckoutWithWebpay,
+    goThroughCheckoutWithWebpay
 } from "../../helpers/checkout.js";
 import {
     fillCardAndAuthenticate,
     continueToCommerce,
-    extractTokenFromUrl,
+    extractTokenFromUrl
 } from "../../helpers/webpay-form.js";
 import {
     getOrderCountByToken,
     getTransactionStatus,
     holdLock,
     isLockHeld,
-    closePool,
+    closePool
 } from "../../helpers/database.js";
 import {
     expectOrderConfirmation,
     expectPaymentError,
-    expectValidResponse,
+    expectValidResponse
 } from "../../helpers/assertions.js";
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -46,12 +46,12 @@ import {
 test.describe("Webpay Plus — Lock prevents duplicate orders", () => {
     test("Both tabs resolve without error when the return URL receives the same token twice", async ({
         browser,
-        baseURL,
+        baseURL
     }) => {
         console.log("═══ START: Lock prevents duplicate orders ═══");
         const context = await browser.newContext({
             baseURL,
-            ignoreHTTPSErrors: true,
+            ignoreHTTPSErrors: true
         });
 
         // ── Barrier: intercept return requests ──
@@ -79,7 +79,7 @@ test.describe("Webpay Plus — Lock prevents duplicate orders", () => {
                 const requestUrl = route.request().url();
                 commerceReturns.push(requestUrl);
                 console.log(
-                    `[BARRIER] Return intercepted #${commerceReturns.length}: ${requestUrl}`,
+                    `[BARRIER] Return intercepted #${commerceReturns.length}: ${requestUrl}`
                 );
 
                 if (!returnsReleased) {
@@ -87,7 +87,7 @@ test.describe("Webpay Plus — Lock prevents duplicate orders", () => {
                 }
 
                 await route.continue();
-            },
+            }
         );
 
         const page = await context.newPage();
@@ -121,7 +121,7 @@ test.describe("Webpay Plus — Lock prevents duplicate orders", () => {
                     .poll(() => commerceReturns.length, {
                         message: "Waiting for first intercepted return",
                         timeout: 45_000,
-                        intervals: [500],
+                        intervals: [500]
                     })
                     .toBeGreaterThanOrEqual(1);
 
@@ -133,34 +133,34 @@ test.describe("Webpay Plus — Lock prevents duplicate orders", () => {
                     commerceReturnUrl,
                     {
                         waitUntil: "commit",
-                        timeout: 45_000,
-                    },
+                        timeout: 45_000
+                    }
                 );
 
                 await expect
                     .poll(() => commerceReturns.length, {
                         message: "Waiting for both returns to be intercepted",
                         timeout: 45_000,
-                        intervals: [500],
+                        intervals: [500]
                     })
                     .toBeGreaterThanOrEqual(2);
 
                 console.log(
-                    `[BARRIER] Both returns intercepted (${commerceReturns.length}). Releasing...`,
+                    `[BARRIER] Both returns intercepted (${commerceReturns.length}). Releasing...`
                 );
                 returnsReleased = true;
                 releaseReturns();
 
                 await Promise.all([
                     page.waitForLoadState("load").catch(() => {}),
-                    duplicateNavigation?.catch(() => {}),
+                    duplicateNavigation?.catch(() => {})
                 ]);
 
                 await Promise.all([
                     page.waitForLoadState("networkidle").catch(() => {}),
                     duplicatePage
                         .waitForLoadState("networkidle")
-                        .catch(() => {}),
+                        .catch(() => {})
                 ]);
             });
 
@@ -179,7 +179,7 @@ test.describe("Webpay Plus — Lock prevents duplicate orders", () => {
             await test.step("Verify both tabs show a valid response", async () => {
                 for (const { label, p } of [
                     { label: "Tab 1 (original)", p: page },
-                    { label: "Tab 2 (duplicate)", p: duplicatePage },
+                    { label: "Tab 2 (duplicate)", p: duplicatePage }
                 ]) {
                     await expect
                         .poll(
@@ -195,15 +195,15 @@ test.describe("Webpay Plus — Lock prevents duplicate orders", () => {
                             {
                                 timeout: 30_000,
                                 intervals: [1_000],
-                                message: `${label}: waiting for navigation to finish`,
-                            },
+                                message: `${label}: waiting for navigation to finish`
+                            }
                         )
                         .toBe(true);
 
                     const { confirmation, paymentErr } =
                         await expectValidResponse(p, label);
                     console.log(
-                        `[RESULT] ${label}: url=${p.url()}, confirmation=${confirmation}, payment_error=${paymentErr}`,
+                        `[RESULT] ${label}: url=${p.url()}, confirmation=${confirmation}, payment_error=${paymentErr}`
                     );
                 }
             });
@@ -212,20 +212,20 @@ test.describe("Webpay Plus — Lock prevents duplicate orders", () => {
                 const token = extractTokenFromUrl(commerceReturns[0]);
                 expect(
                     token,
-                    "Could not extract token from the return URL",
+                    "Could not extract token from the return URL"
                 ).toBeTruthy();
                 const orderCount = await getOrderCountByToken(token);
                 const txStatus = await getTransactionStatus(token);
                 console.log(
-                    `[DB] Orders created: ${orderCount}, Transaction status: ${txStatus}`,
+                    `[DB] Orders created: ${orderCount}, Transaction status: ${txStatus}`
                 );
                 expect(
                     orderCount,
-                    "There must be exactly 1 order for this token",
+                    "There must be exactly 1 order for this token"
                 ).toBe(1);
                 expect(
                     txStatus,
-                    "Transaction must be in APPROVED state (4)",
+                    "Transaction must be in APPROVED state (4)"
                 ).toBe(4);
             });
         } finally {
@@ -259,12 +259,12 @@ test.describe("Webpay Plus — Lock prevents duplicate orders", () => {
 test.describe("Webpay Plus — Retry when lock is busy", () => {
     test("Retry processes the transaction after GET_LOCK times out", async ({
         browser,
-        baseURL,
+        baseURL
     }) => {
         console.log("═══ START: Retry when lock is busy ═══");
         const context = await browser.newContext({
             baseURL,
-            ignoreHTTPSErrors: true,
+            ignoreHTTPSErrors: true
         });
 
         // ── Intercept return request with barrier ──
@@ -291,7 +291,7 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
                 console.log(`[BARRIER] Return intercepted: ${returnUrl}`);
                 await returnCanContinue;
                 await route.continue();
-            },
+            }
         );
 
         const page = await context.newPage();
@@ -336,14 +336,14 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
                     .poll(() => returnIntercepted, {
                         message: "Waiting for intercepted return",
                         timeout: 45_000,
-                        intervals: [500],
+                        intervals: [500]
                     })
                     .toBe(true);
 
                 const token = extractTokenFromUrl(returnUrl);
                 expect(
                     token,
-                    "Could not extract token from the return URL",
+                    "Could not extract token from the return URL"
                 ).toBeTruthy();
                 console.log(`[TEST] Token captured: ${token}`);
 
@@ -353,10 +353,10 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
 
                 expect(
                     await isLockHeld(token),
-                    "External lock must be active before releasing the return",
+                    "External lock must be active before releasing the return"
                 ).toBe(true);
                 console.log(
-                    "[TEST] External lock confirmed. Releasing return request...",
+                    "[TEST] External lock confirmed. Releasing return request..."
                 );
 
                 releaseReturn();
@@ -372,7 +372,7 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
                 await externalLock.release();
                 externalLock = null;
                 console.log(
-                    "[TEST] External lock released. The retry should acquire the lock now.",
+                    "[TEST] External lock released. The retry should acquire the lock now."
                 );
 
                 await expect
@@ -390,8 +390,8 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
                             timeout: 60_000,
                             intervals: [1_000],
                             message:
-                                "Waiting for the retry to finish processing",
-                        },
+                                "Waiting for the retry to finish processing"
+                        }
                     )
                     .toBe(true);
             });
@@ -400,15 +400,15 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
 
             await test.step("Verify at least one retry was executed", async () => {
                 console.log(
-                    `[RETRY] Total redirects with retryCount: ${retryRedirects.length}`,
+                    `[RETRY] Total redirects with retryCount: ${retryRedirects.length}`
                 );
                 expect(
                     retryRedirects.length,
-                    "PHP must have responded with at least one 302 with retryCount",
+                    "PHP must have responded with at least one 302 with retryCount"
                 ).toBeGreaterThanOrEqual(1);
                 expect(
                     retryRedirects[0],
-                    "First redirect must have retryCount=1",
+                    "First redirect must have retryCount=1"
                 ).toContain("retryCount=1");
             });
 
@@ -418,7 +418,7 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
                 for (const url of retryRedirects) {
                     const retryToken = extractTokenFromUrl(url);
                     expect(retryToken, "Retry must use the same token").toBe(
-                        originalToken,
+                        originalToken
                     );
                 }
             });
@@ -426,7 +426,7 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
             await test.step("Verify the page shows order confirmation", async () => {
                 await page.waitForURL(/confirmacion-pedido/, {
                     timeout: 30_000,
-                    waitUntil: "load",
+                    waitUntil: "load"
                 });
                 await expectOrderConfirmation(page);
             });
@@ -435,20 +435,20 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
                 const token = extractTokenFromUrl(returnUrl);
                 expect(
                     token,
-                    "Could not extract token from the return URL",
+                    "Could not extract token from the return URL"
                 ).toBeTruthy();
                 const orderCount = await getOrderCountByToken(token);
                 const txStatus = await getTransactionStatus(token);
                 console.log(
-                    `[DB] Orders created: ${orderCount}, Transaction status: ${txStatus}`,
+                    `[DB] Orders created: ${orderCount}, Transaction status: ${txStatus}`
                 );
                 expect(
                     orderCount,
-                    "There must be exactly 1 order for this token",
+                    "There must be exactly 1 order for this token"
                 ).toBe(1);
                 expect(
                     txStatus,
-                    "Transaction must be in APPROVED state (4)",
+                    "Transaction must be in APPROVED state (4)"
                 ).toBe(4);
             });
         } finally {
@@ -492,7 +492,7 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
             console.log("═══ START: Max retries exhausted ═══");
             const context = await browser.newContext({
                 baseURL,
-                ignoreHTTPSErrors: true,
+                ignoreHTTPSErrors: true
             });
 
             // ── Barrier: intercept return requests ──
@@ -520,7 +520,7 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                     const requestUrl = route.request().url();
                     commerceReturns.push(requestUrl);
                     console.log(
-                        `[BARRIER] Return intercepted #${commerceReturns.length}: ${requestUrl}`,
+                        `[BARRIER] Return intercepted #${commerceReturns.length}: ${requestUrl}`
                     );
 
                     if (!returnsReleased) {
@@ -528,7 +528,7 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                     }
 
                     await route.continue();
-                },
+                }
             );
 
             const page = await context.newPage();
@@ -564,19 +564,19 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                         .poll(() => commerceReturns.length, {
                             message: "Waiting for first intercepted return",
                             timeout: 45_000,
-                            intervals: [500],
+                            intervals: [500]
                         })
                         .toBeGreaterThanOrEqual(1);
 
                     const commerceReturnUrl = commerceReturns[0];
                     console.log(
-                        `[TEST] Return URL captured: ${commerceReturnUrl}`,
+                        `[TEST] Return URL captured: ${commerceReturnUrl}`
                     );
 
                     duplicatePage = await context.newPage();
                     duplicatePage.goto(commerceReturnUrl, {
                         waitUntil: "commit",
-                        timeout: 120_000,
+                        timeout: 120_000
                     });
 
                     await expect
@@ -584,7 +584,7 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                             message:
                                 "Waiting for both returns to be intercepted",
                             timeout: 45_000,
-                            intervals: [500],
+                            intervals: [500]
                         })
                         .toBeGreaterThanOrEqual(2);
 
@@ -592,15 +592,15 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                     const token = extractTokenFromUrl(commerceReturnUrl);
                     expect(
                         token,
-                        "Could not extract token from the return URL",
+                        "Could not extract token from the return URL"
                     ).toBeTruthy();
                     externalLock = await holdLock(token);
                     expect(
                         await isLockHeld(token),
-                        "External lock must be active before releasing returns",
+                        "External lock must be active before releasing returns"
                     ).toBe(true);
                     console.log(
-                        `[TEST] External lock acquired for token: ${token}`,
+                        `[TEST] External lock acquired for token: ${token}`
                     );
 
                     // Listen for retry redirects BEFORE releasing the barrier to avoid race conditions.
@@ -609,13 +609,13 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                         if (location.includes("retryCount")) {
                             retryRedirects.push(location);
                             console.log(
-                                `[RETRY] Tab B 302 redirect: ${location}`,
+                                `[RETRY] Tab B 302 redirect: ${location}`
                             );
                         }
                     });
 
                     console.log(
-                        `[BARRIER] Both returns intercepted (${commerceReturns.length}). Releasing simultaneously...`,
+                        `[BARRIER] Both returns intercepted (${commerceReturns.length}). Releasing simultaneously...`
                     );
                     returnsReleased = true;
                     releaseReturns();
@@ -631,7 +631,7 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                         .poll(() => retryRedirects.length, {
                             timeout: 60_000,
                             intervals: [2_000],
-                            message: "Waiting for all 3 retry redirects",
+                            message: "Waiting for all 3 retry redirects"
                         })
                         .toBeGreaterThanOrEqual(3);
 
@@ -655,8 +655,8 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                                 timeout: 30_000,
                                 intervals: [1_000],
                                 message:
-                                    "Waiting for Tab B error page to render",
-                            },
+                                    "Waiting for Tab B error page to render"
+                            }
                         )
                         .toBe(true);
                 });
@@ -665,23 +665,23 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
 
                 await test.step("Verify all 3 retries were attempted on Tab B", async () => {
                     console.log(
-                        `[RETRY] Total Tab B redirects: ${retryRedirects.length}`,
+                        `[RETRY] Total Tab B redirects: ${retryRedirects.length}`
                     );
                     expect(
                         retryRedirects.length,
-                        "Must have exactly 3 retry redirects",
+                        "Must have exactly 3 retry redirects"
                     ).toBe(3);
                     expect(
                         retryRedirects[0],
-                        "First redirect must be retryCount=1",
+                        "First redirect must be retryCount=1"
                     ).toContain("retryCount=1");
                     expect(
                         retryRedirects[1],
-                        "Second redirect must be retryCount=2",
+                        "Second redirect must be retryCount=2"
                     ).toContain("retryCount=2");
                     expect(
                         retryRedirects[2],
-                        "Third redirect must be retryCount=3",
+                        "Third redirect must be retryCount=3"
                     ).toContain("retryCount=3");
                 });
 
@@ -695,7 +695,7 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                     console.log(`[DB] Orders for this token: ${orderCount}`);
                     expect(
                         orderCount,
-                        "At most 1 order must exist (no duplicate from Tab B)",
+                        "At most 1 order must exist (no duplicate from Tab B)"
                     ).toBeLessThanOrEqual(1);
                 });
             } finally {
@@ -704,6 +704,6 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                 await closePool();
                 await context.close();
             }
-        },
+        }
     );
 });

@@ -21,7 +21,7 @@ export default defineConfig({
     workers: 1,
     timeout: 120_000,
     expect: {
-        timeout: 15_000,
+        timeout: 15_000
     },
     retries: 0,
     reporter: [["html", { open: "never" }], ["list"]],
@@ -32,6 +32,6 @@ export default defineConfig({
         screenshot: "only-on-failure",
         video: "retain-on-failure",
         actionTimeout: 15_000,
-        navigationTimeout: 45_000,
-    },
+        navigationTimeout: 45_000
+    }
 });

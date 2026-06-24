@@ -3,13 +3,6 @@ import { expect } from "@playwright/test";
 /**
  * Helpers for the Transbank WebpayPlus integration test environment forms.
  *
- * Test card data (Transbank integration):
- *   Card:     4051 8856 0044 6623
- *   Expiry:   any future date
- *   CVV:      123
- *   RUT:      11.111.111-1
- *   Password: 123
- *
  * The selectors below target the Transbank integration test environment at
  * webpay3gint.transbank.cl. Update them if Transbank changes their form layout.
  */
@@ -17,12 +10,12 @@ import { expect } from "@playwright/test";
 const TEST_CARD = {
     number: "4051885600446623",
     expiry: "12/30",
-    cvv: "123",
+    cvv: "123"
 };
 
 const BANK_SIM = {
     rut: "11.111.111-1",
-    password: "123",
+    password: "123"
 };
 
 /* ---------- Selectors ---------- */
@@ -37,7 +30,7 @@ const S = {
     bankPassword: "#passwordClient",
     bankAccept: 'input[type="submit"][value="Aceptar"]',
     resultVci: "#vci",
-    continueBtn: 'input[type="submit"][value="Continuar"]',
+    continueBtn: 'input[type="submit"][value="Continuar"]'
 };
 
 /* ---------- Public API ---------- */
@@ -95,7 +88,7 @@ export async function fillCardAndAuthenticate(page) {
  */
 export async function continueToCommerce(page) {
     await expect(page.locator(S.resultVci)).toHaveValue("TSY", {
-        timeout: 30_000,
+        timeout: 30_000
     });
     await page.locator(S.continueBtn).click();
 }
