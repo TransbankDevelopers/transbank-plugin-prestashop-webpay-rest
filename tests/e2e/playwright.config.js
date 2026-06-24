@@ -1,4 +1,5 @@
 // @ts-check
+import "dotenv/config";
 import { defineConfig } from "@playwright/test";
 
 /**
@@ -9,10 +10,10 @@ import { defineConfig } from "@playwright/test";
  *   - Webpay module installed and configured in integration mode
  *   - Demo data present (default customer: test.user@example.com / Password123!)
  *
- * Environment variables (all optional):
- *   BASE_URL          — PrestaShop URL             (default: http://localhost:8080)
- *   CUSTOMER_EMAIL    — Test customer email         (default: test.user@example.com)
- *   CUSTOMER_PASSWORD — Test customer password      (default: Password123!)
+ * Environment variables (configured via .env — see .env.example):
+ *   BASE_URL          — PrestaShop URL
+ *   CUSTOMER_EMAIL    — Test customer email
+ *   CUSTOMER_PASSWORD — Test customer password
  */
 export default defineConfig({
     testDir: "./specs",
@@ -25,7 +26,7 @@ export default defineConfig({
     retries: 0,
     reporter: [["html", { open: "never" }], ["list"]],
     use: {
-        baseURL: process.env.BASE_URL || "http://localhost:8080",
+        baseURL: process.env.BASE_URL,
         ignoreHTTPSErrors: true,
         trace: "retain-on-failure",
         screenshot: "only-on-failure",

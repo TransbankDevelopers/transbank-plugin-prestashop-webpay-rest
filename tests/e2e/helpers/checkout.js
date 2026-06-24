@@ -6,8 +6,8 @@
  */
 
 const CUSTOMER = {
-    email: process.env.CUSTOMER_EMAIL || "test.user@example.com",
-    password: process.env.CUSTOMER_PASSWORD || "Password123!",
+    email: process.env.CUSTOMER_EMAIL,
+    password: process.env.CUSTOMER_PASSWORD,
 };
 
 /**

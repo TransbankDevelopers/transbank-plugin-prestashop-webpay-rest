@@ -107,5 +107,5 @@ export async function continueToCommerce(page) {
  * @returns {string | null}
  */
 export function extractTokenFromUrl(url) {
-    return url.match(/token_ws=([^&]+)/)?.[1] ?? null;
+    return /token_ws=([^&]+)/.exec(url)?.[1] ?? null;
 }
