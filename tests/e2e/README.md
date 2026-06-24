@@ -6,12 +6,12 @@ Tests end-to-end con Playwright que validan los flujos de pago del plugin Transb
 
 ### Webpay Plus
 
-| Test                     | Archivo                                        | Descripción                                                                                                                                     |
-| ------------------------ | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pago normal              | `webpay-plus/webpay-payment.spec.js`           | Flujo completo: login → carrito → checkout → pago en Transbank → confirmación de orden                                                          |
-| Lock previene duplicados | `webpay-plus/webpay-duplicated-return.spec.js` | Simula dos pestañas retornando con el mismo token simultáneamente. Verifica que no se creen órdenes duplicadas                                  |
-| Retry con lock ocupado   | `webpay-plus/webpay-duplicated-return.spec.js` | Fuerza el timeout de `GET_LOCK` adquiriendo el lock externamente. Verifica que el retry procesa la transacción correctamente                    |
-| Reintentos agotados      | `webpay-plus/webpay-duplicated-return.spec.js` | Duplica la pestaña en el retorno. La primera procesa mientras la segunda agota los 3 reintentos. Verifica página de error sin duplicar la orden |
+| Test                     | Archivo                                                        | Descripción                                                                                                                                         |
+| ------------------------ | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pago exitoso             | `webpay-plus/payment-validate/successful-payment.spec.js`      | Flujo completo: login → carrito → checkout → pago en Transbank → confirmación de orden                                                              |
+| Lock previene duplicados | `webpay-plus/payment-validate/concurrent-lock-success.spec.js` | Simula dos requests retornando con el mismo token simultáneamente. Verifica que no se creen órdenes duplicadas                                      |
+| Retry con lock ocupado   | `webpay-plus/payment-validate/concurrent-retry-success.spec.js`| Fuerza el timeout de `GET_LOCK` adquiriendo el lock externamente. Verifica que el reintento interno procesa la transacción correctamente             |
+| Reintentos agotados      | `webpay-plus/payment-validate/concurrent-retry-failure.spec.js`| Duplica el request en el retorno. Ambos requests agotan los reintentos internos contra un lock externo. Verifica página de error sin duplicar la orden |
 
 ## Prerequisitos
 
@@ -82,6 +82,7 @@ Cuando un test falla se guardan automáticamente en `test-results/`:
 tests/e2e/
 ├── specs/                        # Tests agrupados por medio de pago
 │   └── webpay-plus/
+│       └── payment-validate/     # Tests de validación de pago
 ├── helpers/                      # Funciones reutilizables
 │   ├── checkout.js               # Login, carrito, checkout PrestaShop
 │   ├── webpay-form.js            # Formulario de tarjeta Transbank
