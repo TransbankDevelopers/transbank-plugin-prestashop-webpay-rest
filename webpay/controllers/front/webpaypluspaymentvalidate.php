@@ -30,8 +30,6 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
     const WEBPAY_EXCEPTION_FLOW_MESSAGE = 'No se pudo procesar el pago. Si el problema persiste, contacte al comercio.';
     const WEBPAY_CART_MANIPULATED_MESSAGE = "El monto del carro ha cambiado mientras se procesaba el pago, la transacción fue cancelada. Ningún cobro fue realizado.";
 
-    const WEBPAY_RETURN_LOCK_MAX_RETRIES = 3;
-
     protected $responseData = [];
     protected MariaDbNamedLock $webpayReturnLock;
 
@@ -157,9 +155,7 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
 
             if (!$lockAcquired) {
                 throw new EcommerceException(
-                    "No se pudo adquirir el lock de retorno después de "
-                    . self::WEBPAY_RETURN_LOCK_MAX_RETRIES
-                    . " reintentos para token: {$token}"
+                    "No se pudo adquirir el lock de retorno para token: {$token}"
                 );
             }
 
@@ -201,21 +197,21 @@ class WebPayWebpayplusPaymentValidateModuleFrontController extends PaymentModule
      */
     private function acquireWebpayReturnLockWithRetries(string $token): bool
     {
-        for ($retry = 0; $retry <= self::WEBPAY_RETURN_LOCK_MAX_RETRIES; $retry++) {
+        $maxAttempts = 4;
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             try {
                 if ($this->webpayReturnLock->acquire($token)) {
                     return true;
                 }
 
                 $this->logInfo(
-                    "Lock de retorno ocupado, intento {$retry}/"
-                    . self::WEBPAY_RETURN_LOCK_MAX_RETRIES
+                    "Lock de retorno ocupado, intento {$attempt}/{$maxAttempts}"
                     . " => token: {$token}"
                 );
             } catch (\Throwable $e) {
                 $this->logError(
-                    "Error al adquirir lock de retorno, intento {$retry}/"
-                    . self::WEBPAY_RETURN_LOCK_MAX_RETRIES
+                    "Error al adquirir lock de retorno, intento {$attempt}/{$maxAttempts}"
                     . " => token: {$token} - Error: {$e->getMessage()}"
                 );
             }
