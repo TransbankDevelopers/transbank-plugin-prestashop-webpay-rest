@@ -13,9 +13,11 @@ use PrestaShop\Module\WebpayPlus\Exceptions\MariaDbNamedLockException;
 class MariaDbNamedLock
 {
     private const GET_LOCK_TIMEOUT_SECONDS = 5;
+    private const MAX_LOCK_NAME_LENGTH = 64;
 
     public function acquire(string $key): bool
     {
+        $this->validateKeyLength($key);
         $escapedKey = pSQL($key);
         $timeout = self::GET_LOCK_TIMEOUT_SECONDS;
         $query = "SELECT GET_LOCK('$escapedKey', $timeout)";
@@ -32,6 +34,7 @@ class MariaDbNamedLock
 
     public function release(string $key): bool
     {
+        $this->validateKeyLength($key);
         $escapedKey = pSQL($key);
         $query = "SELECT RELEASE_LOCK('$escapedKey')";
         $result = Db::getInstance()->getValue($query);
@@ -43,5 +46,14 @@ class MariaDbNamedLock
         }
 
         return $result === 1;
+    }
+
+    private function validateKeyLength(string $key): void
+    {
+        if (strlen($key) > self::MAX_LOCK_NAME_LENGTH) {
+            throw new MariaDbNamedLockException(
+                'El nombre del lock excede el límite de ' . self::MAX_LOCK_NAME_LENGTH . ' caracteres de MySQL.'
+            );
+        }
     }
 }
