@@ -4,6 +4,7 @@ import {
     goThroughCheckoutWithWebpay
 } from "./checkout.js";
 import { fillCardAndAuthenticate } from "./webpay-form.js";
+import { isPaymentError } from "./assertions.js";
 
 const isReturnUrl = (url) => {
     const s = url.toString();
@@ -49,29 +50,6 @@ export async function holdReturnRequests(context) {
     };
 }
 
-export async function holdReturnRequest(context) {
-    let releaseReturn;
-    const returnCanContinue = new Promise((resolve) => {
-        releaseReturn = resolve;
-    });
-    let returnUrl = "";
-    let intercepted = false;
-
-    await context.route(isReturnUrl, async (route) => {
-        returnUrl = route.request().url();
-        intercepted = true;
-        console.log(`[INTERCEPTOR] Return intercepted: ${returnUrl}`);
-        await returnCanContinue;
-        await route.continue();
-    });
-
-    return {
-        getReturnUrl: () => returnUrl,
-        isIntercepted: () => intercepted,
-        release: () => releaseReturn()
-    };
-}
-
 export function hasNavigatedPastValidation(page) {
     try {
         return !page.url().includes("webpaypluspaymentvalidate");
@@ -84,10 +62,7 @@ export async function hasErrorContent(page) {
     try {
         const content = await page.content();
 
-        return (
-            content.includes("Reintentar pago") ||
-            content.includes("errorMessage")
-        );
+        return isPaymentError(content);
     } catch {
         return false;
     }

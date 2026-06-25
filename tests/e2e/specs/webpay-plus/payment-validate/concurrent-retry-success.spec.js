@@ -13,7 +13,7 @@ import {
 import { expectOrderConfirmation } from "../../../helpers/assertions.js";
 import {
     runCheckoutFlow,
-    holdReturnRequest,
+    holdReturnRequests,
     hasNavigatedPastValidation
 } from "../../../helpers/concurrent.js";
 
@@ -38,7 +38,7 @@ import {
  * ════════════════════════════════════════════════════════════════════════════ */
 
 const acquireExternalLock = async (returnHolder) => {
-    const returnUrl = returnHolder.getReturnUrl();
+    const returnUrl = returnHolder.commerceReturns[0];
     const token = extractTokenFromUrl(returnUrl);
     expect(token, "Could not extract token from the return URL").toBeTruthy();
     console.log(`[INTERCEPTOR] Token captured: ${token}`);
@@ -82,7 +82,7 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
             baseURL,
             ignoreHTTPSErrors: true
         });
-        const returnHolder = await holdReturnRequest(context);
+        const returnHolder = await holdReturnRequests(context);
         const page = await context.newPage();
         let externalLock;
 
@@ -93,8 +93,10 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
             await test.step("Capture return URL and acquire external lock", async () => {
                 await continueToCommerce(page);
 
+                const isIntercepted = () => returnHolder.commerceReturns.length > 0;
+
                 await expect
-                    .poll(returnHolder.isIntercepted, {
+                    .poll(isIntercepted, {
                         message: "Waiting for intercepted return",
                         timeout: 45_000,
                         intervals: [500]
@@ -121,7 +123,7 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
             });
 
             await test.step("Verify exactly 1 order was created in the database", async () => {
-                const token = extractTokenFromUrl(returnHolder.getReturnUrl());
+                const token = extractTokenFromUrl(returnHolder.commerceReturns[0]);
                 expect(
                     token,
                     "Could not extract token from the return URL"
