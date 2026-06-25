@@ -20,7 +20,7 @@ class MariaDbNamedLock
         $this->validateKeyLength($key);
         $escapedKey = pSQL($key);
         $timeout = self::GET_LOCK_TIMEOUT_SECONDS;
-        $query = "SELECT GET_LOCK('$escapedKey', $timeout)";
+        $query = sprintf("SELECT GET_LOCK('%s', %d)", $escapedKey, $timeout);
         $result = Db::getInstance()->getValue($query);
 
         if ($result === null) {
@@ -36,7 +36,7 @@ class MariaDbNamedLock
     {
         $this->validateKeyLength($key);
         $escapedKey = pSQL($key);
-        $query = "SELECT RELEASE_LOCK('$escapedKey')";
+        $query = sprintf("SELECT RELEASE_LOCK('%s')", $escapedKey);
         $result = Db::getInstance()->getValue($query);
 
         if ($result === null) {
