@@ -51,7 +51,7 @@ const captureAndDuplicateWithLock = async (context, page, returnHolder) => {
     const commerceReturnUrl = returnHolder.commerceReturns[0];
 
     const duplicatePage = await context.newPage();
-    duplicatePage.goto(commerceReturnUrl, {
+    const duplicateNavigation = duplicatePage.goto(commerceReturnUrl, {
         waitUntil: "commit",
         timeout: 120_000
     });
@@ -78,6 +78,10 @@ const captureAndDuplicateWithLock = async (context, page, returnHolder) => {
         `[INTERCEPTOR] Both returns intercepted (${returnHolder.commerceReturns.length}). Releasing simultaneously...`
     );
     returnHolder.release();
+
+    duplicateNavigation.catch((err) => {
+        console.log(`[INTERCEPTOR] Duplicate navigation error: ${err.message}`);
+    });
 
     return { duplicatePage, externalLock };
 };
