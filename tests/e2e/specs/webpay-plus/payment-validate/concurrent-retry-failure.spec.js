@@ -37,7 +37,7 @@ import {
  *        No duplicate orders created
  * ════════════════════════════════════════════════════════════════════════════ */
 
-async function captureAndDuplicateWithLock(context, page, returnHolder) {
+const captureAndDuplicateWithLock = async (context, page, returnHolder) => {
     await continueToCommerce(page);
 
     await expect
@@ -80,7 +80,7 @@ async function captureAndDuplicateWithLock(context, page, returnHolder) {
     returnHolder.release();
 
     return { duplicatePage, externalLock };
-}
+};
 
 test.describe("Webpay Plus — Max retries exhausted", () => {
     test(
@@ -110,13 +110,14 @@ test.describe("Webpay Plus — Max retries exhausted", () => {
                         ));
                 });
 
+                const checkErrorContent = () => hasErrorContent(duplicatePage);
+
                 await test.step("Wait for Request B retries to exhaust", async () => {
                     await expect
-                        .poll(() => hasErrorContent(duplicatePage), {
+                        .poll(checkErrorContent, {
                             timeout: 60_000,
                             intervals: [1_000],
-                            message:
-                                "Waiting for Request B error page to render"
+                            message: "Waiting for Request B error page to render"
                         })
                         .toBe(true);
                 });

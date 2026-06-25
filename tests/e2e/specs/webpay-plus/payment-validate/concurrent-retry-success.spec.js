@@ -37,7 +37,7 @@ import {
  *                   processes transaction
  * ════════════════════════════════════════════════════════════════════════════ */
 
-async function acquireExternalLock(returnHolder) {
+const acquireExternalLock = async (returnHolder) => {
     const returnUrl = returnHolder.getReturnUrl();
     const token = extractTokenFromUrl(returnUrl);
     expect(token, "Could not extract token from the return URL").toBeTruthy();
@@ -53,9 +53,9 @@ async function acquireExternalLock(returnHolder) {
     returnHolder.release();
 
     return externalLock;
-}
+};
 
-async function waitForRetryAndReleaseLock(externalLock, page) {
+const waitForRetryAndReleaseLock = async (externalLock, page) => {
     await new Promise((r) => setTimeout(r, 6_000));
 
     await externalLock.release();
@@ -70,7 +70,7 @@ async function waitForRetryAndReleaseLock(externalLock, page) {
             message: "Waiting for the retry to finish processing"
         })
         .toBe(true);
-}
+};
 
 test.describe("Webpay Plus — Retry when lock is busy", () => {
     test("Internal retry processes the transaction after GET_LOCK times out", async ({
@@ -94,7 +94,7 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
                 await continueToCommerce(page);
 
                 await expect
-                    .poll(() => returnHolder.isIntercepted(), {
+                    .poll(returnHolder.isIntercepted, {
                         message: "Waiting for intercepted return",
                         timeout: 45_000,
                         intervals: [500]
@@ -112,7 +112,7 @@ test.describe("Webpay Plus — Retry when lock is busy", () => {
             await test.step("Verify the page shows order confirmation", async () => {
                 await page.waitForURL(/confirmacion-pedido/, {
                     timeout: 30_000,
-                    waitUntil: "load",
+                    waitUntil: "load"
                 });
                 await expectOrderConfirmation(page);
                 console.log(

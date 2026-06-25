@@ -5,11 +5,11 @@ import {
 } from "./checkout.js";
 import { fillCardAndAuthenticate } from "./webpay-form.js";
 
-function isReturnUrl(url) {
+const isReturnUrl = (url) => {
     const s = url.toString();
 
     return s.includes("webpaypluspaymentvalidate") && s.includes("token_ws=");
-}
+};
 
 export async function runCheckoutFlow(page) {
     await login(page);
@@ -72,7 +72,7 @@ export async function holdReturnRequest(context) {
     };
 }
 
-export async function hasNavigatedPastValidation(page) {
+export function hasNavigatedPastValidation(page) {
     try {
         return !page.url().includes("webpaypluspaymentvalidate");
     } catch {
@@ -92,3 +92,4 @@ export async function hasErrorContent(page) {
         return false;
     }
 }
+

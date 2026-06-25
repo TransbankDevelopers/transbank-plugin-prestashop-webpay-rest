@@ -36,7 +36,7 @@ import {
  *           → only 1 order created
  * ════════════════════════════════════════════════════════════════════════════ */
 
-async function captureAndDuplicateReturn(context, page, returnHolder) {
+const captureAndDuplicateReturn = async (context, page, returnHolder) => {
     await continueToCommerce(page);
 
     await expect
@@ -79,9 +79,9 @@ async function captureAndDuplicateReturn(context, page, returnHolder) {
     ]);
 
     return duplicatePage;
-}
+};
 
-async function verifyBothPagesResolved(page, duplicatePage) {
+const verifyBothPagesResolved = async (page, duplicatePage) => {
     for (const { label, p } of [
         { label: "Request 1 (original)", p: page },
         { label: "Request 2 (duplicate)", p: duplicatePage }
@@ -102,7 +102,7 @@ async function verifyBothPagesResolved(page, duplicatePage) {
             `[INTERCEPTOR] ${label}: url=${p.url()}, confirmation=${confirmation}, payment_error=${paymentErr}`
         );
     }
-}
+};
 
 test.describe("Webpay Plus — Lock prevents duplicate orders", () => {
     test("Both requests resolve without error when the return URL receives the same token twice", async ({
