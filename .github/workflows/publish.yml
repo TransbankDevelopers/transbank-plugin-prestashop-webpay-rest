@@ -4,67 +4,37 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+
 jobs:
-  run:
+  release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     name: Build the plugin with PHP 8.2 and upload binaries
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
     steps:
       - name: 1. Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
 
       - name: 2. Setup php and composer
-        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
         with:
           php-version: "8.2"
 
-      - name: 3. Install dependencies
+      - name: 3. Package plugin
+        id: package
         run: |
-          cd webpay
-          composer install --no-dev --no-interaction --prefer-dist
+          chmod +x package.sh
+          ./package.sh
 
-      - name: 4. Verify vendor directory
+      - name: 4. Upload binaries to release
+        shell: bash
         run: |
-          if [ ! -d "webpay/vendor" ]; then
-            echo "ERROR: vendor directory not created!"
-            exit 1
-          fi
-          if [ ! -f "webpay/vendor/autoload.php" ]; then
-            echo "ERROR: autoload.php not found!"
-            exit 1
-          fi
-          echo "Dependencies installed successfully"
-
-      - name: 5. Replace versión
-        run: |
-          GITHUB_TAG="${{github.ref_name}}"
-          VERSION="${GITHUB_TAG#v}"
-          sed -i.bkp "s/\$this->version = '1.0.0'/\$this->version = '$VERSION'/g" "webpay/webpay.php"
-          sed -i.bkp "s/\[1.0.0\]/\[$VERSION\]/g" "webpay/config.xml"
-          sed -i.bkp "s/\[1.0.0\]/\[$VERSION\]/g" "webpay/config_es.xml"
-          rm -f webpay/*.bkp
-          rm -f webpay/*.bak
-
-      - name: 6. Archive Release
-        uses: thedoctor0/zip-release@b57d897cb5d60cb78b51a507f63fa184cfe35554
-        with:
-          type: "zip"
-          filename: "plugin-prestashop-webpay-rest-${{github.ref_name}}.zip"
-          path: "./webpay"
-          exclusions: "*.bkp *.bak"
-
-      - name: 7. Verify ZIP contents
-        run: |
-          unzip -l "plugin-prestashop-webpay-rest-${{github.ref_name}}.zip" | grep -q "vendor/" || (echo "vendor not in ZIP!" && exit 1)
-          echo "ZIP contains vendor directory"
-
-      - name: 8. Upload binaries to release
-        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: "./plugin-prestashop-webpay-rest-${{github.ref_name}}.zip"
-          tag: ${{ github.ref }}
-          overwrite: true
+          gh release upload "$RELEASE_TAG" \
+            "${{ steps.package.outputs.package_output }}" \
+            --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

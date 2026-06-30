@@ -29,8 +29,6 @@ webpay/vendor
 
 plugin-prestashop-webpay-**
 
-webpay/composer.lock
-
 docker/docker-prestashop*/modules
 docker/docker-prestashop*/log
 *.zip
@@ -43,3 +41,5 @@ tests/e2e/test-results/
 tests/e2e/playwright-report/
 tests/e2e/blob-report/
 tests/e2e/.env
+
+build
