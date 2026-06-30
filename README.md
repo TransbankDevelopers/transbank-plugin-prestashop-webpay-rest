@@ -32,24 +32,21 @@ A continuación, encontrarás información necesaria para el desarrollo de este 
 
 # Requisitos
 
--   PHP 8.2 o superior
--   PrestaShop 9.0.0 o superior
+- PHP 8.2 o superior
+- PrestaShop 9.0.0 o superior
 
 # Dependencias
 
 El plugin depende de las siguientes librerías:
 
--   transbank/transbank-sdk
--   monolog/monolog
+- transbank/transbank-sdk
+- monolog/monolog
 
-Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.org), e instalarlas con el comando `composer install`.
-
-    Opcionalmente puedes instalar composer ejecutando el bash `composer_install.sh`
-    que esta en la raíz de este proyecto. Te pedirá tu contraseña de root.
+Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.org) y ejecutarlo con el comando `composer install`.
 
 ## Nota
 
--   La versión del sdk de php se encuentra en el archivo `webpay/composer.json`
+- La versión del sdk de php se encuentra en el archivo `webpay/composer.json`
 
 ## Desarrollo
 
@@ -77,14 +74,14 @@ Al crear el release, se generará automáticamente una nueva versión del plugin
 
 ## Estándares generales
 
--   Para los commits nos basamos en las siguientes normas: https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits👀
--   Todas las mezclas a master se hacen mediante Pull Request ⬇️
--   Usamos inglés para los mensajes de commit 💬
--   Se pueden usar tokens como WIP en el subject de un commit separando el token con ':', por ejemplo -> 'WIP: this is a useful commit message'
--   Para los nombres de ramas también usamos inglés
--   Se asume que una rama de feature no mezclada, es un feature no terminado ⚠️
--   El nombre de las ramas va en minúscula 🔤
--   El nombre de la rama se separa con '-' y las ramas comienzan con alguno de los short lead tokens definidos a continuación, por ejemplo -> 'feat/tokens-configuration' 🌿
+- Para los commits nos basamos en las siguientes normas: https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits👀
+- Todas las mezclas a master se hacen mediante Pull Request ⬇️
+- Usamos inglés para los mensajes de commit 💬
+- Se pueden usar tokens como WIP en el subject de un commit separando el token con ':', por ejemplo -> 'WIP: this is a useful commit message'
+- Para los nombres de ramas también usamos inglés
+- Se asume que una rama de feature no mezclada, es un feature no terminado ⚠️
+- El nombre de las ramas va en minúscula 🔤
+- El nombre de la rama se separa con '-' y las ramas comienzan con alguno de los short lead tokens definidos a continuación, por ejemplo -> 'feat/tokens-configuration' 🌿
 
 ### **Short lead tokens**
 
@@ -118,10 +115,10 @@ Al crear el release, se generará automáticamente una nueva versión del plugin
 
 ### Asunto ✉️
 
--   Debe comenzar con el short lead token definido para la rama, seguido de ':' y una breve descripción del cambio
--   Usar imperativos en tiempo presente: "change" no "changed" ni "changes"
--   No usar mayúscula en el inicio
--   No usar punto . al final
+- Debe comenzar con el short lead token definido para la rama, seguido de ':' y una breve descripción del cambio
+- Usar imperativos en tiempo presente: "change" no "changed" ni "changes"
+- No usar mayúscula en el inicio
+- No usar punto . al final
 
 ### Descripción 📃
 
