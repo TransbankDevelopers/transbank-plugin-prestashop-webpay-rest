@@ -45,12 +45,19 @@ resolve_package_version() {
     PLUGIN_VERSION="$version"
 }
 
+escape_sed_replacement() {
+    printf '%s' "$1" | sed 's/[\\/&]/\\&/g'
+}
+
 replace_version_strings() {
     local version="$1"
+    local escaped_version
 
-    sed -i.bkp "s/\$this->version = '1.0.0'/\$this->version = '$version'/g" "$SOURCE_DIR/webpay.php"
-    sed -i.bkp "s/\[1.0.0\]/\[$version\]/g" "$SOURCE_DIR/config.xml"
-    sed -i.bkp "s/\[1.0.0\]/\[$version\]/g" "$SOURCE_DIR/config_es.xml"
+    escaped_version="$(escape_sed_replacement "$version")"
+
+    sed -i.bkp "s/\$this->version = '1.0.0'/\$this->version = '$escaped_version'/g" "$SOURCE_DIR/webpay.php"
+    sed -i.bkp "s/\[1.0.0\]/\[$escaped_version\]/g" "$SOURCE_DIR/config.xml"
+    sed -i.bkp "s/\[1.0.0\]/\[$escaped_version\]/g" "$SOURCE_DIR/config_es.xml"
     rm -f "$SOURCE_DIR"/*.bkp "$SOURCE_DIR"/*.bak
 }
 
@@ -114,7 +121,8 @@ package_plugin() {
 
     if [[ -z "$PACKAGE_OUTPUT" ]]; then
         if [[ -n "$RELEASE_TAG" ]]; then
-            PACKAGE_OUTPUT="plugin-prestashop-webpay-rest-${RELEASE_TAG}.zip"
+            local safe_release_tag="${RELEASE_TAG//[^A-Za-z0-9._-]/_}"
+            PACKAGE_OUTPUT="plugin-prestashop-webpay-rest-${safe_release_tag}.zip"
         else
             PACKAGE_OUTPUT="plugin-prestashop-webpay-rest.zip"
         fi
