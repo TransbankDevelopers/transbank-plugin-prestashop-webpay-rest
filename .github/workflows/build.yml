@@ -1,0 +1,51 @@
+name: Prestashop build package
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build the plugin package
+    steps:
+      - name: 1. Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+
+      - name: 2. Setup php and composer
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
+        with:
+          php-version: "8.2"
+
+      - name: 3. Package plugin
+        run: |
+          chmod +x package.sh
+          ./package.sh
+
+      - name: 4. Upload build artifact
+        id: upload-artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: plugin-prestashop-webpay-rest
+          path: ./plugin-prestashop-webpay-rest.zip
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: 5. Comment PR with artifact link
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
+        run: |
+          gh pr comment "$PR_NUMBER" \
+            --body "Build listo: [plugin-prestashop-webpay-rest.zip]($ARTIFACT_URL)." \
+            --edit-last \
+            --create-if-none
