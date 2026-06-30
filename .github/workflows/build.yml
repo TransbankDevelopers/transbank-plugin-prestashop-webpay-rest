@@ -43,7 +43,7 @@ jobs:
     permissions:
       issues: write
     needs: build
-    uses: transbankdevelopers/transbank-github-actions-templates/.github/workflows/plugin-pr-artifact.yml@c715afa340b6b10888ec17fdcb559bc3ca8680ea
+    uses: transbankdevelopers/transbank-github-actions-templates/.github/workflows/plugin-pr-artifact.yml@a756d10868c2b150c77a11fb4fd6d724cbc4feb0
     with:
       pr_number: ${{ github.event.pull_request.number }}
       source_repo_full_name: ${{ github.event.pull_request.head.repo.full_name }}
