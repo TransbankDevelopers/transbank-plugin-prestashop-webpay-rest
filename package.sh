@@ -88,6 +88,8 @@ create_zip() {
                 webpay/vendor/*|./webpay/vendor/*)
                     has_vendor=1
                     ;;
+                *)
+                    ;;
             esac
         done < <(unzip -Z1 "$output_path")
 
