@@ -58,7 +58,9 @@ resolve_package_version() {
 }
 
 escape_sed_replacement() {
-    printf '%s' "$1" | sed 's/[\\/&]/\\&/g'
+    local value="$1"
+
+    printf '%s' "$value" | sed 's/[\\/&]/\\&/g'
 }
 
 replace_version_strings() {
