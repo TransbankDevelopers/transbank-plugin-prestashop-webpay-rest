@@ -48,13 +48,24 @@ cleanup() {
 }
 
 resolve_package_version() {
-    local version="${RELEASE_TAG#v}"
+    echo "Received RELEASE_TAG: ${RELEASE_TAG:-<empty>}"
+
+    RELEASE_TAG="$(normalize_release_tag "$RELEASE_TAG")"
+    echo "Normalized RELEASE_TAG: ${RELEASE_TAG:-<empty>}"
+
+    local version="$RELEASE_TAG"
 
     if [[ -z "$version" ]]; then
         version="1.0.0"
     fi
 
     PLUGIN_VERSION="$version"
+}
+
+normalize_release_tag() {
+    local tag="$1"
+
+    printf '%s' "${tag#v}"
 }
 
 escape_sed_replacement() {
@@ -134,8 +145,7 @@ package_plugin() {
 
     if [[ -z "$PACKAGE_OUTPUT" ]]; then
         if [[ -n "$RELEASE_TAG" ]]; then
-            local safe_release_tag="${RELEASE_TAG//[^A-Za-z0-9._-]/_}"
-            PACKAGE_OUTPUT="plugin-prestashop-webpay-rest-${safe_release_tag}.zip"
+            PACKAGE_OUTPUT="plugin-prestashop-webpay-rest-${RELEASE_TAG}.zip"
         else
             PACKAGE_OUTPUT="plugin-prestashop-webpay-rest.zip"
         fi
