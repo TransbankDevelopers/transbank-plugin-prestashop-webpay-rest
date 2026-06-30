@@ -57,18 +57,7 @@ resolve_package_version() {
     local version="${RELEASE_TAG#v}"
 
     if [[ -z "$version" ]]; then
-        version="${GITHUB_REF_NAME:-}"
-        version="${version#v}"
-    fi
-
-    if [[ -z "$version" ]]; then
-        if command -v git >/dev/null 2>&1 && [[ -d "$PROJECT_ROOT/.git" ]]; then
-            version="$(git -C "$PROJECT_ROOT" describe --tags --always --dirty 2>/dev/null || true)"
-        fi
-    fi
-
-    if [[ -z "$version" ]]; then
-        version="local"
+        version="1.0.0"
     fi
 
     PLUGIN_VERSION="$version"
