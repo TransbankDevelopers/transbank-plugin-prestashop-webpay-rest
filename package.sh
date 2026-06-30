@@ -106,6 +106,7 @@ create_zip() {
     local output_name="$1"
     local output_path="$PROJECT_ROOT/$output_name"
     local has_vendor=0
+    local zip_entries
 
     rm -f "$output_path"
     (
@@ -114,6 +115,11 @@ create_zip() {
     )
 
     if command -v unzip >/dev/null 2>&1; then
+        if ! zip_entries="$(unzip -Z1 "$output_path")"; then
+            echo "ERROR: failed to inspect ZIP contents with unzip" 1>&2
+            exit 1
+        fi
+
         while IFS= read -r entry; do
             case "$entry" in
                 webpay/vendor/*|./webpay/vendor/*)
@@ -122,7 +128,7 @@ create_zip() {
                 *)
                     ;;
             esac
-        done < <(unzip -Z1 "$output_path")
+        done <<< "$zip_entries"
 
         if [[ "$has_vendor" != "1" ]]; then
             echo "ERROR: vendor directory not found inside ZIP" 1>&2
