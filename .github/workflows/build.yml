@@ -42,10 +42,22 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
         run: |
-          gh pr comment "$PR_NUMBER" \
-            --body "Build listo: [plugin-prestashop-webpay-rest.zip]($ARTIFACT_URL)." \
-            --edit-last \
-            --create-if-none
+          marker="<!-- plugin-prestashop-webpay-rest-artifact -->"
+          body="${marker}"$'\n'"Build listo: [plugin-prestashop-webpay-rest.zip](${ARTIFACT_URL})."
+
+          comment_id="$(
+            gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+              --paginate \
+              --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${marker}\"))) | .id" \
+            | head -n 1
+          )"
+
+          if [[ -n "$comment_id" ]]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${comment_id}" -f body="$body"
+          else
+            gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" -f body="$body"
+          fi
