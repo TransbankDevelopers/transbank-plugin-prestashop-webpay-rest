@@ -32,6 +32,18 @@ on_error() {
 }
 
 cleanup() {
+    local file
+
+    for file in \
+        "$SOURCE_DIR/webpay.php" \
+        "$SOURCE_DIR/config.xml" \
+        "$SOURCE_DIR/config_es.xml"
+    do
+        if [[ -f "$file.bkp" ]]; then
+            mv -f "$file.bkp" "$file"
+        fi
+    done
+
     return 0
 }
 
@@ -58,7 +70,6 @@ replace_version_strings() {
     sed -i.bkp "s/\$this->version = '1.0.0'/\$this->version = '$escaped_version'/g" "$SOURCE_DIR/webpay.php"
     sed -i.bkp "s/\[1.0.0\]/\[$escaped_version\]/g" "$SOURCE_DIR/config.xml"
     sed -i.bkp "s/\[1.0.0\]/\[$escaped_version\]/g" "$SOURCE_DIR/config_es.xml"
-    rm -f "$SOURCE_DIR"/*.bkp "$SOURCE_DIR"/*.bak
 }
 
 install_dependencies() {
@@ -86,7 +97,7 @@ create_zip() {
     rm -f "$output_path"
     (
         cd "$PROJECT_ROOT"
-        zip -rq "$output_path" webpay
+        zip -rq "$output_path" webpay -x 'webpay/*.bkp' 'webpay/*.bak'
     )
 
     if command -v unzip >/dev/null 2>&1; then
