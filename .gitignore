@@ -29,8 +29,6 @@ webpay/vendor
 
 plugin-prestashop-webpay-**
 
-webpay/composer.lock
-
 docker/docker-prestashop*/modules
 docker/docker-prestashop*/log
 *.zip
