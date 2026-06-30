@@ -114,26 +114,29 @@ create_zip() {
         zip -rq "$output_path" webpay -x 'webpay/*.bkp' 'webpay/*.bak'
     )
 
-    if command -v unzip >/dev/null 2>&1; then
-        if ! zip_entries="$(unzip -Z1 "$output_path")"; then
-            echo "ERROR: failed to inspect ZIP contents with unzip" 1>&2
-            exit 1
-        fi
+    if ! command -v unzip >/dev/null 2>&1; then
+        echo "ERROR: missing required command: unzip" 1>&2
+        exit 1
+    fi
 
-        while IFS= read -r entry; do
-            case "$entry" in
-                webpay/vendor/*|./webpay/vendor/*)
-                    has_vendor=1
-                    ;;
-                *)
-                    ;;
-            esac
-        done <<< "$zip_entries"
+    if ! zip_entries="$(unzip -Z1 "$output_path")"; then
+        echo "ERROR: failed to inspect ZIP contents with unzip" 1>&2
+        exit 1
+    fi
 
-        if [[ "$has_vendor" != "1" ]]; then
-            echo "ERROR: vendor directory not found inside ZIP" 1>&2
-            exit 1
-        fi
+    while IFS= read -r entry; do
+        case "$entry" in
+            webpay/vendor/*|./webpay/vendor/*)
+                has_vendor=1
+                ;;
+            *)
+                ;;
+        esac
+    done <<< "$zip_entries"
+
+    if [[ "$has_vendor" != "1" ]]; then
+        echo "ERROR: vendor directory not found inside ZIP" 1>&2
+        exit 1
     fi
 }
 
