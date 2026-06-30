@@ -4,11 +4,9 @@ set -Eeuo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_DIR="$PROJECT_ROOT/webpay"
-WORK_DIR="$PROJECT_ROOT/build/package-webpay"
 
 RELEASE_TAG="${RELEASE_TAG:-}"
 PACKAGE_OUTPUT="${PACKAGE_OUTPUT:-}"
-KEEP_BUILD_ARTIFACTS="${KEEP_BUILD_ARTIFACTS:-0}"
 PLUGIN_VERSION=""
 
 require_command() {
@@ -34,23 +32,7 @@ on_error() {
 }
 
 cleanup() {
-    if [[ "$KEEP_BUILD_ARTIFACTS" == "1" ]]; then
-        echo "Keeping build directory for debugging: $PROJECT_ROOT/build"
-        return 0
-    fi
-
-    rm -rf "$PROJECT_ROOT/build"
-}
-
-prepare_work_dir() {
-    rm -rf "$WORK_DIR"
-    mkdir -p "$WORK_DIR"
-
-    if command -v rsync >/dev/null 2>&1; then
-        rsync -a --delete "$SOURCE_DIR/" "$WORK_DIR/"
-    else
-        cp -a "$SOURCE_DIR/." "$WORK_DIR/"
-    fi
+    return 0
 }
 
 resolve_package_version() {
@@ -66,21 +48,24 @@ resolve_package_version() {
 replace_version_strings() {
     local version="$1"
 
-    sed -i.bkp "s/\$this->version = '1.0.0'/\$this->version = '$version'/g" "webpay.php"
-    sed -i.bkp "s/\[1.0.0\]/\[$version\]/g" "config.xml"
-    sed -i.bkp "s/\[1.0.0\]/\[$version\]/g" "config_es.xml"
-    rm -f ./*.bkp ./*.bak
+    sed -i.bkp "s/\$this->version = '1.0.0'/\$this->version = '$version'/g" "$SOURCE_DIR/webpay.php"
+    sed -i.bkp "s/\[1.0.0\]/\[$version\]/g" "$SOURCE_DIR/config.xml"
+    sed -i.bkp "s/\[1.0.0\]/\[$version\]/g" "$SOURCE_DIR/config_es.xml"
+    rm -f "$SOURCE_DIR"/*.bkp "$SOURCE_DIR"/*.bak
 }
 
 install_dependencies() {
-    run_step "Composer install" composer install --no-dev --no-interaction --prefer-dist
+    (
+        cd "$SOURCE_DIR"
+        run_step "Composer install" composer install --no-dev --no-interaction --prefer-dist
+    )
 
-    if [[ ! -d vendor ]]; then
+    if [[ ! -d "$SOURCE_DIR/vendor" ]]; then
         echo "ERROR: vendor directory not created" 1>&2
         exit 1
     fi
 
-    if [[ ! -f vendor/autoload.php ]]; then
+    if [[ ! -f "$SOURCE_DIR/vendor/autoload.php" ]]; then
         echo "ERROR: vendor/autoload.php not found" 1>&2
         exit 1
     fi
@@ -93,16 +78,17 @@ create_zip() {
 
     rm -f "$output_path"
     (
-        cd "$WORK_DIR"
-        zip -rq "$output_path" .
+        cd "$PROJECT_ROOT"
+        zip -rq "$output_path" webpay
     )
 
     if command -v unzip >/dev/null 2>&1; then
         while IFS= read -r entry; do
-            if [[ "$entry" == vendor/* ]]; then
-                has_vendor=1
-                break
-            fi
+            case "$entry" in
+                webpay/vendor/*|./webpay/vendor/*)
+                    has_vendor=1
+                    ;;
+            esac
         done < <(unzip -Z1 "$output_path")
 
         if [[ "$has_vendor" != "1" ]]; then
@@ -120,15 +106,9 @@ package_plugin() {
 
     resolve_package_version
 
-    prepare_work_dir
-    (
-        cd "$WORK_DIR"
-
-        echo "Packaging version ${PLUGIN_VERSION}"
-        replace_version_strings "$PLUGIN_VERSION"
-
-        install_dependencies
-    )
+    echo "Packaging version ${PLUGIN_VERSION}"
+    replace_version_strings "$PLUGIN_VERSION"
+    install_dependencies
 
     if [[ -z "$PACKAGE_OUTPUT" ]]; then
         if [[ -n "$RELEASE_TAG" ]]; then
@@ -144,9 +124,6 @@ package_plugin() {
     echo "Package created successfully:"
     echo "- Version: $PLUGIN_VERSION"
     echo "- File name: $PACKAGE_OUTPUT"
-    if [[ "$KEEP_BUILD_ARTIFACTS" == "1" ]]; then
-        echo "- Build dir kept for debugging: $WORK_DIR"
-    fi
 }
 
 trap 'on_error $LINENO' ERR
