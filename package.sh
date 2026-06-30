@@ -131,6 +131,18 @@ create_zip() {
     fi
 }
 
+write_outputs() {
+    if [[ -z "${GITHUB_OUTPUT:-}" ]]; then
+        return 0
+    fi
+
+    {
+        printf 'package_output=%s\n' "$PACKAGE_OUTPUT"
+        printf 'plugin_version=%s\n' "$PLUGIN_VERSION"
+        printf 'release_tag=%s\n' "$RELEASE_TAG"
+    } >> "$GITHUB_OUTPUT"
+}
+
 package_plugin() {
     require_command composer
     require_command php
@@ -157,6 +169,8 @@ package_plugin() {
     echo "Package created successfully:"
     echo "- Version: $PLUGIN_VERSION"
     echo "- File name: $PACKAGE_OUTPUT"
+
+    write_outputs
 }
 
 trap 'on_error $LINENO' ERR

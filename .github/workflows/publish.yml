@@ -25,6 +25,7 @@ jobs:
           php-version: "8.2"
 
       - name: 3. Package plugin
+        id: package
         run: |
           chmod +x package.sh
           ./package.sh
@@ -33,7 +34,7 @@ jobs:
         shell: bash
         run: |
           gh release upload "$RELEASE_TAG" \
-            "plugin-prestashop-webpay-rest-${RELEASE_TAG}.zip" \
+            "${{ steps.package.outputs.package_output }}" \
             --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
