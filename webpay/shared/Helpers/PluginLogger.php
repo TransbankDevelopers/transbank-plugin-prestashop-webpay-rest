@@ -114,8 +114,8 @@ final class PluginLogger implements ILogger {
     }
 
     /**
-     * Strips markup and normalizes line breaks before writing to the log, preventing
-     * markup injection and forged log lines from unauthenticated data.
+     * Strips markup and normalizes line breaks before writing to the log,
+     * preventing markup injection.
      *
      * @param mixed $msg The raw message to sanitize before logging.
      * @return string
