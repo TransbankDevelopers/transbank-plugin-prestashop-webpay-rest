@@ -42,22 +42,22 @@ final class PluginLogger implements ILogger {
 
     public function logDebug($msg)
     {
-        $this->logger->debug($msg);
+        $this->logger->debug($this->sanitizeMessage($msg));
     }
 
     public function logInfo($msg)
     {
-        $this->logger->info($msg);
+        $this->logger->info($this->sanitizeMessage($msg));
     }
 
     public function logError($msg)
     {
-        $this->logger->error($msg);
+        $this->logger->error($this->sanitizeMessage($msg));
     }
 
     public function logWarning($msg)
     {
-        $this->logger->warning($msg);
+        $this->logger->warning($this->sanitizeMessage($msg));
     }
 
     public function getInfo()
@@ -111,5 +111,20 @@ final class PluginLogger implements ILogger {
             }
         }
         return $bytes;
+    }
+
+    /**
+     * Strips markup and normalizes line breaks before writing to the log,
+     * preventing markup injection.
+     *
+     * @param mixed $msg The raw message to sanitize before logging.
+     * @return string
+     */
+    private function sanitizeMessage($msg): string
+    {
+        $msg = strip_tags((string) $msg);
+        $msg = preg_replace('/[\r\n]+/', ' ', $msg);
+
+        return trim($msg);
     }
 }
