@@ -52,9 +52,7 @@ Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.o
 
 Para apoyar el levantamiento rápido de un ambiente de desarrollo, hemos creado la especificación de contenedores a través de Docker Compose.
 
-Para usarlo seguir el siguiente [README PrestaShop 8.0.3 con php 8.0](./docker-prestashop-php8.0-pres8.0.3-apache/README.md)
-
-Para usarlo seguir el siguiente [README PrestaShop 1.7.8.5 con php 7.4](./docker-prestashop-php7.4-pres1.7.8.6-apache/README.md)
+Para usarlo seguir el siguiente [README devcontainer](./.devcontainer/README.md).
 
 ### Crear el instalador del plugin
 
