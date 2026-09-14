@@ -4,16 +4,6 @@ namespace PrestaShop\Module\WebpayPlus\Utils;
 
 class Utils
 {
-    public static function getFullVersionPrestashop()
-    {
-        return _PS_VERSION_;
-    }
-
-    public static function getBaseVersionPrestashop()
-    {
-        return substr(_PS_VERSION_, 0, 3);
-    }
-
     /**
      * Generate a random string to be used as identifier
      *
