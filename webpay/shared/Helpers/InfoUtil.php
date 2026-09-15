@@ -12,7 +12,7 @@ class InfoUtil
     public static function getValidatephp()
     {
         if (
-            version_compare(phpversion(), '8.3', '<') &&
+            version_compare(phpversion(), '8.5', '<') &&
             version_compare(phpversion(), '8.2.0', '>=')
         ) {
             return [
