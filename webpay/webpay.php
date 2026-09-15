@@ -69,7 +69,6 @@ class WebPay extends PaymentModule
         $this->logError("installWebpayTable => {$resultInstallWebpayTable}");
         $resultInstallOneclickTable = $this->installOneclickTable();
         $this->logError("installOneclickTable => {$resultInstallOneclickTable}");
-        $this->installTab();
 
         return $result && $this->registerHook(self::MODULE_HOOKS);
     }

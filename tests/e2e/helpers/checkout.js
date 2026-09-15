@@ -31,7 +31,7 @@ export async function addProductToCart(page) {
     await page.locator(".product-miniature a").first().click();
     await page.waitForLoadState("domcontentloaded");
 
-    await page.locator(".add-to-cart").click();
+    await page.locator('[data-ps-ref="add-to-cart"]').click();
     const modal = page.locator("#blockcart-modal");
     await modal.waitFor({ state: "visible", timeout: 10_000 });
     await modal.locator("a").filter({ hasText: "Finalizar compra" }).click();

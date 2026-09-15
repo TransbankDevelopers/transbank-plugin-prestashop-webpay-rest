@@ -31,9 +31,9 @@ Una explicación concisa y clara de qué es lo que esperas que ocurra.
 Si aplica, agrega aquí capturas de pantalla que ayuden a explicar tu problema.
 
 **Versiones (por favor agrega aquí la siguiente información):**
-- Plugin: [ej. 1.0.10]
-- Prestashop: [ej. 1.7]
-- PHP: [ej. 7.1]
+- Plugin: [ej. 1.0.0]
+- Prestashop: [ej. 9.1]
+- PHP: [ej. 8.4]
 
 **Contexto adicional**
 

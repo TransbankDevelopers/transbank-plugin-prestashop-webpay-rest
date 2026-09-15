@@ -11,7 +11,7 @@ Este devcontainer proporciona un entorno completo de desarrollo para el módulo 
 
 ## 📋 Servicios incluidos
 
--   **PrestaShop 9.0.3** con PHP 8.2.
+-   **PrestaShop 9.1.5** con PHP 8.4.
 -   **MariaDB 10.11** como base de datos.
 -   **Apache** para servir el contenido.
 -   **Extensiones de VS Code** para trabajar con PHP y PrestaShop

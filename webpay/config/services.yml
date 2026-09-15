@@ -76,7 +76,7 @@ services:
 
   webpay.grid.definition.factory.transactions_grid_definition_factory:
     class: 'PrestaShop\Module\WebpayPlus\Grid\TransactionsGridDefinitionFactory'
-    parent: "prestashop.core.grid.definition.factory.abstract_grid_definition"
+    parent: "PrestaShop\\PrestaShop\\Core\\Grid\\Definition\\Factory\\AbstractGridDefinitionFactory"
     public: true
     tags:
       - { name: core.grid_definition_factory }
@@ -102,14 +102,14 @@ services:
     arguments:
       - "@webpay.grid.definition.factory.transactions_grid_definition_factory"
       - "@webpay.grid.data.factory.transactions_data_factory"
-      - "@prestashop.core.grid.filter.form_factory"
+      - "@PrestaShop\\PrestaShop\\Core\\Grid\\Filter\\GridFilterFormFactory"
       - "@prestashop.core.hook.dispatcher"
 
   # Oneclick list cards sevices
 
   webpay.grid.definition.factory.oneclick_card_grid_definition_factory:
     class: 'PrestaShop\Module\WebpayPlus\Grid\OneclickCards\OneclickCardGridDefinitionFactory'
-    parent: "prestashop.core.grid.definition.factory.abstract_grid_definition"
+    parent: "PrestaShop\\PrestaShop\\Core\\Grid\\Definition\\Factory\\AbstractGridDefinitionFactory"
     public: true
     tags:
       - { name: core.grid_definition_factory }
@@ -135,7 +135,7 @@ services:
     arguments:
       - "@webpay.grid.definition.factory.oneclick_card_grid_definition_factory"
       - "@webpay.grid.data.factory.oneclick_card_data_factory"
-      - "@prestashop.core.grid.filter.form_factory"
+      - "@PrestaShop\\PrestaShop\\Core\\Grid\\Filter\\GridFilterFormFactory"
       - "@prestashop.core.hook.dispatcher"
 
   # Admin Controllers

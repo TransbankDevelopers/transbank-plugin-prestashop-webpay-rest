@@ -10,7 +10,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    name: Build the plugin with PHP 8.2 and upload binaries
+    name: Build the plugin with PHP 8.4 and upload binaries
     env:
       RELEASE_TAG: ${{ github.event.release.tag_name }}
     steps:
@@ -22,7 +22,7 @@ jobs:
       - name: 2. Setup php and composer
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
         with:
-          php-version: "8.2"
+          php-version: "8.4"
 
       - name: 3. Package plugin
         id: package
