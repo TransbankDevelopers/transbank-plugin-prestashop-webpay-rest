@@ -3,11 +3,11 @@
         "transbank/transbank-sdk": "~5.0",
         "monolog/monolog": "^2.0",
         "ext-json": "*",
-        "php": ">=8.2"
+        "php": ">=8.4"
     },
     "config": {
         "platform": {
-            "php": "8.2"
+            "php": "8.4"
         }
     },
     "autoload": {

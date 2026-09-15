@@ -13,7 +13,7 @@ class InfoUtil
     {
         if (
             version_compare(phpversion(), '8.5', '<') &&
-            version_compare(phpversion(), '8.2.0', '>=')
+            version_compare(phpversion(), '8.4.0', '>=')
         ) {
             return [
                 'status' => 'OK',

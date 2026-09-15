@@ -32,7 +32,7 @@ A continuación, encontrarás información necesaria para el desarrollo de este 
 
 # Requisitos
 
-- PHP 8.2 o superior
+- PHP 8.4 o superior
 - PrestaShop 9.0.0 o superior
 
 # Dependencias
