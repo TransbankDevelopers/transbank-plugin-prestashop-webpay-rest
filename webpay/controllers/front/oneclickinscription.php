@@ -4,6 +4,7 @@ use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
+use PrestaShop\Module\WebpayPlus\Utils\Utils;
 
 class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontController
 {
@@ -14,11 +15,17 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         $this->logInfo('B.1. Iniciando medio de pago Oneclick');
 
         $cart = $this->getCartFromContext();
-        $customer = $this->getCustomerFromContext();
+        $customer = $this->context->customer;
+
+        if (!$customer->id || !$customer->isLogged()) {
+            $this->setPaymentErrorPage('Debes iniciar sesión para inscribir una tarjeta.');
+            return;
+        }
+
         $webpay = OneclickFactory::create();
 
         $userId = $customer->id;
-        $userName = $this->generateUsername($userId);
+        $userName = Utils::generateOneclickUsername((int) $userId);
         $userEmail = $customer->email;
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', [], true);
 
@@ -60,9 +67,4 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         ]);
         $this->setTemplate('module:webpay/views/templates/front/redirect_to_payment_form.tpl');
     }
-
-    private function generateUsername($userId){
-        return 'ps:'.$this->generateRandomId().':'.$userId;
-    }
-
 }

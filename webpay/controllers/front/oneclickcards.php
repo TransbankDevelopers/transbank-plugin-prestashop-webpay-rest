@@ -31,9 +31,6 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /** @var string */
     private $environment;
 
-    /** @var PrestaShop\Module\WebpayPlus\Utils\Utils */
-    private $moduleUtils;
-
     /**
      * Initializes the controller with required dependencies for handling Oneclick card operations.
      * Sets up repository, logger, service, and environment configuration.
@@ -45,7 +42,6 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
         $this->log = TbkFactory::createLogger();
         $this->oneclickService = OneclickFactory::create();
         $this->environment = $this->oneclickService->getEnvironment();
-        $this->moduleUtils = new Utils();
     }
 
     /**
@@ -173,8 +169,8 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     {
         $this->log->logInfo('Iniciando flujo de inscripción de tarjeta');
 
-        $userId = $this->context->customer->id;
-        $username = $this->generateOneclickUsername($userId);
+        $userId = (int) $this->context->customer->id;
+        $username = Utils::generateOneclickUsername($userId);
         $email = $this->context->customer->email;
         $returnUrl = $this->context->link->getModuleLink(
             $this->module->name,
@@ -190,7 +186,7 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
             'token' => $inscriptionResponse['token'],
             'username' => $username,
             'email' => $email,
-            'user_id' => (int) $userId,
+            'user_id' => $userId,
             'pay_after_inscription' => false,
             'from' => 'account',
             'status' => TransbankInscriptions::STATUS_INITIALIZED,
@@ -400,11 +396,5 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     private function isValidCsrf($token)
     {
         return is_string($token) && hash_equals(Tools::getToken(true), $token);
-    }
-
-    public function generateOneclickUsername($userId)
-    {
-        $idLength = 10;
-        return 'ps:' . $this->moduleUtils->generateSecureId($idLength) . ':' . $userId;
     }
 }
