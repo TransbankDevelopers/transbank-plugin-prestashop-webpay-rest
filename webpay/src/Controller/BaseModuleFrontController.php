@@ -84,11 +84,6 @@ class BaseModuleFrontController extends ModuleFrontController
         return Context::getContext()->cart;
     }
 
-    protected function getCustomerFromContext()
-    {
-        return new Customer($this->getCartFromContext()->id_customer);
-    }
-
     protected function getOrderTotalRound($cart)
     {
         return round($this->getOrderTotalOriginal($cart));
