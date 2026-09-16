@@ -27,33 +27,39 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
 
         if ($tbkOrdenCompra && $tbkSessionId && !$token) {
             $this->setPaymentErrorPage('Timeout Error.');
+
+            return;
         }
 
-        //validar si se registro la tarjeta correctamente correctamente
         if (!isset($token)) {
             $this->throwErrorRedirect('No se recibió el token');
         }
 
         $ins = $this->inscriptionRepository->getInscriptionByToken($token);
 
-        if (isset($tbkOrdenCompra)) { //se abandono la inscripcion al haber presionado la opción 'Abandonar y volver al comercio'
+        if (isset($tbkOrdenCompra)) {
             $this->inscriptionRepository->updateById($ins['id'], ['status' => TransbankInscriptions::STATUS_FAILED]);
             $this->setPaymentErrorPage('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ');
+
+            return;
         }
 
-        //registro correcto
-        //flujo correcto
-        $this->finishInscription($ins, $token);
+        if (!$this->finishInscription($ins, $token)) {
+            return;
+        }
+
         Tools::redirect('index.php?controller=order');
     }
 
-    private function finishInscription($ins, $token)
+    private function finishInscription($ins, $token): bool
     {
         $webpay = OneclickFactory::create();
         try {
             $resp = $webpay->finish($token, $ins['username'], $ins['email']);
         } catch (\Exception $e) {
             $this->setPaymentErrorPage($e->getMessage());
+
+            return false;
         }
 
         $this->inscriptionRepository->updateById($ins['id'], [
@@ -67,5 +73,13 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
                 ? TransbankInscriptions::STATUS_COMPLETED
                 : TransbankInscriptions::STATUS_FAILED,
         ]);
+
+        if (!$resp->isApproved()) {
+            $this->setPaymentErrorPage('La inscripción de tarjeta ha sido rechazada, por favor intenta con otro medio de pago.');
+
+            return false;
+        }
+
+        return true;
     }
 }
