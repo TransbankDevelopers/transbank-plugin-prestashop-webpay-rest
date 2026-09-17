@@ -44,10 +44,12 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
             return;
         }
 
-        $this->finishInscription($ins, $token);
+        if ($this->finishInscription($ins, $token)) {
+            Tools::redirect('index.php?controller=order');
+        }
     }
 
-    private function finishInscription($ins, $token): void
+    private function finishInscription($ins, $token): bool
     {
         $webpay = OneclickFactory::create();
         try {
@@ -55,8 +57,10 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         } catch (\Exception $e) {
             $this->setPaymentErrorPage($e->getMessage());
 
-            return;
+            return false;
         }
+
+        $approved = $resp->isApproved();
 
         $this->inscriptionRepository->updateById($ins['id'], [
             'finished'           => true,
@@ -65,17 +69,17 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
             'card_type'          => $resp->getCardType(),
             'card_number'        => $resp->getCardNumber(),
             'transbank_response' => json_encode($resp),
-            'status'             => $resp->isApproved()
+            'status'             => $approved
                 ? TransbankInscriptions::STATUS_COMPLETED
                 : TransbankInscriptions::STATUS_FAILED,
         ]);
 
-        if (!$resp->isApproved()) {
+        if (!$approved) {
             $this->setPaymentErrorPage('La inscripción de tarjeta ha sido rechazada, por favor intenta con otro medio de pago.');
 
-            return;
+            return false;
         }
 
-        Tools::redirect('index.php?controller=order');
+        return true;
     }
 }
