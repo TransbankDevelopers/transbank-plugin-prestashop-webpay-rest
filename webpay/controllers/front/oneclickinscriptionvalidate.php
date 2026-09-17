@@ -55,6 +55,7 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
         try {
             $resp = $webpay->finish($token, $ins['username'], $ins['email']);
         } catch (\Exception $e) {
+            $this->inscriptionRepository->updateById($ins['id'], ['status' => TransbankInscriptions::STATUS_FAILED]);
             $this->setPaymentErrorPage($e->getMessage());
 
             return false;
