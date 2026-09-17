@@ -27,34 +27,44 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
 
         if ($tbkOrdenCompra && $tbkSessionId && !$token) {
             $this->setPaymentErrorPage('Timeout Error.');
+
+            return;
         }
 
-        //validar si se registro la tarjeta correctamente correctamente
         if (!isset($token)) {
             $this->throwErrorRedirect('No se recibió el token');
         }
 
         $ins = $this->inscriptionRepository->getInscriptionByToken($token);
 
-        if (isset($tbkOrdenCompra)) { //se abandono la inscripcion al haber presionado la opción 'Abandonar y volver al comercio'
+        if (isset($tbkOrdenCompra)) {
             $this->inscriptionRepository->updateById($ins['id'], ['status' => TransbankInscriptions::STATUS_FAILED]);
             $this->setPaymentErrorPage('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ');
+
+            return;
         }
 
-        //registro correcto
-        //flujo correcto
-        $this->finishInscription($ins, $token);
-        Tools::redirect('index.php?controller=order');
+        if ($this->finishInscription($ins, $token)) {
+            Tools::redirect('index.php?controller=order');
+        }
     }
 
-    private function finishInscription($ins, $token)
+    private function finishInscription($ins, $token): bool
     {
         $webpay = OneclickFactory::create();
         try {
             $resp = $webpay->finish($token, $ins['username'], $ins['email']);
         } catch (\Exception $e) {
+            if ($ins) {
+                $this->inscriptionRepository->updateById($ins['id'], ['status' => TransbankInscriptions::STATUS_FAILED]);
+            }
+
             $this->setPaymentErrorPage($e->getMessage());
+
+            return false;
         }
+
+        $approved = $resp->isApproved();
 
         $this->inscriptionRepository->updateById($ins['id'], [
             'finished'           => true,
@@ -63,9 +73,17 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
             'card_type'          => $resp->getCardType(),
             'card_number'        => $resp->getCardNumber(),
             'transbank_response' => json_encode($resp),
-            'status'             => $resp->isApproved()
+            'status'             => $approved
                 ? TransbankInscriptions::STATUS_COMPLETED
                 : TransbankInscriptions::STATUS_FAILED,
         ]);
+
+        if (!$approved) {
+            $this->setPaymentErrorPage('La inscripción de tarjeta ha sido rechazada, por favor intenta con otro medio de pago.');
+
+            return false;
+        }
+
+        return true;
     }
 }
