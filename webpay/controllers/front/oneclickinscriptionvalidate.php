@@ -37,6 +37,12 @@ class WebPayOneclickInscriptionValidateModuleFrontController extends BaseModuleF
 
         $ins = $this->inscriptionRepository->getInscriptionByToken($token);
 
+        if (!$ins) {
+            $this->setPaymentErrorPage('No se encontró la inscripción asociada a este token.');
+
+            return;
+        }
+
         if (isset($tbkOrdenCompra)) {
             $this->inscriptionRepository->updateById($ins['id'], ['status' => TransbankInscriptions::STATUS_FAILED]);
             $this->setPaymentErrorPage('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ');
