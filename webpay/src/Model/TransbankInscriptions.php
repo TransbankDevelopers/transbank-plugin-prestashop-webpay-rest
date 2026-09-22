@@ -10,6 +10,7 @@ class TransbankInscriptions extends ObjectModel
     const STATUS_INITIALIZED = 'initialized';
     const STATUS_FAILED = 'failed';
     const STATUS_COMPLETED = 'completed';
+    const NO_TOKEN_PLACEHOLDER = 'NO_TOKEN';
 
     public $id;
     public $token;
