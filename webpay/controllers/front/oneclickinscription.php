@@ -40,7 +40,6 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         $userName = Utils::generateOneclickUsername((int) $userId);
         $userEmail = $customer->email;
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', [], true);
-
         $resp = $this->startAndSaveInscription($webpay, $userName, $userEmail, $returnUrl, (int) $userId);
 
         if ($resp === null) {
