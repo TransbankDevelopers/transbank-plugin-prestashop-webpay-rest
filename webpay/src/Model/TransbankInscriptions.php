@@ -10,6 +10,7 @@ class TransbankInscriptions extends ObjectModel
     const STATUS_INITIALIZED = 'initialized';
     const STATUS_FAILED = 'failed';
     const STATUS_COMPLETED = 'completed';
+    const NO_TOKEN_PLACEHOLDER = 'NO_TOKEN';
 
     public $id;
     public $token;
@@ -41,7 +42,7 @@ class TransbankInscriptions extends ObjectModel
             'email'                     => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'required' => true],
             'user_id'                   => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true],
             'tbk_token'                 => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'allow_null' => true],
-
+            'order_id'                  => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'allow_null' => true],
             'pay_after_inscription'     => ['type' => self::TYPE_INT, 'validate' => 'isInt', 'allow_null' => true],
             'finished'                  => ['type' => self::TYPE_INT, 'validate' => 'isInt', 'required' => false],
             'response_code'             => ['type' => self::TYPE_STRING, 'validate' => 'isString', 'allow_null' => true],

@@ -4,10 +4,16 @@ use PrestaShop\Module\WebpayPlus\Controller\BaseModuleFrontController;
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
+use PrestaShop\Module\WebpayPlus\Repository\InscriptionRepository;
+use PrestaShop\Module\WebpayPlus\Service\OneclickInscriptionService;
+use PrestaShop\Module\WebpayPlus\Utils\TransbankSdkOneclick;
 use PrestaShop\Module\WebpayPlus\Utils\Utils;
 
 class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontController
 {
+    /** @var OneclickInscriptionService */
+    private $inscriptionService;
+
     public function initContent()
     {
         parent::initContent();
@@ -23,34 +29,54 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
         }
 
         $webpay = OneclickFactory::create();
+        $this->inscriptionService = new OneclickInscriptionService(
+            new InscriptionRepository(),
+            $this->logger,
+            $webpay->getEnvironment(),
+            $webpay->getCommerceCode()
+        );
 
         $userId = $customer->id;
         $userName = Utils::generateOneclickUsername((int) $userId);
         $userEmail = $customer->email;
         $returnUrl = Context::getContext()->link->getModuleLink('webpay', 'oneclickinscriptionvalidate', [], true);
+        $resp = $this->startAndSaveInscription($webpay, $userName, $userEmail, $returnUrl, (int) $userId);
+
+        if ($resp === null) {
+            return;
+        }
+
+        $this->setRedirectionTemplate($resp, $this->getOrderTotalRound($cart));
+    }
+
+    /**
+     * Starts a Oneclick inscription with Transbank and persists the local record.
+     * On failure, marks a FAILED record with the real token if one was already issued,
+     * or the placeholder token otherwise, then renders the payment error page.
+     *
+     * @param TransbankSdkOneclick $webpay Oneclick SDK client used to start the inscription
+     * @param string $userName Oneclick username for the inscription
+     * @param string $userEmail Customer email associated with the inscription
+     * @param string $returnUrl URL Transbank redirects to after the inscription form
+     * @param int $userId Customer ID associated with the inscription
+     * @return array|null Inscription response returned by Transbank, or null when the flow failed
+     */
+    private function startAndSaveInscription(TransbankSdkOneclick $webpay, string $userName, string $userEmail, string $returnUrl, int $userId): ?array
+    {
+        $token = TransbankInscriptions::NO_TOKEN_PLACEHOLDER;
+        $orderId = $this->module->currentOrder !== null ? (int) $this->module->currentOrder : null;
 
         try {
             $resp = $webpay->startInscription($userName, $userEmail, $returnUrl);
-        } catch (\Exception $e) {
+            $token = $resp['token'];
+            $this->inscriptionService->save($userName, $userEmail, $userId, $token, TransbankInscriptions::STATUS_INITIALIZED, 'checkout', $orderId);
+        } catch (\Throwable $e) {
+            $this->inscriptionService->markAsFailed($userName, $userEmail, $userId, $token, 'checkout', $orderId);
             $this->setPaymentErrorPage($e->getMessage());
+            return null;
         }
-        $ins = new TransbankInscriptions();
-        $ins->token = $resp['token'];
-        $ins->username = $userName;
-        $ins->email = $userEmail;
-        $ins->user_id = $userId;
-        $ins->pay_after_inscription = false;
-        $ins->from = 'checkout';
-        $ins->status = TransbankInscriptions::STATUS_INITIALIZED;
-        $ins->environment = $webpay->getEnvironment();
-        $ins->commerce_code = $webpay->getCommerceCode();
-        $ins->order_id = $this->module->currentOrder;//importante para recuperar la orden en curso y el carro en curso
-        $saved = $ins->save();
-        if (!$saved) {
-            $this->logError('Could not create record on transbank_inscriptions database');
-            $this->setPaymentErrorPage('No se pudo crear la transacción en la tabla transbank_inscriptions');
-        }
-        $this->setRedirectionTemplate($resp, $this->getOrderTotalRound($cart));
+
+        return $resp;
     }
 
     /**

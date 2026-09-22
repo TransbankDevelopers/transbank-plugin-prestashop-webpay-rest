@@ -7,6 +7,7 @@ use PrestaShop\Module\WebpayPlus\Helpers\TbkFactory;
 use PrestaShop\Module\WebpayPlus\Helpers\OneclickFactory;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 use PrestaShop\Module\WebpayPlus\Repository\InscriptionRepository;
+use PrestaShop\Module\WebpayPlus\Service\OneclickInscriptionService;
 
 class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
 {
@@ -31,6 +32,9 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
     /** @var string */
     private $environment;
 
+    /** @var OneclickInscriptionService */
+    private $inscriptionService;
+
     /**
      * Initializes the controller with required dependencies for handling Oneclick card operations.
      * Sets up repository, logger, service, and environment configuration.
@@ -42,6 +46,12 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
         $this->log = TbkFactory::createLogger();
         $this->oneclickService = OneclickFactory::create();
         $this->environment = $this->oneclickService->getEnvironment();
+        $this->inscriptionService = new OneclickInscriptionService(
+            $this->repository,
+            $this->log,
+            $this->environment,
+            $this->oneclickService->getCommerceCode()
+        );
     }
 
     /**
@@ -180,22 +190,38 @@ class WebPayOneclickCardsModuleFrontController extends ModuleFrontController
         );
 
         $this->log->logInfo("Datos para inscripción => username: {$username}, email: {$email}, returnUrl: {$returnUrl}");
-        $inscriptionResponse = $this->oneclickService->startInscription($username, $email, $returnUrl);
-
-        $this->repository->createInscription([
-            'token' => $inscriptionResponse['token'],
-            'username' => $username,
-            'email' => $email,
-            'user_id' => $userId,
-            'pay_after_inscription' => false,
-            'from' => 'account',
-            'status' => TransbankInscriptions::STATUS_INITIALIZED,
-            'environment' => $this->environment,
-            'commerce_code' => $this->oneclickService->getCommerceCode(),
-        ]);
+        $inscriptionResponse = $this->startAndSaveInscription($username, $email, $returnUrl, $userId);
 
         $this->log->logInfo('Redireccionando a formulario de Webpay');
         $this->redirectToWebpayForm($inscriptionResponse);
+    }
+
+    /**
+     * Starts a Oneclick inscription with Transbank and persists the local record.
+     * On failure, marks a FAILED record with the real token if one was already issued,
+     * or the placeholder token otherwise, then rethrows to the caller.
+     *
+     * @param string $username Oneclick username for the inscription
+     * @param string $email Customer email associated with the inscription
+     * @param string $returnUrl URL Transbank redirects to after the inscription form
+     * @param int $userId Customer ID associated with the inscription
+     * @return array Inscription response returned by Transbank, containing 'token' and 'url'
+     * @throws Throwable When Transbank's start call fails or the local record cannot be created
+     */
+    private function startAndSaveInscription(string $username, string $email, string $returnUrl, int $userId): array
+    {
+        $token = TransbankInscriptions::NO_TOKEN_PLACEHOLDER;
+
+        try {
+            $inscriptionResponse = $this->oneclickService->startInscription($username, $email, $returnUrl);
+            $token = $inscriptionResponse['token'];
+            $this->inscriptionService->save($username, $email, $userId, $token, TransbankInscriptions::STATUS_INITIALIZED, 'account');
+        } catch (Throwable $e) {
+            $this->inscriptionService->markAsFailed($username, $email, $userId, $token, 'account');
+            throw $e;
+        }
+
+        return $inscriptionResponse;
     }
 
     private function handleInscriptionReturnFlow(): void
