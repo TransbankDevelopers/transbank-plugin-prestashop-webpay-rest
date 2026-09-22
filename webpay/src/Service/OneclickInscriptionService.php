@@ -2,6 +2,7 @@
 
 namespace PrestaShop\Module\WebpayPlus\Service;
 
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Plugin\Helpers\PluginLogger;
 use PrestaShop\Module\WebpayPlus\Model\TransbankInscriptions;
 use PrestaShop\Module\WebpayPlus\Repository\InscriptionRepository;
@@ -48,7 +49,7 @@ class OneclickInscriptionService
      * @param string $from Origin of the inscription attempt
      * @param int|null $orderId Order ID associated with the inscription, when available
      * @return void
-     * @throws \RuntimeException When the inscription record could not be created
+     * @throws EcommerceException When the inscription record could not be created
      */
     public function save(string $username, string $email, int $userId, string $token, string $status, string $from, ?int $orderId = null): void
     {
@@ -71,7 +72,7 @@ class OneclickInscriptionService
         $inscriptionId = $this->repository->createInscription($data);
 
         if ($inscriptionId === 0) {
-            throw new \RuntimeException('No se pudo crear el registro en transbank_inscriptions.');
+            throw new EcommerceException('No se pudo crear el registro en transbank_inscriptions.');
         }
     }
 
