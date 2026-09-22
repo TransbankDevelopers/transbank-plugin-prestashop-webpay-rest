@@ -170,7 +170,7 @@ class InscriptionRepository
      */
     private function fillInscriptionFields(TransbankInscriptions $inscription, array $data): TransbankInscriptions
     {
-        $intFields = ['user_id', 'pay_after_inscription', 'finished'];
+        $intFields = ['user_id', 'order_id', 'pay_after_inscription', 'finished'];
         $fillable = [
             'token',
             'username',

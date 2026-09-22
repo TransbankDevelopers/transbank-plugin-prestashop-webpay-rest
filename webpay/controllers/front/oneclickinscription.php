@@ -64,13 +64,13 @@ class WebPayOneclickInscriptionModuleFrontController extends BaseModuleFrontCont
     private function startAndSaveInscription(TransbankSdkOneclick $webpay, string $userName, string $userEmail, string $returnUrl, int $userId): ?array
     {
         $token = TransbankInscriptions::NO_TOKEN_PLACEHOLDER;
-        $orderId = (int) $this->module->currentOrder;
+        $orderId = $this->module->currentOrder !== null ? (int) $this->module->currentOrder : null;
 
         try {
             $resp = $webpay->startInscription($userName, $userEmail, $returnUrl);
             $token = $resp['token'];
             $this->inscriptionService->save($userName, $userEmail, $userId, $token, TransbankInscriptions::STATUS_INITIALIZED, 'checkout', $orderId);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->inscriptionService->markAsFailed($userName, $userEmail, $userId, $token, 'checkout', $orderId);
             $this->setPaymentErrorPage($e->getMessage());
             return null;

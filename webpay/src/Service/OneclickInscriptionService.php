@@ -92,7 +92,7 @@ class OneclickInscriptionService
     {
         try {
             $this->save($username, $email, $userId, $token, TransbankInscriptions::STATUS_FAILED, $from, $orderId);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->logError('No se pudo registrar el estado de error en transbank_inscriptions: ' . $e->getMessage());
         }
     }
