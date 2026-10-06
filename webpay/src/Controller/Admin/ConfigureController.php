@@ -14,6 +14,7 @@ use Transbank\Plugin\Helpers\PrestashopInfoUtil;
 use PrestaShop\Module\WebpayPlus\Grid\TransactionsFilters;
 use PrestaShop\Module\WebpayPlus\Config\WebpayConfig;
 use PrestaShopBundle\Controller\Admin\PrestaShopAdminController;
+use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use PrestaShop\PrestaShop\Core\Form\FormHandlerInterface;
 use PrestaShop\PrestaShop\Core\Grid\GridFactoryInterface;
@@ -23,8 +24,15 @@ class ConfigureController extends PrestaShopAdminController
     const TAB_CLASS_NAME = 'WebpayPlusConfigure';
     const LAYOUT_TITLE = 'Configuración Webpay';
     const SUCCESSFUL_UPDATE = 'Successful update.';
+    private const READ_PERMISSION = "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_READ')";
+    private const READ_DENIED_MESSAGE = 'No tienes permisos para ver esta sección.';
 
     /** @Route("/webpay/configure", name="webpayplus") */
+    #[AdminSecurity(
+        self::READ_PERMISSION,
+        message: self::READ_DENIED_MESSAGE,
+        redirectRoute: "admin_homepage"
+    )]
     public function webpayplusAction(
         #[Autowire(service: 'webpay.form.webpay_plus_form_data_handler')]
         FormHandlerInterface $webpayPlusFormDataHandler,
@@ -39,6 +47,11 @@ class ConfigureController extends PrestaShopAdminController
     }
 
     /** @Route("/webpay/transaction-list", name="transactionList") */
+    #[AdminSecurity(
+        "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURETRANSACTIONS_READ')",
+        message: self::READ_DENIED_MESSAGE,
+        redirectRoute: "admin_homepage"
+    )]
     public function transactionListAction(
         Request $request,
         TransactionsFilters $transactionsFilters,
@@ -55,6 +68,11 @@ class ConfigureController extends PrestaShopAdminController
     }
 
     /** @Route("/webpay/configure", name="oneclick") */
+    #[AdminSecurity(
+        self::READ_PERMISSION,
+        message: self::READ_DENIED_MESSAGE,
+        redirectRoute: "admin_homepage"
+    )]
     public function oneclickAction(
         #[Autowire(service: 'webpay.form.oneclick_form_data_handler')]
         FormHandlerInterface $oneclickFormDataHandler,
@@ -69,6 +87,11 @@ class ConfigureController extends PrestaShopAdminController
     }
 
     /** @Route("/webpay/configure", name="diagnosis") */
+    #[AdminSecurity(
+        self::READ_PERMISSION,
+        message: self::READ_DENIED_MESSAGE,
+        redirectRoute: "admin_homepage"
+    )]
     public function diagnosisAction(): Response
     {
         $summary = InfoUtil::getSummary();
@@ -82,6 +105,11 @@ class ConfigureController extends PrestaShopAdminController
     }
 
     /** @Route("/webpay/configure", name="logs") */
+    #[AdminSecurity(
+        self::READ_PERMISSION,
+        message: self::READ_DENIED_MESSAGE,
+        redirectRoute: "admin_homepage"
+    )]
     public function logsAction(): Response
     {
         $logger = TbkFactory::createLogger();
@@ -96,6 +124,11 @@ class ConfigureController extends PrestaShopAdminController
     }
 
     /** @Route("/webpay/configure", name="saveWebpayPlusForm") */
+    #[AdminSecurity(
+        "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_UPDATE')",
+        message: "No tienes permisos para modificar la configuración.",
+        redirectRoute: "ps_controller_webpay_configure_webpayplus"
+    )]
     public function saveWebpayPlusFormAction(
         Request $request,
         #[Autowire(service: 'webpay.form.webpay_plus_form_data_handler')]
@@ -113,6 +146,11 @@ class ConfigureController extends PrestaShopAdminController
     }
 
     /** @Route("/webpay/configure", name="saveOneclickForm") */
+    #[AdminSecurity(
+        "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_UPDATE')",
+        message: "No tienes permisos para modificar la configuración.",
+        redirectRoute: "ps_controller_webpay_configure_oneclick"
+    )]
     public function saveOneclickFormAction(
         Request $request,
         #[Autowire(service: 'webpay.form.oneclick_form_data_handler')]
