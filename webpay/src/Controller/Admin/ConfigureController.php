@@ -24,11 +24,13 @@ class ConfigureController extends PrestaShopAdminController
     const TAB_CLASS_NAME = 'WebpayPlusConfigure';
     const LAYOUT_TITLE = 'Configuración Webpay';
     const SUCCESSFUL_UPDATE = 'Successful update.';
+    private const READ_PERMISSION = "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_READ')";
+    private const READ_DENIED_MESSAGE = 'No tienes permisos para ver esta sección.';
 
     /** @Route("/webpay/configure", name="webpayplus") */
     #[AdminSecurity(
-        "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_READ')",
-        message: "No tienes permisos para ver esta sección.",
+        self::READ_PERMISSION,
+        message: self::READ_DENIED_MESSAGE,
         redirectRoute: "admin_homepage"
     )]
     public function webpayplusAction(
@@ -47,7 +49,7 @@ class ConfigureController extends PrestaShopAdminController
     /** @Route("/webpay/transaction-list", name="transactionList") */
     #[AdminSecurity(
         "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURETRANSACTIONS_READ')",
-        message: "No tienes permisos para ver esta sección.",
+        message: self::READ_DENIED_MESSAGE,
         redirectRoute: "admin_homepage"
     )]
     public function transactionListAction(
@@ -67,8 +69,8 @@ class ConfigureController extends PrestaShopAdminController
 
     /** @Route("/webpay/configure", name="oneclick") */
     #[AdminSecurity(
-        "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_READ')",
-        message: "No tienes permisos para ver esta sección.",
+        self::READ_PERMISSION,
+        message: self::READ_DENIED_MESSAGE,
         redirectRoute: "admin_homepage"
     )]
     public function oneclickAction(
@@ -86,8 +88,8 @@ class ConfigureController extends PrestaShopAdminController
 
     /** @Route("/webpay/configure", name="diagnosis") */
     #[AdminSecurity(
-        "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_READ')",
-        message: "No tienes permisos para ver esta sección.",
+        self::READ_PERMISSION,
+        message: self::READ_DENIED_MESSAGE,
         redirectRoute: "admin_homepage"
     )]
     public function diagnosisAction(): Response
@@ -104,8 +106,8 @@ class ConfigureController extends PrestaShopAdminController
 
     /** @Route("/webpay/configure", name="logs") */
     #[AdminSecurity(
-        "is_granted('ROLE_MOD_TAB_WEBPAYPLUSCONFIGURE_READ')",
-        message: "No tienes permisos para ver esta sección.",
+        self::READ_PERMISSION,
+        message: self::READ_DENIED_MESSAGE,
         redirectRoute: "admin_homepage"
     )]
     public function logsAction(): Response
