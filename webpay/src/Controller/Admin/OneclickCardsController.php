@@ -15,7 +15,6 @@ use PrestaShopBundle\Controller\Admin\PrestaShopAdminController;
 use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use PrestaShop\PrestaShop\Core\Grid\GridFactoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Transbank\Plugin\Helpers\PluginLogger;
 
@@ -66,8 +65,6 @@ class OneclickCardsController extends PrestaShopAdminController
     public function deleteOneclickCardAction(
         string $cardId,
         string $customerId,
-        #[Autowire(service: 'security.csrf.token_manager')]
-        CsrfTokenManagerInterface $csrfTokenManager,
     ): RedirectResponse {
         $logger = TbkFactory::createLogger();
         try {
@@ -83,7 +80,7 @@ class OneclickCardsController extends PrestaShopAdminController
                 return $this->redirectToRoute('ps_controller_webpay_oneclick_cards_list');
             }
 
-            $this->processOneclickDeletion($cardId, $customerId, $inscription, $csrfTokenManager, $logger);
+            $this->processOneclickDeletion($cardId, $customerId, $inscription, $logger);
         } catch (\Throwable $e) {
             $logger->logError(sprintf(
                 'Error inesperado al eliminar la tarjeta. ' . self::LOG_CONTEXT_WITH_ERROR,
@@ -118,7 +115,6 @@ class OneclickCardsController extends PrestaShopAdminController
         string $cardId,
         string $customerId,
         array $inscription,
-        CsrfTokenManagerInterface $csrfTokenManager,
         PluginLogger $logger
     ): void {
         $oneclickService = OneclickFactory::create();
@@ -151,14 +147,13 @@ class OneclickCardsController extends PrestaShopAdminController
             ));
             $this->addFlash('success', 'Tarjeta eliminada correctamente.');
         } catch (EcommerceException $e) {
-            $this->handleEcommerceException($cardId, $customerId, $csrfTokenManager, $logger, $e);
+            $this->handleEcommerceException($cardId, $customerId, $logger, $e);
         }
     }
 
     private function handleEcommerceException(
         string $cardId,
         string $customerId,
-        CsrfTokenManagerInterface $csrfTokenManager,
         PluginLogger $logger,
         EcommerceException $e
     ): void {
@@ -174,13 +169,10 @@ class OneclickCardsController extends PrestaShopAdminController
             'customerId' => $customerId
         ]);
 
-        $csrfToken = $csrfTokenManager->getToken('force_delete_' . $cardId)->getValue();
-
         $this->addFlash('delete_failed', [
             'cardId' => $cardId,
             'customerId' => $customerId,
-            'forceDeleteUrl' => $forceDeleteUrl,
-            'csrfToken' => $csrfToken
+            'forceDeleteUrl' => $forceDeleteUrl
         ]);
     }
 
